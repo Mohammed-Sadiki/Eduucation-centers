@@ -165,13 +165,32 @@ DB_PASSWORD=
 
 *(Si vous préférez exécuter en mode autonome avec SQLite sans serveur MySQL, spécifiez `DB_CONNECTION=sqlite` et créez le fichier `database/database.sqlite`).*
 
-### 5. Exécuter les migrations et les seeders
+### 5. Exécuter les migrations et créer les comptes de connexion Demo
 
-Cette commande va créer toutes les tables et injecter les centres, filières, utilisateurs et données de démonstration :
+**Recommandé pour un clone / `git pull`** — ne crée QUE les comptes de connexion
+de démonstration (aucune donnée métier) :
+
+```bash
+php artisan migrate
+php artisan db:seed --class=DemoAccountsSeeder
+```
+
+> ⚠️ À lancer **explicitement** sur une base de développement ou de démonstration
+> uniquement. Le seeder est bloqué en production, idempotent (rejouable sans
+> doublon) et ne modifie **jamais** les comptes réels ni les centres existants.
+
+<details>
+<summary>Alternative : jeu de démonstration complet (données métier incluses)</summary>
 
 ```bash
 php artisan migrate --seed
 ```
+
+Cette commande injecte également les centres, filières, utilisateurs et données
+de démonstration complètes. À éviter si vous souhaitez saisir vous-même vos
+vraies données depuis l'interface.
+
+</details>
 
 ### 6. Créer le lien symbolique pour les uploads
 
@@ -205,21 +224,81 @@ Accédez ensuite à l'application dans votre navigateur : **`http://localhost:80
 
 ---
 
-## 🔑 Comptes de Démonstration (Seeders)
+## 🔑 Comptes de Connexion de Démonstration (`DemoAccountsSeeder`)
 
-Tous les comptes de démonstration pré-configurés utilisent le mot de passe unique suivant :
-👉 **`EducationAdmin2026!`**
+Ces comptes sont créés **uniquement** par `php artisan db:seed --class=DemoAccountsSeeder`.
+Ils vivent dans l'espace d'e-mails réservé `@education-centers.test` et n'entrent
+jamais en collision avec des comptes réels. **Aucune donnée métier** (étudiant, stagiaire,
+paiement, facture, dépense, salaire, inscription, classe, emploi du temps) n'est
+créée : chaque développeur remplit ensuite son propre contenu depuis l'application.
 
-| Rôle | Adresse E-mail | Centre Associé | Périmètre & Droits |
-|---|---|---|---|
-| 👑 **Super Admin** | `admin@education-centers.de` | *Tous (Global)* | Accès complet, paramétrage multi-centres, finances globales |
-| 🏢 **Admin Centre Berlin** | `admin.berlin@education-centers.de` | Berlin | Gestion complète du centre de Berlin |
-| 🏢 **Admin Centre Munich** | `admin.munich@education-centers.de` | Munich | Gestion complète du centre de Munich |
-| 👨‍🏫 **Professeur Berlin (1)** | `prof.berlin@education-centers.de` | Berlin | Classes, cours, présences et notes à Berlin |
-| 👨‍🏫 **Professeur Berlin (2)** | `prof.berlin2@education-centers.de` | Berlin | Classes distinctes à Berlin (isolation des cours) |
-| 👨‍🏫 **Professeur Munich** | `prof.munich@education-centers.de` | Munich | Classes, cours, présences et notes à Munich |
-| 🎓 **Élève Berlin** | `eleve.berlin@education-centers.de` | Berlin | Portail apprenant (Hiba Berlin), cours, notes, bulletins |
-| 🎓 **Élève Munich** | `eleve.munich@education-centers.de` | Munich | Portail apprenant, cours, notes, attestations |
+Le mot de passe commun est lu depuis la variable d'environnement **non versionnée**
+`DEMO_DEFAULT_PASSWORD` (fichier `.env`, voir `.env.example`) — jamais réinitialisé
+si le compte existe déjà :
+
+```env
+DEMO_DEFAULT_PASSWORD=DemoEducation2026!
+```
+
+### Liste des e-mails Demo (29 comptes)
+
+| Rôle | Adresse E-mail | Centre |
+|---|---|---|
+| 👑 Super Admin | `superadmin.demo@education-centers.test` | *Tous (Global)* |
+| 🏢 Admin Centre | `admin.tanger.demo@education-centers.test` | Tanger |
+| 🏢 Admin Centre | `admin.agadir.demo@education-centers.test` | Agadir |
+| 🏢 Admin Centre | `admin.essaouira.demo@education-centers.test` | Essaouira |
+| 🏢 Admin Centre | `admin.tetouane.demo@education-centers.test` | Tétouane |
+| 👨‍🏫 Professeurs (6/centre) | `prof.demo.{centre}.{domaine}@education-centers.test` | chacun son centre |
+
+`{centre}` ∈ `tanger`, `agadir`, `essaouira`, `tetouane` —
+`{domaine}` ∈ `sante`, `informatique`, `hotellerie`, `maconnerie`, `design-interieur`, `design-graphique`.
+
+Exemple complet pour Tanger : `prof.demo.tanger.sante@education-centers.test`,
+`prof.demo.tanger.informatique@education-centers.test`, etc.
+
+### Isolation vérifiée
+
+- Un Admin Centre Demo ne voit que les professeurs et données **de son centre**.
+- Le Super Admin Demo n'est rattaché à aucun centre (accès global).
+- Un Professeur Demo est rattaché à son centre et à son domaine d'enseignement.
+
+### Installation complète pour un collègue
+
+```bash
+git clone <url-du-depot>
+cd education-centers
+composer install
+npm install
+cp .env.example .env        # puis ajuster DB_* et DEMO_DEFAULT_PASSWORD
+php artisan key:generate
+php artisan storage:link
+php artisan migrate
+php artisan db:seed --class=DemoAccountsSeeder
+npm run build               # ou : npm run dev
+php artisan serve --port=8000
+```
+
+Puis se connecter sur **http://localhost:8000** avec l'un des comptes Demo et le
+mot de passe `DEMO_DEFAULT_PASSWORD`.
+
+> ✅ Ces garanties sont couvertes par des tests automatisés :
+> `php artisan test --filter=DemoAccountsSeederTest`
+
+<details>
+<summary>Comptes de l'ancien jeu de démonstration complet (<code>php artisan migrate --seed</code>) — données métier incluses</summary>
+
+Ils utilisent le mot de passe `EducationAdmin2026!` et incluent des données métier :
+
+| Rôle | Adresse E-mail | Centre Associé |
+|---|---|---|
+| 👑 **Super Admin** | `admin@education-centers.de` | *Tous (Global)* |
+| 🏢 **Admin Centre Berlin** | `admin.berlin@education-centers.de` | Berlin |
+| 🏢 **Admin Centre Munich** | `admin.munich@education-centers.de` | Munich |
+| 🎓 **Élève Berlin** | `eleve.berlin@education-centers.de` | Berlin |
+| 🎓 **Élève Munich** | `eleve.munich@education-centers.de` | Munich |
+
+</details>
 
 ---
 

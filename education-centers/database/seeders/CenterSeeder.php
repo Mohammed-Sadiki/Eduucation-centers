@@ -8,11 +8,14 @@ use Illuminate\Database\Seeder;
 class CenterSeeder extends Seeder
 {
     /**
-     * Insère ou met à jour les 4 centres marocains.
+     * Définition canonique des 4 centres de référence (source unique,
+     * réutilisée par les seeders de comptes Demo).
+     *
+     * @return list<array<string, string>>
      */
-    public function run(): void
+    public static function referenceCenters(): array
     {
-        $centers = [
+        return [
             [
                 'name'        => 'Centre Tanger',
                 'code'        => 'TANGER',
@@ -58,8 +61,14 @@ class CenterSeeder extends Seeder
                 'status'      => 'active',
             ],
         ];
+    }
 
-        foreach ($centers as $centerData) {
+    /**
+     * Insère ou met à jour les 4 centres marocains.
+     */
+    public function run(): void
+    {
+        foreach (self::referenceCenters() as $centerData) {
             Center::updateOrCreate(
                 ['code' => $centerData['code']],
                 $centerData
