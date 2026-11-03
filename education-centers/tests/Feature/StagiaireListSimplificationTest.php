@@ -598,10 +598,13 @@ class StagiaireListSimplificationTest extends TestCase
         $this->assertStringNotContainsString(route('stagiaires.index'), $sidebar);
         $this->assertStringNotContainsString(route('stagiaires.create'), $sidebar);
 
-        // Les autres rubriques restent en place (pas d'espace vide orphelin).
-        $this->assertStringContainsString('Pédagogie', $sidebar);
-        $this->assertStringContainsString('Gestion', $sidebar);
-        $this->assertStringContainsString('Communication', $sidebar);
+        // Mission « sidebar plate Admin Centre » : plus aucun titre de
+        // catégorie n'est rendu pour l'Admin Centre (navigation plate).
+        $this->assertStringNotContainsString('Pédagogie', $sidebar);
+        $this->assertStringNotContainsString('Communication', $sidebar);
+        // La navigation plate reste fonctionnelle : liens cibles en place.
+        $this->assertStringContainsString(route('center-admin.domaines'), $sidebar);
+        $this->assertStringContainsString(route('notifications.index'), $sidebar);
 
         // La carte « Gestion des stagiaires » reste visible et fonctionnelle sur Accueil.
         $home = $this->actingAs($this->adminBerlin)

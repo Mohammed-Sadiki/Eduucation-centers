@@ -15,9 +15,12 @@
 
     // La « Gestion des stagiaires » est ouverte au Super Admin (tous centres
     // autorisés) comme à l'Admin Centre (périmètre = son centre, imposé serveur).
-    $stagiairesRoute = ($isSuperAdmin || $isCenterAdmin)
+    // Admin Centre : la carte mène directement au formulaire « Ajouter un
+    // stagiaire » (création = acte principal de son quotidien). La page
+    // « Tous les stagiaires » reste accessible depuis la sidebar du module.
+    $stagiairesRoute = $isSuperAdmin
         ? route('stagiaires.index')
-        : route('dashboard');
+        : ($isCenterAdmin ? route('stagiaires.create') : route('dashboard'));
 
     // Le module financier est ouvert aux deux rôles : le Super Admin voit la vue
     // globale multi-centres, l'Admin Centre voit UNIQUEMENT son centre (périmètre
@@ -187,7 +190,7 @@
             <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ __('Consultez, organisez et suivez les stagiaires de votre établissement.') }}</p>
         </div>
         <div class="relative mt-6 flex items-center justify-between rounded-xl bg-teal-100/70 px-4 py-2.5 text-sm font-semibold text-teal-700 transition-colors group-hover:bg-teal-200/60 dark:bg-teal-500/10 dark:text-teal-300 dark:group-hover:bg-teal-500/20">
-            <span>{{ __('Accéder aux stagiaires') }}</span>
+            <span>{{ $isCenterAdmin ? __('Ajouter un stagiaire') : __('Accéder aux stagiaires') }}</span>
             <span class="flex h-7 w-7 items-center justify-center rounded-full bg-teal-600 text-white shadow-sm transition-transform group-hover:translate-x-1 rtl:rotate-180">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
             </span>

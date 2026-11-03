@@ -71,7 +71,7 @@ class SidebarDomainCleanupTest extends TestCase
         ];
     }
 
-    private function assertSidebarIsClean(string $sidebar, bool $withTranslations): void
+    private function assertSidebarIsClean(string $sidebar, bool $withTranslations, bool $flatCenterNav = false): void
     {
         foreach ($this->forbiddenEntries() as $label => [$routeName, $text]) {
             $this->assertStringNotContainsString($text, $sidebar, "Le libellé « {$label} » ne doit plus apparaître dans la sidebar.");
@@ -83,17 +83,36 @@ class SidebarDomainCleanupTest extends TestCase
             $this->assertStringNotContainsString(route('super-admin.translations.index'), $sidebar);
         }
 
-        // Sections conservées : aucun espace vide (le rendu saute les groupes vides,
-        // et les groupes « Gestion »/« Communication » gardent des entrées).
+        // Sections conservées : aucun espace vide (le rendu saute les groupes vides).
         $this->assertDoesNotMatchRegularExpression('/<ul[^>]*>\s*<\/ul>/', $sidebar, 'Aucune section vide ne doit être rendue.');
+        $this->assertStringNotContainsString(route('students.index'), $sidebar);
+        $this->assertStringNotContainsString(route('teachers.index'), $sidebar);
+
+        if ($flatCenterNav) {
+            // Mission « sidebar plate Admin Centre » : navigation plate de
+            // sept liens. Les entrées Documents / Annonces / Formations /
+            // Classes / Salles / Inscriptions ne sont plus dans le MENU,
+            // mais leurs pages et routes restent intactes (vérifié ailleurs).
+            foreach ([
+                __('Accueil'), __('Domaines'), __('Emploi du temps'), __('Présences'),
+                __('Évaluations'), __('Certificats'), __('Notifications'),
+            ] as $label) {
+                $this->assertStringContainsString($label, $sidebar);
+            }
+
+            $this->assertStringNotContainsString(__('Documents'), $sidebar);
+            $this->assertStringNotContainsString(__('Annonces'), $sidebar);
+            $this->assertStringNotContainsString(__('Classes'), $sidebar);
+
+            return;
+        }
+
         $this->assertStringContainsString(__('Présences'), $sidebar);
         $this->assertStringContainsString(__('Évaluations'), $sidebar);
         $this->assertStringContainsString(__('Documents'), $sidebar);
         $this->assertStringContainsString(__('Certificats'), $sidebar);
         $this->assertStringContainsString(__('Notifications'), $sidebar);
         $this->assertStringContainsString(__('Annonces'), $sidebar);
-        $this->assertStringNotContainsString(route('students.index'), $sidebar);
-        $this->assertStringNotContainsString(route('teachers.index'), $sidebar);
         $this->assertStringContainsString(__('Formations'), $sidebar);
         $this->assertStringContainsString(__('Classes'), $sidebar);
     }
@@ -124,7 +143,7 @@ class SidebarDomainCleanupTest extends TestCase
                 ->get(route('center-admin.domain.dashboard', 'informatique'))
                 ->assertOk();
 
-            $this->assertSidebarIsClean($this->sidebarHtml($response), withTranslations: false);
+            $this->assertSidebarIsClean($this->sidebarHtml($response), withTranslations: false, flatCenterNav: true);
         }
     }
 

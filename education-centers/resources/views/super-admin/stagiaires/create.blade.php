@@ -1,9 +1,11 @@
 @extends('layouts.app')
 
 @php
-    // Refonte du formulaire : deux cartes uniquement — « Informations personnelles »
-    // et « Entreprise où le stagiaire effectuera son stage ». Tous les champs
-    // affichés sont obligatoires, à l'exception de la section « Autres fichiers ».
+    // Disposition : des cartes côte à côte sur desktop (deux colonnes équilibrées),
+    // une seule colonne sur tablette/mobile. « Informations personnelles » à côté
+    // de « Documents et fichiers », puis « Entreprise où le stagiaire effectuera
+    // son stage » en pleine largeur. Tous les champs affichés sont obligatoires,
+    // à l'exception de la section « Autres fichiers ».
     $authUser = auth()->user();
     $isCenterAdmin = $authUser->isCenterAdmin();
     $forcedCenter = $isCenterAdmin ? $authUser->center : null;
@@ -84,7 +86,7 @@
         {{-- ══════════════════════════════════════════════════════════════
              CARTE 1 — INFORMATIONS PERSONNELLES
         ══════════════════════════════════════════════════════════════ --}}
-        <section class="ec-card overflow-hidden lg:col-span-2">
+        <section class="ec-card overflow-hidden">
             <header class="border-b border-slate-100 bg-slate-50/60 px-6 py-5 dark:border-slate-800 dark:bg-slate-800/40">
                 <h2 class="flex items-center gap-3 text-2xl font-extrabold tracking-tight text-brand-700 dark:text-brand-300">
                     <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-[1.0625rem] font-extrabold text-brand-700 dark:bg-brand-500/20 dark:text-brand-300">1</span>
@@ -93,7 +95,9 @@
                 </h2>
             </header>
 
-            <div class="grid gap-5 p-6 sm:grid-cols-2">
+            {{-- Une colonne par champ tant que la carte est étroite (lg), deux
+                 colonnes dès que sa largeur le permet (xl) : jamais de débordement. --}}
+            <div class="grid gap-5 p-6 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                 <div>
                     <label for="last_name" class="ec-label text-[1.0625rem] font-semibold">{{ __('Nom') }} <span class="text-rose-500">*</span></label>
                     <input type="text" id="last_name" name="last_name" value="{{ old('last_name') }}" required data-required data-label="{{ __('Nom') }}"
@@ -129,12 +133,61 @@
                     @error('phone') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
                 </div>
 
+                <div>
+                    <label for="whatsapp" class="ec-label text-[1.0625rem] font-semibold">{{ __('Numéro WhatsApp') }} <span class="text-rose-500">*</span></label>
+                    <input type="tel" id="whatsapp" name="whatsapp" value="{{ old('whatsapp') }}" required data-required data-label="{{ __('Numéro WhatsApp') }}" inputmode="tel"
+                           class="ec-input text-[1.0625rem] @error('whatsapp') is-invalid @enderror" placeholder="+212 XXXXXXXXX">
+                    @error('whatsapp') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label for="emergency_contact_phone" class="ec-label text-[1.0625rem] font-semibold">{{ __('Numéro de téléphone d\'urgence') }} <span class="text-rose-500">*</span></label>
+                    <input type="tel" id="emergency_contact_phone" name="emergency_contact_phone" value="{{ old('emergency_contact_phone') }}" required data-required data-label="{{ __('Numéro de téléphone d\'urgence') }}" inputmode="tel"
+                           class="ec-input text-[1.0625rem] @error('emergency_contact_phone') is-invalid @enderror" placeholder="+212 XXXXXXXXX">
+                    @error('emergency_contact_phone') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                </div>
+
+                {{-- Rattachement : sélecteur conservé pour le Super Admin uniquement.
+                     Admin Centre : centre imposé côté serveur (bandeau ci-dessus). --}}
+                @unless ($isCenterAdmin)
+                    <div class="sm:col-span-2">
+                        <label for="center_id" class="ec-label text-[1.0625rem] font-semibold">{{ __('Centre de rattachement') }} <span class="text-rose-500">*</span></label>
+                        <select id="center_id" name="center_id" required data-required data-label="{{ __('Centre de rattachement') }}"
+                                class="ec-select text-[1.0625rem] @error('center_id') is-invalid @enderror">
+                            <option value="">{{ __('— Sélectionner un centre —') }}</option>
+                            @foreach($centers as $c)
+                                <option value="{{ $c->id }}" @selected(old('center_id') == $c->id)>
+                                    {{ $c->translated('name') }} ({{ $c->city }})
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('center_id') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                    </div>
+                @endunless
+            </div>
+        </section>
+
+        {{-- ════════════════════════════════════════════════════════════
+             CARTE 2 — DOCUMENTS ET FICHIERS (CIN, photo, autres fichiers)
+             Cartes côte à côte avec « Informations personnelles » sur desktop.
+        ════════════════════════════════════════════════════════════ --}}
+        <section class="ec-card overflow-hidden">
+            <header class="border-b border-slate-100 bg-slate-50/60 px-6 py-5 dark:border-slate-800 dark:bg-slate-800/40">
+                <h2 class="flex items-center gap-3 text-2xl font-extrabold tracking-tight text-brand-700 dark:text-brand-300">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-[1.0625rem] font-extrabold text-brand-700 dark:bg-brand-500/20 dark:text-brand-300">2</span>
+                    <x-icon name="document" class="h-6 w-6" />
+                    {{ __('Documents et fichiers') }}
+                </h2>
+            </header>
+
+            <div class="space-y-5 p-6">
+
                 {{-- ── CIN — Télécharger les photos ── --}}
-                <div class="sm:col-span-2 rounded-2xl border border-slate-200 bg-slate-50/50 p-5 dark:border-slate-700/80 dark:bg-slate-800/30">
+                <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-5 dark:border-slate-700/80 dark:bg-slate-800/30">
                     <h3 class="text-[1.15rem] font-bold text-slate-800 dark:text-slate-100">{{ __('CIN — Télécharger les photos') }} <span class="text-rose-500">*</span></h3>
                     <p class="ec-help mt-1 text-[0.95rem]">{{ __('Formats autorisés : PDF, JPG, PNG — 5 Mo maximum par photo. Stockage sécurisé et privé.') }}</p>
 
-                    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                         <div>
                             <label for="cin_recto" class="ec-label text-[1.0625rem] font-semibold">{{ __('Photo CIN — Recto') }} <span class="text-rose-500">*</span></label>
                             <input type="file" id="cin_recto" name="cin_recto" accept=".pdf,.jpg,.jpeg,.png" required data-required data-label="{{ __('Photo CIN — Recto') }}" data-max-kb="5120"
@@ -162,7 +215,7 @@
                 </div>
 
                 {{-- ── Photo de profil avec aperçu ── --}}
-                <div class="sm:col-span-2">
+                <div>
                     <label class="ec-label text-[1.0625rem] font-semibold">{{ __('Photo de profil') }} <span class="text-rose-500">*</span></label>
                     <p class="ec-help text-[0.95rem]">{{ __('Téléchargez la photo du stagiaire (JPG ou PNG, 5 Mo maximum). Un aperçu s\'affiche avant l\'enregistrement.') }}</p>
                     <div class="mt-2 flex items-center gap-4">
@@ -180,22 +233,8 @@
                     @error('profile_photo') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
                 </div>
 
-                <div>
-                    <label for="whatsapp" class="ec-label text-[1.0625rem] font-semibold">{{ __('Numéro WhatsApp') }} <span class="text-rose-500">*</span></label>
-                    <input type="tel" id="whatsapp" name="whatsapp" value="{{ old('whatsapp') }}" required data-required data-label="{{ __('Numéro WhatsApp') }}" inputmode="tel"
-                           class="ec-input text-[1.0625rem] @error('whatsapp') is-invalid @enderror" placeholder="+212 XXXXXXXXX">
-                    @error('whatsapp') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
-                </div>
-
-                <div>
-                    <label for="emergency_contact_phone" class="ec-label text-[1.0625rem] font-semibold">{{ __('Numéro de téléphone d\'urgence') }} <span class="text-rose-500">*</span></label>
-                    <input type="tel" id="emergency_contact_phone" name="emergency_contact_phone" value="{{ old('emergency_contact_phone') }}" required data-required data-label="{{ __('Numéro de téléphone d\'urgence') }}" inputmode="tel"
-                           class="ec-input text-[1.0625rem] @error('emergency_contact_phone') is-invalid @enderror" placeholder="+212 XXXXXXXXX">
-                    @error('emergency_contact_phone') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
-                </div>
-
                 {{-- ── Autres fichiers (section facultative) ── --}}
-                <div class="sm:col-span-2 rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-5 dark:border-slate-600 dark:bg-slate-800/30">
+                <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-5 dark:border-slate-600 dark:bg-slate-800/30">
                     <h3 class="text-[1.15rem] font-bold text-slate-800 dark:text-slate-100">
                         {{ __('Autres fichiers') }}
                         <span class="ms-2 inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-[0.85rem] font-bold uppercase tracking-wide text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">{{ __('Facultatif') }}</span>
@@ -220,34 +259,17 @@
                     </div>
                     @error('other_files.*') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
                 </div>
-
-                {{-- Rattachement : sélecteur conservé pour le Super Admin uniquement.
-                     Admin Centre : centre imposé côté serveur (bandeau ci-dessus). --}}
-                @unless ($isCenterAdmin)
-                    <div class="sm:col-span-2">
-                        <label for="center_id" class="ec-label text-[1.0625rem] font-semibold">{{ __('Centre de rattachement') }} <span class="text-rose-500">*</span></label>
-                        <select id="center_id" name="center_id" required data-required data-label="{{ __('Centre de rattachement') }}"
-                                class="ec-select text-[1.0625rem] @error('center_id') is-invalid @enderror">
-                            <option value="">{{ __('— Sélectionner un centre —') }}</option>
-                            @foreach($centers as $c)
-                                <option value="{{ $c->id }}" @selected(old('center_id') == $c->id)>
-                                    {{ $c->translated('name') }} ({{ $c->city }})
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('center_id') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
-                    </div>
-                @endunless
             </div>
         </section>
 
         {{-- ══════════════════════════════════════════════════════════════
-             CARTE 2 — ENTREPRISE OÙ LE STAGIAIRE EFFECTUERA SON STAGE
+             CARTE 3 — ENTREPRISE OÙ LE STAGIAIRE EFFECTUERA SON STAGE
+             Dernière section : pleine largeur sur desktop.
         ══════════════════════════════════════════════════════════════ --}}
-        <section class="ec-card overflow-hidden">
+        <section class="ec-card overflow-hidden lg:col-span-2">
             <header class="border-b border-slate-100 bg-slate-50/60 px-6 py-5 dark:border-slate-800 dark:bg-slate-800/40">
                 <h2 class="flex items-center gap-3 text-2xl font-extrabold tracking-tight text-brand-700 dark:text-brand-300">
-                    <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-[1.0625rem] font-extrabold text-brand-700 dark:bg-brand-500/20 dark:text-brand-300">2</span>
+                    <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-[1.0625rem] font-extrabold text-brand-700 dark:bg-brand-500/20 dark:text-brand-300">3</span>
                     <x-icon name="building" class="h-6 w-6" />
                     {{ __('Entreprise où le stagiaire effectuera son stage') }}
                 </h2>

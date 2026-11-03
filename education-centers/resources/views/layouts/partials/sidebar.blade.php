@@ -192,33 +192,25 @@
         $groups[] = ['title' => __('Communication'), 'items' => $com];
 
     } elseif ($user->isCenterAdmin()) {
+        // ────────────────────────────────────────────────────────────
+        // SIDEBAR ADMIN CENTRE : navigation PLATE (pas de sections,
+        // pas de titres de catégories ni de chevrons). Exactement sept
+        // liens, dans l'ordre. Les pages/routes/contrôleurs retirés de la
+        // navigation restent entièrement accessibles par ailleurs (cartes
+        // de l'Accueil, dashboards domaine).
+        // ────────────────────────────────────────────────────────────
         $groups[] = ['title' => null, 'items' => array_filter([
             $link(__('Accueil'), 'admin.home', 'home', 'admin.home'),
             $link(__('Domaines'), 'center-admin.domaines', 'book', 'center-admin.domaines'),
-        ])];
-
-        $adminItems = array_filter([
-            $link(__('Formations'), 'formations.index', 'book', 'formations.*'),
-            $link(__('Classes'), 'classes.index', 'classes', 'classes.*'),
-            $link(__('Salles'), 'rooms.index', 'door', 'rooms.*'),
             $link(__('Emploi du temps'), 'schedules.index', 'calendar', 'schedules.*'),
-            $link(__('Inscriptions'), 'enrollments.index', 'clipboard', 'enrollments.*'),
-        ]);
-        $groups[] = ['title' => __('Pédagogie'), 'items' => $adminItems];
-
-        $ops = array_filter([
             $link(__('Présences'), 'attendances.index', 'clock', 'attendances.*'),
             $link(__('Évaluations'), 'evaluations.index', 'chart', 'evaluations.*'),
-            $link(__('Documents'), 'documents.index', 'document', 'documents.*'),
             $link(__('Certificats'), 'certificates.index', 'certificate', 'certificates.*'),
-        ]);
-        $groups[] = ['title' => __('Gestion'), 'items' => $ops];
-
-        $com = array_filter([
             $link(__('Notifications'), 'notifications.index', 'bell', 'notifications.*'),
-            $link(__('Annonces'), 'announcements.index', 'megaphone', 'announcements.*'),
-        ]);
-        $groups[] = ['title' => __('Communication'), 'items' => $com];
+        ])];
+        // NB : le contexte dédié « Gestion financière » (bloc $isFinance
+        // ci-dessus) et le banner « formation active » en haut de sidebar
+        // sont inchangés — seuls les liens de navigation simplifiés ici.
 
     } elseif ($user->isTeacher()) {
         $groups[] = ['title' => __('Mon espace'), 'items' => array_filter([
