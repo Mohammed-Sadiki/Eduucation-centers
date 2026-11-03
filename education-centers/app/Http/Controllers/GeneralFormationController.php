@@ -9,7 +9,9 @@ use App\Services\OfficialFormationService;
 use App\Support\DomainRegistry;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
@@ -58,23 +60,32 @@ class GeneralFormationController extends Controller
             ->get()
             ->keyBy('official_code');
 
+        // Formations générales personnalisées du centre (catalogue extensible).
+        $customFormations = Formation::query()
+            ->customGeneral()
+            ->where('center_id', $centerId)
+            ->orderBy('name')
+            ->get();
+
         return view('formations-generales.index', [
-            'domains'      => $domains,
+            'domains'        => $domains,
             'officialByCode' => $officialByCode,
-            'centers'      => $centers,
-            'centerId'     => $centerId,
+            'customFormations' => $customFormations,
+            'centers'        => $centers,
+            'centerId'       => $centerId,
         ]);
     }
 
     /**
      * Sélecteur de configuration : présente les SIX emplacements officiels
      * autorisés (Santé / Informatique / Hôtellerie / Maçonnerie /
-     * Design intérieur / Design graphique) et leur état de configuration.
+     * Design intérieur / Design graphique), leur état de configuration, ainsi
+     * que les formations générales PERSONNALISÉES déjà créées par le centre.
      *
-     * Aucun septième slot n'est possible : la liste provient de
-     * DomainRegistry::visible(), source unique du catalogue officiel.
-     * Si l'emplacement est déjà configuré pour le centre, on redirige vers
-     * son édition ; sinon on propose de l'activer (via activate()).
+     * Le catalogue est extensible : les six officielles restent la base,
+     * mais le bouton « + » permet d'ajouter des formations supplémentaires,
+     * liées directement au centre, sans domaine ni sous-formation.
+     * Si l'emplacement officiel est déjà configuré, on ouvre son édition.
      */
     public function picker(Request $request): View
     {
@@ -98,12 +109,244 @@ class GeneralFormationController extends Controller
             ->get()
             ->keyBy('official_code');
 
+        // Formations personnalisées du centre (hors des six codes officiels).
+        $customFormations = Formation::query()
+            ->customGeneral()
+            ->where('center_id', $centerId)
+            ->with('teacher')
+            ->orderBy('name')
+            ->get();
+
         return view('formations-generales.picker', [
-            'domains'        => $domains,
-            'officialByCode' => $officialByCode,
-            'centers'        => $centers,
-            'centerId'       => $centerId,
+            'domains'          => $domains,
+            'officialByCode'   => $officialByCode,
+            'customFormations' => $customFormations,
+            'centers'          => $centers,
+            'centerId'         => $centerId,
         ]);
+    }
+
+    /**
+     * Formulaire de création d'une formation générale personnalisée.
+     * Le catalogue des six officielles reste la base ; cette page permet
+     * d'ajouter des formations supplémentaires liées directement au centre,
+     * sans domaine ni sous-formation.
+     */
+    public function create(Request $request): View
+    {
+        Gate::authorize('create', Formation::class);
+
+        $authUser = $request->user();
+
+        if ($authUser->isCenterAdmin()) {
+            $centerId = (int) $authUser->center_id;
+        } else {
+            // Super Admin : centre choisi via ?center_id, sinon premier centre
+            // (même résolution que index()/picker() — jamais d'écran vide).
+            $centers  = Center::query()->orderBy('name')->get();
+            $centerId = (int) $request->query('center_id', (string) ($centers->first()->id ?? 0));
+        }
+
+        $center = Center::query()->findOrFail($centerId);
+
+        $centerTeachers = Teacher::query()
+            ->where('center_id', $centerId)
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->get();
+
+        return view('formations-generales.create-custom', [
+            'center'         => $center,
+            'centerTeachers' => $centerTeachers,
+        ]);
+    }
+
+    /**
+     * Enregistre une nouvelle formation générale personnalisée dans le centre actif.
+     * is_official = true et official_code = NULL : mêmes règles métier que les
+     * six officielles (≤2 classes, 1 responsable) mais hors du DomainRegistry.
+     * Le center_id est toujours forcé côté serveur (isolation des centres).
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        Gate::authorize('create', Formation::class);
+
+        $authUser = $request->user();
+
+        // Centre forcé : Admin Centre = le sien ; Super Admin = center_id fourni.
+        if ($authUser->isCenterAdmin()) {
+            $centerId = (int) $authUser->center_id;
+        } else {
+            $centerId = (int) $request->input('center_id', 0);
+            if ($centerId <= 0 || ! Center::query()->whereKey($centerId)->exists()) {
+                return redirect()
+                    ->route('formations-generales.picker')
+                    ->with('error', __('Centre invalide pour la création de la formation.'));
+            }
+        }
+
+        $data = $request->validate([
+            'name'           => ['required', 'string', 'max:255',
+                Rule::unique('formations', 'name')
+                    ->where('center_id', $centerId)
+                    ->where('is_official', true)],
+            'description'    => ['nullable', 'string', 'max:2000'],
+            'duration_weeks' => ['nullable', 'integer', 'min:1', 'max:520'],
+            'duration_hours' => ['nullable', 'integer', 'min:1', 'max:10000'],
+            'annual_price'   => ['required', 'numeric', 'min:0'],
+            'currency'       => ['nullable', 'string', 'max:8'],
+            'status'         => ['required', 'in:active,inactive'],
+            'teacher_id'     => ['nullable', 'integer', 'exists:teachers,id'],
+            'image'          => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ]);
+
+        // Professeur du même centre obligatoirement (facultatif à la création).
+        if (! empty($data['teacher_id'])) {
+            $teacher = Teacher::query()->findOrFail($data['teacher_id']);
+            if ((int) $teacher->center_id !== $centerId) {
+                return back()
+                    ->withInput()
+                    ->withErrors(['teacher_id' => __('Ce professeur n\'appartient pas au centre sélectionné.')]);
+            }
+        }
+
+        $center = Center::query()->findOrFail($centerId);
+
+        $imagePath = $request->hasFile('image')
+            ? $request->file('image')->store('formations', 'public')
+            : null;
+
+        $formation = Formation::query()->create([
+            'center_id'      => $centerId,
+            'name'           => $data['name'],
+            // Code technique auto-généré, unique par centre (cf. index unique).
+            'code'           => strtoupper(sprintf('CF-%s-%s', $center->code, Str::random(6))),
+            'description'    => $data['description'] ?? null,
+            'duration_weeks' => $data['duration_weeks'] ?? null,
+            'duration_hours' => $data['duration_hours'] ?? null,
+            'annual_price'   => $data['annual_price'],
+            'currency'       => $data['currency'] ?? default_currency(),
+            'status'         => $data['status'],
+            'is_official'    => true,
+            'official_code'  => null,
+            'teacher_id'     => $data['teacher_id'] ?? null,
+            'image_path'     => $imagePath,
+        ]);
+
+        return redirect()
+            ->route('formations-generales.picker', ['center_id' => $centerId])
+            ->with('success', __('La formation « :name » a été ajoutée au catalogue du centre.', ['name' => $formation->name]));
+    }
+
+    /**
+     * Formulaire de modification d'une formation personnalisée (nom inclus).
+     * Réutilise la vue de configuration ; le nom n'est éditable que si
+     * official_code est NULL (règle serveur reprise dans la vue).
+     */
+    public function editCustom(Request $request, Formation $formation): View
+    {
+        $this->authorizeOfficial($request, $formation, 'update');
+        abort_unless($formation->official_code === null, 404);
+
+        $formation->load(['teacher', 'center']);
+
+        $centerTeachers = Teacher::query()
+            ->where('center_id', $formation->center_id)
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->get();
+
+        return view('formations-generales.create-custom', [
+            'formation'      => $formation,
+            'center'         => $formation->center,
+            'centerTeachers' => $centerTeachers,
+        ]);
+    }
+
+    /**
+     * Met à jour une formation personnalisée (tous les champs métier).
+     */
+    public function updateCustom(Request $request, Formation $formation): RedirectResponse
+    {
+        $this->authorizeOfficial($request, $formation, 'update');
+        abort_unless($formation->official_code === null, 404);
+
+        $data = $request->validate([
+            'name'           => ['required', 'string', 'max:255',
+                Rule::unique('formations', 'name')
+                    ->where('center_id', $formation->center_id)
+                    ->where('is_official', true)
+                    ->ignore($formation->id)],
+            'description'    => ['nullable', 'string', 'max:2000'],
+            'duration_weeks' => ['nullable', 'integer', 'min:1', 'max:520'],
+            'duration_hours' => ['nullable', 'integer', 'min:1', 'max:10000'],
+            'annual_price'   => ['required', 'numeric', 'min:0'],
+            'currency'       => ['nullable', 'string', 'max:8'],
+            'status'         => ['required', 'in:active,inactive'],
+            'teacher_id'     => ['nullable', 'integer', 'exists:teachers,id'],
+            'image'          => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ]);
+
+        if (! empty($data['teacher_id'])) {
+            $teacher = Teacher::query()->findOrFail($data['teacher_id']);
+            if ((int) $teacher->center_id !== (int) $formation->center_id) {
+                return back()
+                    ->withInput()
+                    ->withErrors(['teacher_id' => __('Ce professeur n\'appartient pas au centre de cette formation.')]);
+            }
+        }
+
+        if ($request->hasFile('image')) {
+            // Remplacement : on efface l'ancien fichier après upload réussi.
+            $oldPath = $formation->image_path;
+            $data['image'] = null;
+            $formation->image_path = $request->file('image')->store('formations', 'public');
+            if ($oldPath && $oldPath !== $formation->image_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+            }
+        }
+
+        $formation->fill([
+            'name'           => $data['name'],
+            'description'    => $data['description'] ?? null,
+            'duration_weeks' => $data['duration_weeks'] ?? null,
+            'duration_hours' => $data['duration_hours'] ?? null,
+            'annual_price'   => $data['annual_price'],
+            'currency'       => $data['currency'] ?? $formation->currency,
+            'status'         => $data['status'],
+            'teacher_id'     => $data['teacher_id'] ?? null,
+        ])->save();
+
+        return redirect()
+            ->route('formations-generales.picker', ['center_id' => $formation->center_id])
+            ->with('success', __('La formation « :name » a été mise à jour.', ['name' => $formation->name]));
+    }
+
+    /**
+     * Supprime une formation personnalisée (jamais les six officielles),
+     * uniquement si elle n'a plus de classes ni d'inscriptions actives.
+     */
+    public function destroyCustom(Request $request, Formation $formation): RedirectResponse
+    {
+        $this->authorizeOfficial($request, $formation, 'delete');
+        abort_unless($formation->official_code === null, 404);
+
+        if ($formation->classes()->exists() || $formation->enrollments()->whereIn('status', ['accepted', 'pending', 'under_review'])->exists()) {
+            return back()->with('error', __('Impossible de supprimer une formation qui possède encore des classes ou des inscriptions actives.'));
+        }
+
+        $centerId = (int) $formation->center_id;
+        $name = $formation->name;
+
+        if ($formation->image_path) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($formation->image_path);
+        }
+
+        $formation->delete();
+
+        return redirect()
+            ->route('formations-generales.picker', ['center_id' => $centerId])
+            ->with('success', __('La formation « :name » a été supprimée.', ['name' => $name]));
     }
 
     /**
@@ -187,17 +430,25 @@ class GeneralFormationController extends Controller
     }
 
     /**
-     * Enregistre la configuration d'une formation officielle.
+     * Enregistre la configuration d'une formation (officielle ou personnalisée).
      * Ne crée JAMAIS de nouvelle ligne : agit uniquement sur la formation
-     * officielle déjà identifiée par {formation} (404 sinon, cf.
-     * authorizeOfficial). Le `center_id` n'est jamais accepté depuis le
-     * client, ce qui empêche tout cross-center.
+     * déjà identifiée par {formation} (404 sinon, cf. authorizeOfficial).
+     * Le `center_id` n'est jamais accepté depuis le client, ce qui empêche
+     * tout cross-center. Une formation PERSONNALISÉE peut aussi voir son nom
+     * et sa description mis à jour ici.
      */
     public function update(Request $request, Formation $formation): RedirectResponse
     {
         $this->authorizeOfficial($request, $formation, 'update');
 
+        $isCustom = $formation->official_code === null;
+
         $data = $request->validate([
+            'name'           => [$isCustom ? 'required' : 'nullable', 'string', 'max:255',
+                Rule::unique('formations', 'name')
+                    ->where('center_id', $formation->center_id)
+                    ->where('is_official', true)
+                    ->ignore($formation->id)],
             'description'    => ['nullable', 'string', 'max:2000'],
             'annual_price'   => ['nullable', 'numeric', 'min:0'],
             'currency'       => ['nullable', 'string', 'max:8'],
@@ -218,10 +469,11 @@ class GeneralFormationController extends Controller
             }
         }
 
-        // On ne touche ni au nom, ni au code, ni au center_id, ni à
-        // official_code, ni à is_official : la configuration reste strictement
-        // cantonnée aux champs métier affichés.
-        $formation->fill([
+        // On ne touche ni au code, ni au center_id, ni à official_code, ni à
+        // is_official : la configuration reste strictement cantonnée aux champs
+        // métier affichés. Le nom n'est modifiable que pour les personnalisées.
+        $formation->fill(array_filter([
+            'name'           => $isCustom ? ($data['name'] ?? null) : null,
             'description'    => $data['description']    ?? $formation->description,
             'annual_price'   => $data['annual_price']   ?? null,
             'currency'       => $data['currency']       ?? $formation->currency,
@@ -229,11 +481,11 @@ class GeneralFormationController extends Controller
             'duration_weeks' => $data['duration_weeks'] ?? null,
             'status'         => $data['status'],
             'teacher_id'     => $data['teacher_id']     ?? null,
-        ])->save();
+        ], fn ($v) => $v !== null))->save();
 
         return redirect()
             ->route('formations-generales.show', $formation)
-            ->with('success', __('La formation officielle a été mise à jour.'));
+            ->with('success', __('La formation a été mise à jour.'));
     }
 
     /**

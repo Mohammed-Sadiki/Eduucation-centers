@@ -1,9 +1,16 @@
 @props([
     'domain',
     'routeUrl',
+    'imageUrl' => null,
+    'iconName' => null,
+    'badgeLabel' => null,
 ])
 
 @php
+    // Libellé du badge de statut : personnalisable (ex. « Personnalisée »)
+    // tout en conservant « Actif » par défaut pour le catalogue officiel.
+    $badgeLabel ??= __('Actif');
+
     $paletteConfig = [
         'sante' => [
             'color'       => 'emerald',
@@ -94,7 +101,7 @@
 
     $imageWebp = "images/domaines/{$cfg['img']}.webp";
     $imageJpg  = "images/domaines/{$cfg['img']}.jpg";
-    $hasImage = file_exists(public_path($imageWebp)) || file_exists(public_path($imageJpg));
+    $hasImage = $imageUrl !== null || file_exists(public_path($imageWebp)) || file_exists(public_path($imageJpg));
 @endphp
 
 <div id="card-domaine-{{ $domain->slug }}"
@@ -102,7 +109,14 @@
 
     {{-- 1. Grande photographie illustrative horizontale en haut --}}
     <div class="relative aspect-16/9 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-        @if ($hasImage)
+        @if ($imageUrl !== null)
+            {{-- Image fournie par une formation personnalisée (upload centre) --}}
+            <img src="{{ $imageUrl }}"
+                 alt="{{ __('Illustration de la formation :domain', ['domain' => __($domain->name)]) }}"
+                 loading="lazy"
+                 class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            >
+        @elseif ($hasImage)
             <picture>
                 @if (file_exists(public_path($imageWebp)))
                     <source srcset="{{ asset($imageWebp) }}" type="image/webp">
@@ -118,7 +132,7 @@
 
         {{-- Fallback visuel élégant si l'image est indisponible --}}
         <div class="fallback-banner {{ $hasImage ? 'hidden' : 'flex' }} absolute inset-0 items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900">
-            <x-icon :name="$cfg['icon']" class="h-14 w-14 text-slate-400 dark:text-slate-600" />
+            <x-icon :name="$iconName ?: $cfg['icon']" class="h-14 w-14 text-slate-400 dark:text-slate-600" />
         </div>
     </div>
 
@@ -129,7 +143,7 @@
             <div class="flex min-w-0 items-center gap-3">
                 {{-- 2. Icône SVG colorée représentant le domaine --}}
                 <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-md {{ $cfg['chip'] }}" aria-hidden="true">
-                    <x-icon :name="$cfg['icon']" class="h-6 w-6 text-white" stroke-width="2" />
+                    <x-icon :name="$iconName ?: $cfg['icon']" class="h-6 w-6 text-white" stroke-width="2" />
                 </span>
 
                 {{-- 3. Titre du domaine --}}
@@ -138,10 +152,10 @@
                 </h3>
             </div>
 
-            {{-- 4. Badge de statut « Actif » --}}
+            {{-- 4. Badge de statut (« Actif » par défaut, personnalisable) --}}
             <span class="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold {{ $cfg['badge'] }}">
                 <span class="h-2 w-2 rounded-full {{ $cfg['dot'] }}" aria-hidden="true"></span>
-                <span>{{ __('Actif') }}</span>
+                <span>{{ $badgeLabel }}</span>
             </span>
         </div>
 

@@ -237,16 +237,24 @@ Route::middleware('auth')->group(function () {
         Route::patch('formations/{formation}/toggle-status', [FormationController::class, 'toggleStatus'])
             ->name('formations.toggle-status');
 
-        // ── Formations générales officielles (surface additive de la refonte) ──
-        // Portail des 6 cartes + espace par formation officielle (≤2 classes,
-        // 1 professeur responsable). N'affecte pas les routes/domaines historiques.
+        // ── Formations générales (surface additive de la refonte) ──
+        // Portail des cartes (6 officielles + personnalisées) + espace par
+        // formation (≤2 classes, 1 professeur responsable). N'affecte pas les
+        // routes/domaines historiques.
         Route::prefix('formations-generales')->name('formations-generales.')->group(function () {
             Route::get('/', [GeneralFormationController::class, 'index'])->name('index');
 
+            // Formations générales PERSONNALISÉES (au-delà des six officielles).
+            // Ces segments littéraux DOIVENT précéder le joker /{formation}.
+            Route::get('/nouvelle', [GeneralFormationController::class, 'create'])->name('create');
+            Route::post('/', [GeneralFormationController::class, 'store'])->name('store');
+            Route::get('/{formation}/modifier', [GeneralFormationController::class, 'editCustom'])->name('edit-custom');
+            Route::put('/{formation}/modifier', [GeneralFormationController::class, 'updateCustom'])->name('update-custom');
+            Route::delete('/{formation}', [GeneralFormationController::class, 'destroyCustom'])->name('destroy-custom');
+
             // Configuration des six formations générales officielles.
             // Le picker liste les 6 emplacements autorisés ; l'édition met à
-            // jour prix/durée/description/statut/professeur responsable sans
-            // jamais permettre de 7ᵉ formation ni de sous-formation.
+            // jour prix/durée/description/statut/professeur responsable.
             // Ces segments littéraux DOIVENT précéder le joker /{formation}.
             Route::get('/configurer', [GeneralFormationController::class, 'picker'])
                 ->name('picker');

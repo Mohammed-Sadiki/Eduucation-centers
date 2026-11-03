@@ -50,6 +50,7 @@ class Formation extends Model
         'is_official',
         'official_code',
         'teacher_id',
+        'image_path',
         'merged_into_id',
     ];
 
@@ -135,6 +136,17 @@ class Formation extends Model
     public function scopeOfficial(Builder $query): Builder
     {
         return $query->where('is_official', true);
+    }
+
+    /**
+     * Scope : formations générales PERSONNALISÉES créées par un centre
+     * (is_official = true mais hors des six codes officiels : official_code
+     * NULL). Elles suivent les mêmes règles métier (≤2 classes, 1
+     * responsable) mais ne dépendent pas du DomainRegistry.
+     */
+    public function scopeCustomGeneral(Builder $query): Builder
+    {
+        return $query->where('is_official', true)->whereNull('official_code');
     }
 
     /**

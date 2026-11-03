@@ -20,7 +20,9 @@ use Tests\TestCase;
  *    (formations-generales.picker) qui expose les SIX emplacements officiels
  *    et permet d'éditer prix / durée / description / statut / professeur
  *    responsable ;
- *  - aucun septième emplacement n'est jamais proposé, aucun doublon n'est
+ *  - le picker expose exactement les SIX emplacements officiels (les
+ *    formations personnalisées passent par le bouton « + » et sont rendues
+ *    avec un identifiant distinct « picker-custom- ») ; aucun doublon n'est
  *    créé (un slot déjà configuré s'ouvre en édition) ;
  *  - les permissions Admin Centre / Super Admin sont respectées.
  */
@@ -108,7 +110,8 @@ class OfficialFormationConfigurationTest extends TestCase
         // Slots vierges → bouton Activer et configurer.
         $response->assertSee('id="picker-activate-informatique"', false);
 
-        // Jamais de septième slot.
+        // Le picker expose exactement six emplacements officiels (les formations
+        // personnalisées ont leur propre section « picker-custom- »).
         $html = $response->getContent();
         $count = preg_match_all('/id="picker-slot-[a-z\-]+"/', $html);
         $this->assertSame(6, $count, 'Le picker doit exposer exactement six emplacements.');
@@ -191,7 +194,7 @@ class OfficialFormationConfigurationTest extends TestCase
         $this->assertSame('active', $formation->status);
         $this->assertSame($teacher->id, (int) $formation->teacher_id);
 
-        // Aucun doublon, aucune 7ᵉ formation.
+        // Aucun doublon, aucune formation officielle supplémentaire créée.
         $this->assertSame($before, Formation::count());
     }
 
@@ -251,7 +254,7 @@ class OfficialFormationConfigurationTest extends TestCase
     }
 
     /**
-     * Un code officiel inconnu (tentative de 7ᵉ formation) est rejeté.
+     * Un code officiel inconnu n'est pas activable (création via « + »).
      */
     public function test_activate_rejects_unknown_official_code(): void
     {

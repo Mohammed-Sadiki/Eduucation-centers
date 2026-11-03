@@ -25,7 +25,7 @@
                     @endif
                 </h1>
                 <p class="text-sm text-slate-500 dark:text-slate-400">
-                    {{ __('Chaque centre dispose de ses six formations générales officielles.') }}
+                    {{ __('Chaque centre dispose de ses six formations générales officielles, complétées le cas échéant par ses formations personnalisées.') }}
                 </p>
             </div>
         </div>
@@ -66,6 +66,29 @@
                     : route('center-admin.domain.dashboard', $domain->slug);
             @endphp
             <x-domain-card :domain="$domain" :route-url="$routeUrl" />
+        @endforeach
+
+        {{-- Formations générales personnalisées du centre : même style de carte.
+             Pas de dashboard domaine → le clic ouvre l’espace de la formation
+             (formations-generales.show). Métadonnées visuelles portées par la
+             formation elle-même (image téléversée, sinon icône générique), sans
+             dépendre de DomainRegistry. --}}
+        @foreach ($customFormations as $custom)
+            @php
+                $pseudoDomain = new \App\Models\Domain([
+                    'slug'        => 'perso-' . $custom->id,
+                    'name'        => $custom->translated('name') ?? $custom->name,
+                    'description' => $custom->translated('description') ?? ($custom->description ?: __('Formation générale personnalisée du centre.')),
+                    'icon'        => 'book',
+                ]);
+            @endphp
+            <x-domain-card
+                :domain="$pseudoDomain"
+                :route-url="route('formations-generales.show', $custom)"
+                :image-url="$custom->image_path ? asset('storage/' . $custom->image_path) : null"
+                icon-name="book"
+                :badge-label="$custom->status === 'active' ? __('Personnalisée') : __('Inactive')"
+            />
         @endforeach
     </div>
 
