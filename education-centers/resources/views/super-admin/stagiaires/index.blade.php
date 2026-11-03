@@ -108,14 +108,17 @@
         </form>
     </div>
 
-    {{-- Tableau des stagiaires --}}
+    {{-- Tableau des stagiaires : sept colonnes (Stagiaire, Centre, Type de stage,
+         Période du stage, Prix convenu, Statut, Actions). Le « N° CIN » n'est plus
+         affiché ici — la donnée reste en base, modifiable au formulaire et visible
+         sur la fiche du stagiaire. Les largeurs se répartissent automatiquement
+         (.ec-table : layout auto + min-w-full, conteneur overflow-x-auto). --}}
     <div class="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-xs dark:border-slate-800 dark:bg-slate-900">
         <div class="ec-table-wrap">
             <table class="ec-table">
                 <thead>
                     <tr>
                         <th>{{ __('Stagiaire') }}</th>
-                        <th>{{ __('N° CIN') }}</th>
                         <th>{{ __('Centre') }}</th>
                         <th>{{ __('Type de stage') }}</th>
                         <th>{{ __('Période du stage') }}</th>
@@ -136,15 +139,6 @@
                                 <div class="text-[11px] text-slate-500">
                                     <bdi dir="ltr">{{ $stagiaire->email ?? $stagiaire->phone ?? __('Aucun contact') }}</bdi>
                                 </div>
-                            </td>
-                            <td>
-                                @if($stagiaire->cin_number)
-                                    <span class="font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">
-                                        {{ $stagiaire->cin_number }}
-                                    </span>
-                                @else
-                                    <span class="text-xs text-amber-600 dark:text-amber-400 italic">{{ __('Non renseigné') }}</span>
-                                @endif
                             </td>
                             <td>
                                 <span class="text-xs font-medium text-slate-700 dark:text-slate-300">
@@ -203,7 +197,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="py-12 text-center text-sm text-slate-500">
+                            <td colspan="7" class="py-12 text-center text-sm text-slate-500">
                                 <span class="text-2xl block mb-2">🔍</span>
                                 {{ __('Aucun stagiaire correspondant aux critères sélectionnés.') }}
                                 <div class="mt-3">

@@ -20,6 +20,11 @@
     $cinBack  = $documents->first(fn($d) => in_array($d->type, ['cin_back', 'cin_verso']) || str_contains(strtolower($d->title), 'verso'));
     $otherDocs = $documents->filter(fn($d) => $d->id !== $cinFront?->id && $d->id !== $cinBack?->id);
 
+    // Photo : URL uniquement si le fichier existe réellement sur son disque
+    // (photo privée servie par la route students.profile-photo). Sans photo
+    // valide, l'avatar par défaut est affiché — jamais une image cassée.
+    $photoUrl = $student->profilePhotoUrl();
+
     // Initiales si pas de photo
     $initials = mb_substr($student->first_name, 0, 1) . mb_substr($student->last_name, 0, 1);
 @endphp
@@ -64,8 +69,8 @@
         <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
             {{-- Photo ou initiales --}}
             <div class="relative shrink-0">
-                @if($student->profile_photo_path)
-                    <img src="{{ asset('storage/' . $student->profile_photo_path) }}"
+                @if($photoUrl)
+                    <img src="{{ $photoUrl }}"
                          alt="{{ $student->full_name }}"
                          class="h-28 w-28 rounded-2xl border-4 border-white object-cover shadow-md dark:border-slate-800 md:h-32 md:w-32">
                 @else

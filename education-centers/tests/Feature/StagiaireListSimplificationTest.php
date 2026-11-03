@@ -22,6 +22,11 @@ use Tests\TestCase;
  * « Documents » et le bouton « Nouveau stagiaire » de l'en-tête ont disparu.
  * Aucune donnée ni fonctionnalité métier n'est supprimée : documents, tarifs,
  * périodes de stage, actions et accès restent intacts.
+ *
+ * La colonne « N° CIN » a ensuite été retirée du tableau (Super Admin et Admin
+ * Centre) : sept colonnes restent, la largeur se répartit automatiquement, et le
+ * CIN demeure en base, modifiable au formulaire, visible sur la fiche et pris en
+ * charge par la recherche.
  */
 class StagiaireListSimplificationTest extends TestCase
 {
@@ -91,6 +96,39 @@ class StagiaireListSimplificationTest extends TestCase
         $this->assertSame(1, preg_match('/text-3xl[^>]*>\s*(\d+)\s*</', $card, $m), 'Le nombre doit être affiché sur la carte.');
 
         return $m[1];
+    }
+
+    /**
+     * HTML du tableau de la liste (unique sur la page).
+     */
+    private function tableHtml(string $page): string
+    {
+        $this->assertSame(1, preg_match('#<table class="ec-table">.*?</table>#s', $page, $m), 'Le tableau de la liste doit être rendu.');
+
+        return $m[0];
+    }
+
+    /**
+     * Libellés des colonnes (<th>), dans l'ordre de rendu.
+     *
+     * @return list<string>
+     */
+    private function tableHeaders(string $page): array
+    {
+        $this->assertSame(1, preg_match('#<thead>.*?</thead>#s', $this->tableHtml($page), $m));
+        preg_match_all('#<th[^>]*>(.*?)</th>#s', $m[0], $cells);
+
+        return array_map(static fn (string $h): string => trim(strip_tags($h)), $cells[1]);
+    }
+
+    /**
+     * Nombre de cellules (<td>) de la première ligne du corps du tableau.
+     */
+    private function firstTableRowCells(string $page): int
+    {
+        $this->assertSame(1, preg_match('#<tbody>.*?<tr>(.*?)</tr>#s', $this->tableHtml($page), $m), 'Une ligne doit être rendue.');
+
+        return substr_count($m[1], '<td');
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -482,14 +520,16 @@ class StagiaireListSimplificationTest extends TestCase
             ->assertSee('Karim')
             ->assertSee('Benali')
             ->assertSee('karim.benali@test.de')
-            ->assertSee('C987654')
             ->assertSee('Stage de perfectionnement')
             ->assertSee('Centre Berlin')
             ->getContent();
 
-        foreach (['Stagiaire', 'N° CIN', 'Centre', 'Type de stage', 'Période du stage', 'Prix convenu', 'Statut', 'Actions'] as $column) {
-            $this->assertStringContainsString($column, $page);
-        }
+        // Exactement les sept colonnes demandées, dans l'ordre. La colonne
+        // « N° CIN » n'est plus rendue (mission « suppression du N° CIN »).
+        $this->assertSame(
+            ['Stagiaire', 'Centre', 'Type de stage', 'Période du stage', 'Prix convenu', 'Statut', 'Actions'],
+            $this->tableHeaders($page)
+        );
 
         // Montant et périodes du stage affichés.
         $this->assertStringContainsString('1 234,50', $page);
@@ -497,6 +537,127 @@ class StagiaireListSimplificationTest extends TestCase
         $this->assertStringContainsString('28/02/2027', $page);
         // Statut conservé (avancement du stage, pas la complétude d'un dossier).
         $this->assertStringContainsString('Stage en cours', $page);
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // 14 bis. Colonne « N° CIN » retirée du tableau (affichage uniquement)
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function test_cin_column_is_removed_from_the_table_for_both_roles(): void
+    {
+        $stagiaire = $this->makeStagiaire(['last_name' => 'SansColonne', 'cin_number' => 'C987654']);
+
+        $roles = [
+            'super admin'  => $this->superAdmin,
+            'admin centre' => $this->adminBerlin,
+        ];
+
+        foreach ($roles as $role => $user) {
+            $page = $this->actingAs($user)
+                ->get(route('stagiaires.index'))
+                ->assertOk()
+                ->assertSee('SansColonne')
+                ->getContent();
+
+            // Sept colonnes, sept cellules par ligne : rien ne déborde.
+            $this->assertCount(7, $this->tableHeaders($page), $role);
+            $this->assertSame(7, $this->firstTableRowCells($page), $role);
+
+            // En-tête et valeur du CIN ont disparu du tableau.
+            $this->assertStringNotContainsString('N° CIN', $page, $role);
+            $this->assertStringNotContainsString('C987654', $page, $role . ' : le numéro ne doit plus être affiché dans la liste.');
+            // L'ancien état « non renseigné » de cette colonne n'est plus rendu non plus.
+            $this->assertStringNotContainsString('Non renseigné', $page, $role);
+
+            // Les trois actions restent présentes.
+            foreach (['Consulter le stagiaire', 'Modifier le stagiaire', 'Supprimer le stagiaire'] as $action) {
+                $this->assertStringContainsString($action, $page, $role . ' : l\'action ' . $action . ' doit rester disponible.');
+            }
+        }
+
+        // « Ne pas supprimer la colonne CIN de la base » : la donnée reste intacte.
+        $this->assertDatabaseHas('stagiaires', ['id' => $stagiaire->id, 'cin_number' => 'C987654']);
+
+        // La fiche du stagiaire continue d'afficher le CIN (rien d'autre modifié).
+        $this->actingAs($this->superAdmin)
+            ->get(route('stagiaires.show', $stagiaire))
+            ->assertOk()
+            ->assertSee('C987654');
+
+        // La recherche par CIN reste fonctionnelle (backend inchangé).
+        $this->actingAs($this->superAdmin)
+            ->get(route('stagiaires.index', ['search' => 'C987654']))
+            ->assertOk()
+            ->assertSee('SansColonne');
+    }
+
+    public function test_cin_column_is_absent_in_the_four_moroccan_centers(): void
+    {
+        $centers = [
+            ['name' => 'Centre Tanger',     'code' => 'TGR'],
+            ['name' => 'Centre Agadir',     'code' => 'AGD'],
+            ['name' => 'Centre Essaouira',  'code' => 'ESS'],
+            ['name' => 'Centre Tétouane',   'code' => 'TET'],
+        ];
+
+        foreach ($centers as $center) {
+            $created = Center::factory()->create($center);
+            $admin = User::factory()->centerAdmin($created->id)->create(['email' => strtolower($center['code']) . '-cin@test.ma']);
+            $this->makeStagiaire([
+                'last_name'  => 'Stagiaire' . $center['code'],
+                'cin_number' => 'AA' . $center['code'],
+                'center_id'  => $created->id,
+            ]);
+
+            $page = $this->actingAs($admin)
+                ->get(route('stagiaires.index'))
+                ->assertOk()
+                ->assertSee('Stagiaire' . $center['code'])
+                ->getContent();
+
+            $this->assertSame(
+                ['Stagiaire', 'Centre', 'Type de stage', 'Période du stage', 'Prix convenu', 'Statut', 'Actions'],
+                $this->tableHeaders($page),
+                $center['name']
+            );
+            $this->assertStringNotContainsString('N° CIN', $page, $center['name']);
+            $this->assertStringNotContainsString('AA' . $center['code'], $page, $center['name'] . ' : le CIN ne doit plus être affiché.');
+        }
+    }
+
+    public function test_cin_column_is_absent_in_arabic_and_empty_state_matches_columns(): void
+    {
+        // Ligne vide : l'unique <td> doit couvrir les sept colonnes restantes.
+        $empty = $this->actingAs($this->adminBerlin)->get(route('stagiaires.index'))->assertOk()->getContent();
+        $this->assertStringContainsString('colspan="7"', $empty);
+        $this->assertStringNotContainsString('colspan="8"', $empty);
+
+        $this->makeStagiaire(['last_name' => 'Muller', 'cin_number' => 'C987654']);
+
+        // Libellés attendus tels que les produirait la traduction arabe (calculés
+        // hors requête, puis rendus via le sélecteur de langue).
+        $columns = ['Stagiaire', 'Centre', 'Type de stage', 'Période du stage', 'Prix convenu', 'Statut', 'Actions'];
+        $current = App::getLocale();
+        App::setLocale('ar');
+        $expected = array_map(static fn (string $key): string => (string) __($key), $columns);
+        App::setLocale($current);
+
+        $this->actingAs($this->adminBerlin)->get(route('locale.switch', 'ar'))->assertRedirect();
+
+        $ar = $this->actingAs($this->adminBerlin)
+            ->get(route('stagiaires.index'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('dir="rtl"', $ar);
+
+        // En-têtes traduits, sans la colonne CIN (« رقم CIN » en arabe).
+        $this->assertSame($expected, $this->tableHeaders($ar));
+        $this->assertStringNotContainsString('رقم CIN', $ar);
+        $this->assertStringNotContainsString('C987654', $ar);
+        $this->assertSame(7, $this->firstTableRowCells($ar));
+
+        $this->actingAs($this->adminBerlin)->get(route('locale.switch', 'fr'))->assertRedirect();
     }
 
     public function test_row_actions_stay_functional(): void

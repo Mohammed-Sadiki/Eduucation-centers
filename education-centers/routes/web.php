@@ -224,6 +224,10 @@ Route::middleware('auth')->group(function () {
 
         // Étudiants
         Route::resource('students', StudentController::class);
+        // Photo de profil : disque privé → servie par une route autorisée
+        // (asset('storage/…') ne pointe que sur le disque public).
+        Route::get('students/{student}/profile-photo', [StudentController::class, 'showProfilePhoto'])
+            ->name('students.profile-photo');
         Route::patch('students/{student}/toggle-status', [StudentController::class, 'toggleStatus'])
             ->name('students.toggle-status');
 

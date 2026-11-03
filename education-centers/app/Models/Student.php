@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class Student extends Model
 {
@@ -138,6 +139,64 @@ class Student extends Model
     public function getFullNameAttribute(): string
     {
         return trim("{$this->first_name} {$this->last_name}");
+    }
+
+    /**
+     * Disques où une photo de profil peut se trouver, par ordre de préférence.
+     * « private » est le disque d'écriture actuel (donnée personnelle) ; « public »
+     * reste en lecture pour les dossiers enregistrés avant cette règle.
+     *
+     * @var list<string>
+     */
+    private const PHOTO_DISKS = ['private', 'public'];
+
+    /**
+     * Nom du disque qui contient réellement la photo, ou null si aucune photo
+     * valide n'existe (chemin null ou fichier absent du disque).
+     */
+    public function profilePhotoDisk(): ?string
+    {
+        if (! $this->profile_photo_path) {
+            return null;
+        }
+
+        foreach (self::PHOTO_DISKS as $disk) {
+            if (Storage::disk($disk)->exists($this->profile_photo_path)) {
+                return $disk;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Une photo affichable existe-t-elle vraiment sur le disque ?
+     */
+    public function hasProfilePhoto(): bool
+    {
+        return $this->profilePhotoDisk() !== null;
+    }
+
+    /**
+     * URL du fichier stocké sur le disque public (jamais le cas des photos
+     * privées), ou URL sécurisée de la route dédiée pour le stockage privé.
+     *
+     * L'ancienne écriture asset('storage/' . $path) produisait une URL du disque
+     * public alors que la photo est enregistrée sur le disque privé : l'image
+     * était donc cassée. La route students.profile-photo sert le fichier après
+     * contrôle d'autorisation, exactement comme pour les stagiaires.
+     */
+    public function profilePhotoUrl(): ?string
+    {
+        $disk = $this->profilePhotoDisk();
+
+        if ($disk === null) {
+            return null;
+        }
+
+        return $disk === 'public'
+            ? Storage::disk('public')->url($this->profile_photo_path)
+            : route('students.profile-photo', $this);
     }
 
     /**

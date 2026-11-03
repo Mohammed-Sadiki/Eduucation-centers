@@ -17,8 +17,10 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class StudentController extends Controller
 {
@@ -394,6 +396,28 @@ class StudentController extends Controller
             'returnClassId',
             'isStandalone'
         ));
+    }
+
+    /**
+     * Sert la photo de profil d'un étudiant.
+     *
+     * La photo est une donnée personnelle enregistrée sur le disque PRIVÉ
+     * (storage/app/private) : elle ne peut donc pas être atteinte par
+     * asset('storage/…'), qui construit une URL du disque PUBLIC. Elle transite
+     * par cette route, protégée par la même politique que la page
+     * « Détails de l'étudiant », comme c'est déjà le cas pour les stagiaires.
+     */
+    public function showProfilePhoto(Student $student): BinaryFileResponse
+    {
+        Gate::authorize('view', $student);
+
+        $disk = $student->profilePhotoDisk();
+
+        if ($disk === null) {
+            abort(404, __('Photo introuvable.'));
+        }
+
+        return response()->file(Storage::disk($disk)->path($student->profile_photo_path));
     }
 
     /**
