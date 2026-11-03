@@ -90,16 +90,20 @@ class SidebarDomainCleanupTest extends TestCase
 
         if ($flatCenterNav) {
             // Mission « sidebar plate Admin Centre » : navigation plate de
-            // sept liens. Les entrées Documents / Annonces / Formations /
-            // Classes / Salles / Inscriptions ne sont plus dans le MENU,
-            // mais leurs pages et routes restent intactes (vérifié ailleurs).
+            // six liens. Les entrées Domaines / Documents / Annonces /
+            // Formations / Classes / Salles / Inscriptions ne sont plus dans
+            // le MENU, mais leurs pages et routes restent intactes
+            // (vérifié ailleurs).
             foreach ([
-                __('Accueil'), __('Domaines'), __('Emploi du temps'), __('Présences'),
+                // Premier lien : libellé « Dashboard » (dashboard pédagogique
+                // de la formation active).
+                __('Dashboard'), __('Emploi du temps'), __('Présences'),
                 __('Évaluations'), __('Certificats'), __('Notifications'),
             ] as $label) {
                 $this->assertStringContainsString($label, $sidebar);
             }
 
+            $this->assertStringNotContainsString('href="' . route('center-admin.domaines') . '"', $sidebar);
             $this->assertStringNotContainsString(__('Documents'), $sidebar);
             $this->assertStringNotContainsString(__('Annonces'), $sidebar);
             $this->assertStringNotContainsString(__('Classes'), $sidebar);

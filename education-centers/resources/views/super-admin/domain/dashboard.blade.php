@@ -15,6 +15,12 @@
     $domainLabel = \App\Support\DomainRegistry::labels()[$domain] ?? $cfg['label'];
     $user = auth()->user();
 
+    // Vue partagée Super Admin / Admin Centre. La version simplifiée affichée
+    // à l'Admin Centre (4 KPI, sans graphiques ni tableau des inscriptions)
+    // est obtenue par condition de rôle : aucune donnée, route ou calcul
+    // n'est retiré — seul l'affichage change.
+    $isCenterAdmin = $user->isCenterAdmin();
+
     // Séries prêtes pour Chart.js (à partir des collections du contrôleur)
     $monthLabels = collect(range(1, 12))
         ->map(fn (int $m) => \Illuminate\Support\Carbon::create(null, $m)->translatedFormat('M'))
@@ -104,10 +110,16 @@
     @endphp
     <div class="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <x-ui.stat :label="__('Étudiants')" :value="format_number($stats['students'])" icon="users" tone="primary" :hint="__('inscrits')" :href="$cardUrls['students']" />
-        <x-ui.stat :label="__('Professeurs')" :value="format_number($stats['teachers'])" icon="user" tone="info" :hint="__('enseignants')" :href="$cardUrls['teachers']" />
-        <x-ui.stat :label="__('Formations')" :value="format_number($stats['formations'])" icon="book" tone="success" :hint="__('disponibles')" :href="$cardUrls['formations']" />
-        <x-ui.stat :label="__('Classes')" :value="format_number($stats['classes'])" icon="classes" tone="info" :hint="__('actives')" :href="$cardUrls['classes']" />
-        <x-ui.stat :label="__('Inscriptions')" :value="format_number($stats['enrollments'])" icon="clipboard" tone="primary" :hint="__('au total')" :href="$cardUrls['enrollments']" />
+        @unless($isCenterAdmin)
+            {{-- Cartes réservées au Super Admin : Professeurs, Formations,
+                 Classes et Inscriptions ne sont plus affichées dans le
+                 dashboard pédagogique de l'Admin Centre. Les pages, routes,
+                 contrôleurs et compteurs correspondants restent intacts. --}}
+            <x-ui.stat :label="__('Professeurs')" :value="format_number($stats['teachers'])" icon="user" tone="info" :hint="__('enseignants')" :href="$cardUrls['teachers']" />
+            <x-ui.stat :label="__('Formations')" :value="format_number($stats['formations'])" icon="book" tone="success" :hint="__('disponibles')" :href="$cardUrls['formations']" />
+            <x-ui.stat :label="__('Classes')" :value="format_number($stats['classes'])" icon="classes" tone="info" :hint="__('actives')" :href="$cardUrls['classes']" />
+            <x-ui.stat :label="__('Inscriptions')" :value="format_number($stats['enrollments'])" icon="clipboard" tone="primary" :hint="__('au total')" :href="$cardUrls['enrollments']" />
+        @endunless
         <x-ui.stat :label="__('Certificats')" :value="format_number($stats['certificates_issued'])" icon="certificate" tone="success" :hint="__('délivrés')" :href="$cardUrls['certificates']" />
         <x-ui.stat :label="__('Présences (jour)')" :value="format_number($stats['attendances_today'])" icon="clock" tone="info" :hint="__('aujourd\'hui')" :href="$cardUrls['attendances']" />
         <x-ui.stat :label="__('Revenus (payés)')" :value="format_price($stats['payments_total'])" icon="banknotes" tone="warning" :hint="__('encaissés')" :href="$cardUrls['payments']" />
@@ -132,7 +144,11 @@
         </form>
     @endif
 
-    {{-- ── GRAPHIQUES ─────────────────────────────────────────────────── --}}
+    {{-- ── GRAPHIQUES (Super Admin uniquement) ────────────────────────── --}}
+    {{-- Le dashboard Admin Centre est épuré : « Évolution des inscriptions »
+         et « Répartition des étudiants » ne sont plus rendus pour ce rôle.
+         La bibliothèque Chart.js et les données restent utilisées ailleurs. --}}
+    @unless($isCenterAdmin)
     <div class="mb-6 grid gap-6 xl:grid-cols-3">
         <div class="ec-panel xl:col-span-2">
             <div class="ec-panel__head">
@@ -163,9 +179,14 @@
             </div>
         </div>
     </div>
+    @endunless
 
     {{-- ── TABLEAU + PROCHAINS COURS ──────────────────────────────────── --}}
-    <div class="grid gap-6 xl:grid-cols-3">
+    {{-- Admin Centre : le tableau « Dernières inscriptions » est retiré, la
+         section « Prochains cours » occupe alors toute la largeur (pas de
+         colonne vide). --}}
+    <div class="grid gap-6{{ $isCenterAdmin ? '' : ' xl:grid-cols-3' }}">
+        @unless($isCenterAdmin)
         <div class="ec-panel xl:col-span-2">
             <div class="ec-panel__head">
                 <div class="ec-panel__title">
@@ -203,6 +224,7 @@
                 </table>
             </div>
         </div>
+        @endunless
 
         <div class="ec-panel">
             <div class="ec-panel__head">
@@ -235,6 +257,7 @@
 
 @endsection
 
+@unless($isCenterAdmin)
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -296,3 +319,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 @endpush
+@endunless

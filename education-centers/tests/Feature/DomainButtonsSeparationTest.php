@@ -78,10 +78,13 @@ class DomainButtonsSeparationTest extends TestCase
     /**
      * TEST B : Sur la page d'accueil admin, la carte Formations expose deux
      * boutons aux destinations strictement distinctes :
-     *  - « + Ajouter une formation » → sélecteur de configuration des six
-     *    formations générales officielles (formations-generales.picker) ;
+     *  - « + Ajouter une formation » → formulaire existant « Nouvelle formation
+     *    générale » (formations-generales.create), sans page intermédiaire ;
      *  - « Accéder aux formations »  → catalogue des six cartes (formations-
      *    generales.index). Aucun des deux n'expose de champ élève ou paiement.
+     * La page de sélection des six formations (formations-generales.picker) et
+     * ses boutons « Configurer » restent en place, simplement non ciblés par le
+     * bouton « + Ajouter une formation ».
      */
     public function test_button_add_formation_opens_catalog_formation_form_without_student_fields(): void
     {
@@ -89,19 +92,22 @@ class DomainButtonsSeparationTest extends TestCase
         $responseSA = $this->actingAs($this->superAdmin)->get(route('admin.home'));
         $responseSA->assertOk();
         $responseSA->assertSee('id="btn-add-formation-domaines"', false);
-        $responseSA->assertSee(route('formations-generales.picker'), false);
+        $responseSA->assertSee(route('formations-generales.create'), false);
         $responseSA->assertSee(route('formations-generales.index'), false);
         $responseSA->assertSee('Ajouter une formation');
         $responseSA->assertSee('Accéder aux formations');
 
-        // Le sélecteur de configuration n'expose aucun champ élève ni paiement.
-        $pickerSA = $this->actingAs($this->superAdmin)->get(route('formations-generales.picker'));
-        $pickerSA->assertOk();
-        $pickerSA->assertDontSee('Photos CIN');
-        $pickerSA->assertDontSee('Numéro WhatsApp');
-        $pickerSA->assertDontSee('Numéro d\'urgence');
-        $pickerSA->assertDontSee('Informations personnelles');
-        $pickerSA->assertDontSee('Paiement : Avance ou Payé');
+        // Le formulaire de nouvelle formation n'expose aucun champ élève ni paiement.
+        $createFormSA = $this->actingAs($this->superAdmin)->get(route('formations-generales.create'));
+        $createFormSA->assertOk();
+        $createFormSA->assertSee('Nouvelle formation générale');
+        $createFormSA->assertSee('Identité de la formation');
+        $createFormSA->assertSee('Tarif et durée');
+        $createFormSA->assertSee('Professeur responsable et image');
+        $createFormSA->assertDontSee('Photos CIN');
+        $createFormSA->assertDontSee('Numéro WhatsApp');
+        $createFormSA->assertDontSee('Numéro d\'urgence');
+        $createFormSA->assertDontSee('Paiement : Avance ou Payé');
 
         // Le catalogue des six cartes n'expose pas non plus de champ élève.
         $catalogSA = $this->actingAs($this->superAdmin)->get(route('formations-generales.index'));
@@ -113,14 +119,19 @@ class DomainButtonsSeparationTest extends TestCase
         $responseCA = $this->actingAs($this->adminBerlin)->get(route('admin.home'));
         $responseCA->assertOk();
         $responseCA->assertSee('id="btn-add-formation-ca-domaines"', false);
-        $responseCA->assertSee(route('formations-generales.picker'), false);
+        $responseCA->assertSee(route('formations-generales.create'), false);
         $responseCA->assertSee(route('formations-generales.index'), false);
 
+        $createFormCA = $this->actingAs($this->adminBerlin)->get(route('formations-generales.create'));
+        $createFormCA->assertOk();
+        $createFormCA->assertDontSee('Photos CIN');
+        $createFormCA->assertDontSee('Numéro WhatsApp');
+        $createFormCA->assertDontSee('Numéro d\'urgence');
+
+        // 3. La page des six cartes et ses boutons de configuration sont conservés.
         $pickerCA = $this->actingAs($this->adminBerlin)->get(route('formations-generales.picker'));
         $pickerCA->assertOk();
-        $pickerCA->assertDontSee('Photos CIN');
-        $pickerCA->assertDontSee('Numéro WhatsApp');
-        $pickerCA->assertDontSee('Numéro d\'urgence');
+        $pickerCA->assertSee('id="picker-slot-sante"', false);
     }
 
     /**

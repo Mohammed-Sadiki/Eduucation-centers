@@ -194,14 +194,23 @@
     } elseif ($user->isCenterAdmin()) {
         // ────────────────────────────────────────────────────────────
         // SIDEBAR ADMIN CENTRE : navigation PLATE (pas de sections,
-        // pas de titres de catégories ni de chevrons). Exactement sept
+        // pas de titres de catégories ni de chevrons). Exactement six
         // liens, dans l'ordre. Les pages/routes/contrôleurs retirés de la
         // navigation restent entièrement accessibles par ailleurs (cartes
-        // de l'Accueil, dashboards domaine).
+        // de l'Accueil, dashboards domaine, bouton « Toutes les formations »
+        // de la bannière — la page Domaines est conservée).
+        //
+        // Le lien « Dashboard » ouvre le tableau de bord PÉDAGOGIQUE de la
+        // formation active (exactement le domaine affiché par la bannière),
+        // et surtout pas la page d'accueil générale admin.home : c'est le
+        // petit bouton « Accueil » de la bannière qui ramène à /admin/accueil.
+        // Route existante des dashboards de domaine — le centre est forcé côté
+        // serveur par CenterAdminDomainController, jamais pris dans l'URL.
+        // Sans formation active en session, on retombe sur le domaine par
+        // défaut comme le fait déjà le Super Admin (jamais sur admin.home).
         // ────────────────────────────────────────────────────────────
         $groups[] = ['title' => null, 'items' => array_filter([
-            $link(__('Accueil'), 'admin.home', 'home', 'admin.home'),
-            $link(__('Domaines'), 'center-admin.domaines', 'book', 'center-admin.domaines'),
+            $link(__('Dashboard'), 'center-admin.domain.dashboard', 'home', 'center-admin.domain.dashboard', null, [$activeDomain ?: 'sante']),
             $link(__('Emploi du temps'), 'schedules.index', 'calendar', 'schedules.*'),
             $link(__('Présences'), 'attendances.index', 'clock', 'attendances.*'),
             $link(__('Évaluations'), 'evaluations.index', 'chart', 'evaluations.*'),
@@ -410,15 +419,20 @@
                    title="{{ __('Retour à l\'accueil') }}"
                    id="sidebar-changer-domaine-center">
                     <x-icon name="home" class="h-3 w-3" />
+                    {{-- Ramène à la page d'accueil générale de l'Admin Centre
+                         (/admin/accueil) : destination et design inchangés,
+                         seul le libellé redevient « Accueil ». Le tableau de
+                         bord pédagogique de la formation active s'ouvre par le
+                         lien « Dashboard » de la navigation. --}}
                     <span>{{ __('Accueil') }}</span>
                 </a>
             </div>
             <div class="mt-2 flex items-center gap-2" x-show="!$store.ui.sidebarCollapsed">
-                <a href="{{ route('center-admin.domaines') }}"
+                <a href="{{ route('formations-generales.index') }}"
                    class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border {{ $pal['btn_border'] }} bg-white/70 px-2 py-1 text-[11px] font-semibold {{ $pal['btn_text'] }} {{ $pal['btn_hover'] }} dark:bg-slate-900/60 transition-colors"
                    id="sidebar-tous-domaines-center">
                     <x-icon name="building" class="h-3 w-3" />
-                    <span>{{ __('Tous les domaines') }}</span>
+                    <span>{{ __('Toutes les formations') }}</span>
                 </a>
             </div>
             <div class="flex justify-center" x-show="$store.ui.sidebarCollapsed">

@@ -19,13 +19,18 @@ use Tests\TestCase;
 /**
  * Cartes statistiques cliquables du tableau de bord de domaine.
  *
- * Les huit KPI du dashboard (Shared : super-admin.domain.dashboard et
+ * Les KPI du dashboard (vue partagée : super-admin.domain.dashboard et
  * center-admin.domain.dashboard) sont des liens <a> vers les listes existantes,
  * filtrées centre + domaine côté serveur avec exactement les mêmes critères de
  * comptage que la carte. Aucun module n'est dupliqué : seules des routes
  * existantes sont réutilisées. Le lien de retour ramène au dashboard du domaine
  * courant, et l'Admin Centre reste enfermé dans son centre, même si l'URL est
  * manipulée.
+ *
+ * Depuis l'épurage du dashboard pédagogique : l'Admin Centre ne voit plus que
+ * quatre cartes (Étudiants, Certificats, Présences du jour, Revenus payés) —
+ * les cartes Professeurs / Formations / Classes / Inscriptions ne sont plus
+ * affichées pour ce rôle, leurs pages et routes restant accessibles.
  */
 class DomainDashboardClickableCardsTest extends TestCase
 {
@@ -110,13 +115,53 @@ class DomainDashboardClickableCardsTest extends TestCase
     }
 
     // ──────────────────────────────────────────────────────────────────────────
-    // 1. Les huit cartes sont rendues comme liens <a> vers les pages existantes
+    // 1. Les cartes rendues sont des liens <a> vers les pages existantes
+    //    (Admin Centre : 4 KPI après épurage — Super Admin : les 8 d'origine)
     // ──────────────────────────────────────────────────────────────────────────
 
-    public function test_all_eight_cards_render_as_anchor_links(): void
+    public function test_center_admin_dashboard_renders_only_four_clickable_cards(): void
     {
         $html = $this->actingAs($this->adminTanger)
             ->get(route('center-admin.domain.dashboard', 'sante'))
+            ->assertOk()
+            ->getContent();
+
+        // Les quatre cartes conservées, inchangées (mêmes URL, mêmes critères).
+        $kept = [
+            $this->renderedUrl('students.index', ['domain' => 'sante']),
+            $this->renderedUrl('certificates.index', ['domain' => 'sante', 'status' => 'issued']),
+            $this->renderedUrl('attendances.index', ['domain' => 'sante', 'date' => now()->toDateString()]),
+            $this->renderedUrl('payments.index', ['domain' => 'sante', 'status' => 'paid']),
+        ];
+        foreach ($kept as $url) {
+            $this->assertStringContainsString($url, $html, "La carte doit pointer vers {$url}.");
+        }
+
+        // Les quatre cartes retirées de l'affichage (pages et routes intactes).
+        $removed = [
+            $this->renderedUrl('teachers.index', ['domain' => 'sante']),
+            $this->renderedUrl('formations.index', ['domain' => 'sante']),
+            $this->renderedUrl('classes.index', ['domain' => 'sante']),
+            $this->renderedUrl('enrollments.index', ['domain' => 'sante']),
+        ];
+        foreach ($removed as $url) {
+            $this->assertStringNotContainsString($url, $html, "La carte « {$url} » ne doit plus être affichée.");
+        }
+
+        // Exactement quatre cartes KPI cliquables.
+        $this->assertMatchesRegularExpression('/<a[^>]+class="ec-kpi[^"]*cursor-pointer/', $html);
+        $this->assertSame(4, substr_count($html, 'class="ec-kpi cursor-pointer'), 'Quatre cartes KPI pour l’Admin Centre.');
+
+        // Les pages visées restent accessibles (aucune suppression de route).
+        foreach (['teachers.index', 'formations.index', 'classes.index', 'enrollments.index'] as $routeName) {
+            $this->actingAs($this->adminTanger)->get(route($routeName, ['domain' => 'sante']))->assertOk();
+        }
+    }
+
+    public function test_super_admin_dashboard_still_renders_all_eight_cards(): void
+    {
+        $html = $this->actingAs($this->superAdmin)
+            ->get(route('super-admin.domain.dashboard', 'sante'))
             ->assertOk()
             ->getContent();
 
@@ -138,7 +183,12 @@ class DomainDashboardClickableCardsTest extends TestCase
         // Rendues en véritables <a class="ec-kpi ..."> (toute la surface est
         // cliquable, navigation clavier possible), pas en <div>.
         $this->assertMatchesRegularExpression('/<a[^>]+class="ec-kpi[^"]*cursor-pointer/', $html);
-        $this->assertSame(8, substr_count($html, 'class="ec-kpi cursor-pointer'), 'Les huit cartes KPI doivent être cliquables.');
+        $this->assertSame(8, substr_count($html, 'class="ec-kpi cursor-pointer'), 'Les huit cartes KPI du Super Admin sont inchangées.');
+
+        // Graphiques et tableau « Dernières inscriptions » conservés chez lui.
+        $this->assertStringContainsString('enrollTrendChart', $html);
+        $this->assertStringContainsString('studentsDistChart', $html);
+        $this->assertStringContainsString('Dernières inscriptions', $html);
     }
 
     // ──────────────────────────────────────────────────────────────────────────

@@ -129,13 +129,13 @@
                     </a>
                 @endcan
                 @can('create', \App\Models\Formation::class)
-                    {{-- Le bouton ouvre désormais un sélecteur de configuration
-                         dédié aux six formations générales officielles :
-                         édition du prix / durée / description / statut /
-                         professeur responsable. Il ne mène plus à la liste
-                         des six cartes (celle-ci est ouverte par « Accéder
-                         aux formations »). --}}
-                    <a href="{{ route('formations-generales.picker') }}"
+                    {{-- Le bouton mène directement au formulaire existant
+                         « Nouvelle formation générale » (identité, tarif et
+                         durée, professeur responsable et image). La page de
+                         sélection des six formations officielles avec leurs
+                         boutons « Configurer » reste inchangée et accessible
+                         depuis « Accéder aux formations ». --}}
+                    <a href="{{ route('formations-generales.create') }}"
                        id="{{ $isSuperAdmin ? 'btn-add-formation-domaines' : 'btn-add-formation-ca-domaines' }}"
                        class="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:ring-offset-2 dark:bg-violet-500 dark:hover:bg-violet-600"
                        title="{{ __('Ajouter une formation') }}">

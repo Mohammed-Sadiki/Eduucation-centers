@@ -16,10 +16,12 @@ use Tests\TestCase;
  * Vérifie que, sur admin.home :
  *  - « Accéder aux formations » ouvre bien le catalogue des six cartes
  *    (formations-generales.index) ;
- *  - « Ajouter une formation » ouvre une page DISTINCTE de configuration
- *    (formations-generales.picker) qui expose les SIX emplacements officiels
- *    et permet d'éditer prix / durée / description / statut / professeur
- *    responsable ;
+ *  - « Ajouter une formation » ouvre directement le formulaire existant
+ *    « Nouvelle formation générale » (formations-generales.create) ;
+ *  - la page de configuration des SIX emplacements officiels
+ *    (formations-generales.picker), qui permet d'éditer prix / durée /
+ *    description / statut / professeur responsable, est conservée et reste
+ *    atteignable (bouton « + » du picker, gestion des six cartes) ;
  *  - le picker expose exactement les SIX emplacements officiels (les
  *    formations personnalisées passent par le bouton « + » et sont rendues
  *    avec un identifiant distinct « picker-custom- ») ; aucun doublon n'est
@@ -50,23 +52,25 @@ class OfficialFormationConfigurationTest extends TestCase
 
     /**
      * Les deux boutons de la carte Formations mènent à des destinations
-     * strictement distinctes (aucune confusion possible).
+     * strictement distinctes (aucune confusion possible) : « Ajouter une
+     * formation » va directement sur le formulaire existant « Nouvelle
+     * formation générale », sans page intermédiaire.
      */
     public function test_two_buttons_on_admin_home_target_distinct_destinations(): void
     {
         $home = $this->actingAs($this->adminBerlin)->get(route('admin.home'));
         $home->assertOk();
 
-        $home->assertSee(route('formations-generales.picker'), false);
+        $home->assertSee(route('formations-generales.create'), false);
         $home->assertSee(route('formations-generales.index'), false);
 
         // Vérifie la destination exacte de chaque bouton via le HTML.
         $html = $home->getContent();
 
         $this->assertMatchesRegularExpression(
-            '/<a[^>]+href="' . preg_quote(route('formations-generales.picker'), '/') . '"[^>]+id="btn-add-formation-ca-domaines"/',
+            '/<a[^>]+href="' . preg_quote(route('formations-generales.create'), '/') . '"[^>]+id="btn-add-formation-ca-domaines"/',
             $html,
-            'Le bouton « Ajouter une formation » doit cibler formations-generales.picker.'
+            'Le bouton « Ajouter une formation » doit cibler formations-generales.create.'
         );
 
         $this->assertMatchesRegularExpression(
@@ -77,9 +81,23 @@ class OfficialFormationConfigurationTest extends TestCase
 
         // Les deux URL sont différentes.
         $this->assertNotSame(
-            route('formations-generales.picker'),
+            route('formations-generales.create'),
             route('formations-generales.index'),
         );
+
+        // Le formulaire ciblé est bien celui décrit (identité / tarif / responsable + image).
+        $form = $this->actingAs($this->adminBerlin)->get(route('formations-generales.create'));
+        $form->assertOk();
+        $form->assertSee('Nouvelle formation générale');
+        $form->assertSee('Identité de la formation');
+        $form->assertSee('Tarif et durée');
+        $form->assertSee('Professeur responsable et image');
+
+        // La page des six cartes et ses boutons de configuration sont conservés.
+        $picker = $this->actingAs($this->adminBerlin)->get(route('formations-generales.picker'));
+        $picker->assertOk();
+        $picker->assertSee('id="picker-slot-sante"', false);
+        $picker->assertSee('Activer et configurer');
     }
 
     /**

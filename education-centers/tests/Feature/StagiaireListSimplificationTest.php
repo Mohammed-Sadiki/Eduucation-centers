@@ -603,7 +603,9 @@ class StagiaireListSimplificationTest extends TestCase
         $this->assertStringNotContainsString('Pédagogie', $sidebar);
         $this->assertStringNotContainsString('Communication', $sidebar);
         // La navigation plate reste fonctionnelle : liens cibles en place.
-        $this->assertStringContainsString(route('center-admin.domaines'), $sidebar);
+        // Le lien « Domaines » a été retiré du menu (la page Domaines est
+        // conservée et reste atteignable depuis Accueil / les dashboards).
+        $this->assertStringNotContainsString('href="' . route('center-admin.domaines') . '"', $sidebar);
         $this->assertStringContainsString(route('notifications.index'), $sidebar);
 
         // La carte « Gestion des stagiaires » reste visible et fonctionnelle sur Accueil.

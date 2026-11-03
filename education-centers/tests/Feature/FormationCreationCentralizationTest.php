@@ -63,13 +63,13 @@ class FormationCreationCentralizationTest extends TestCase
             ->assertSee('btn-add-student-domaines', false)
             ->assertSee('btn-add-formation-domaines', false)
             ->assertSee('Ajouter un élève')
-            // Nouveau parcours : le bouton formation mène au sélecteur de
-            // configuration des six formations générales officielles (page
-            // dédiée), pas à la liste des six cartes (cellule « Accéder
-            // aux formations »).
+            // Nouveau parcours : le bouton formation mène directement au
+            // formulaire existant « Nouvelle formation générale » (aucune page
+            // intermédiaire) ; la liste des six cartes reste dans la cellule
+            // « Accéder aux formations ».
             ->assertSee('Ajouter une formation')
             ->assertSee(route('students.create'), false)
-            ->assertSee(route('formations-generales.picker'), false);
+            ->assertSee(route('formations-generales.create'), false);
 
         $html = $response->getContent();
         // Le bouton formation suit immédiatement le bouton élève (ordre visuel « côte à côte »).
@@ -91,7 +91,7 @@ class FormationCreationCentralizationTest extends TestCase
                 ->assertSee('Ajouter un élève')
                 ->assertSee('Ajouter une formation')
                 ->assertSee(route('students.create'), false)
-                ->assertSee(route('formations-generales.picker'), false);
+                ->assertSee(route('formations-generales.create'), false);
 
             $html = $response->getContent();
             $this->assertLessThan(
