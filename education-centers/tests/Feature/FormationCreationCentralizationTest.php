@@ -54,15 +54,22 @@ class FormationCreationCentralizationTest extends TestCase
 
     public function test_super_admin_domaines_shows_formation_button_beside_student_button(): void
     {
+        // Les deux actions rapides sont désormais hébergées par la carte
+        // Formations de la page d'accueil admin (admin.home), plus par la
+        // page Domaines.
         $response = $this->actingAs($this->superAdmin)
-            ->get(route('super-admin.domaines'))
+            ->get(route('admin.home'))
             ->assertOk()
             ->assertSee('btn-add-student-domaines', false)
             ->assertSee('btn-add-formation-domaines', false)
             ->assertSee('Ajouter un élève')
+            // Nouveau parcours : le bouton formation mène au sélecteur de
+            // configuration des six formations générales officielles (page
+            // dédiée), pas à la liste des six cartes (cellule « Accéder
+            // aux formations »).
             ->assertSee('Ajouter une formation')
             ->assertSee(route('students.create'), false)
-            ->assertSee(route('formations.create'), false);
+            ->assertSee(route('formations-generales.picker'), false);
 
         $html = $response->getContent();
         // Le bouton formation suit immédiatement le bouton élève (ordre visuel « côte à côte »).
@@ -77,14 +84,14 @@ class FormationCreationCentralizationTest extends TestCase
     {
         foreach ([$this->adminBerlin, $this->adminMunich] as $admin) {
             $response = $this->actingAs($admin)
-                ->get(route('center-admin.domaines'))
+                ->get(route('admin.home'))
                 ->assertOk()
                 ->assertSee('btn-add-student-ca-domaines', false)
                 ->assertSee('btn-add-formation-ca-domaines', false)
                 ->assertSee('Ajouter un élève')
                 ->assertSee('Ajouter une formation')
                 ->assertSee(route('students.create'), false)
-                ->assertSee(route('formations.create'), false);
+                ->assertSee(route('formations-generales.picker'), false);
 
             $html = $response->getContent();
             $this->assertLessThan(

@@ -42,9 +42,9 @@ class StudentCreationCentralizationTest extends TestCase
         $this->adminBerlin = User::factory()->centerAdmin($this->centerBerlin->id)->create(['email' => 'ab@test.de']);
         $this->adminMunich = User::factory()->centerAdmin($this->centerMunich->id)->create(['email' => 'am@test.de']);
 
-        $this->formationSanteBerlin = Formation::factory()->forCenter($this->centerBerlin)->forDomain('sante')->create();
-        $this->formationSanteMunich = Formation::factory()->forCenter($this->centerMunich)->forDomain('sante')->create();
-        $this->formationInfoBerlin = Formation::factory()->forCenter($this->centerBerlin)->forDomain('informatique')->create();
+        $this->formationSanteBerlin = Formation::factory()->forCenter($this->centerBerlin)->forDomain('sante')->official('sante')->create();
+        $this->formationSanteMunich = Formation::factory()->forCenter($this->centerMunich)->forDomain('sante')->official('sante')->create();
+        $this->formationInfoBerlin = Formation::factory()->forCenter($this->centerBerlin)->forDomain('informatique')->official('informatique')->create();
     }
 
     private function newStudentUser(Center $center, string $name, string $email): User
@@ -58,8 +58,10 @@ class StudentCreationCentralizationTest extends TestCase
 
     public function test_super_admin_sees_add_student_button_on_domaines_page(): void
     {
+        // Le bouton a été déplacé de la page Domaines vers la carte Formations
+        // de la page d'accueil admin (admin.home).
         $this->actingAs($this->superAdmin)
-            ->get(route('super-admin.domaines'))
+            ->get(route('admin.home'))
             ->assertOk()
             ->assertSee('btn-add-student-domaines', false)
             ->assertSee('Ajouter un élève')
@@ -70,7 +72,7 @@ class StudentCreationCentralizationTest extends TestCase
     {
         foreach ([$this->adminBerlin, $this->adminMunich] as $admin) {
             $this->actingAs($admin)
-                ->get(route('center-admin.domaines'))
+                ->get(route('admin.home'))
                 ->assertOk()
                 ->assertSee('btn-add-student-ca-domaines', false)
                 ->assertSee('Ajouter un élève');
@@ -118,7 +120,7 @@ class StudentCreationCentralizationTest extends TestCase
             ->get(route('students.create'))
             ->assertOk()
             ->assertSee('name="center_id"', false)
-            ->assertSee('name="domain"', false)
+            ->assertDontSee('name="domain"', false)
             ->assertSee('name="formation_id"', false)
             ->assertSee('Centre Berlin')
             ->assertSee('Centre Munich');
@@ -393,19 +395,20 @@ class StudentCreationCentralizationTest extends TestCase
         }
     }
 
-    public function test_back_to_domaines_button_targets_the_right_portal_per_role(): void
+    public function test_back_to_formations_button_targets_the_right_portal_per_role(): void
     {
+        // Nouveau parcours : le bouton de retour cible désormais la page
+        // des Formations générales (et plus les Domaines).
         $this->actingAs($this->superAdmin)
             ->get(route('students.create'))
             ->assertOk()
-            ->assertSee(route('super-admin.domaines'), false)
-            ->assertSee('Retour aux domaines');
+            ->assertSee(route('formations-generales.index'), false)
+            ->assertSee('Retour aux formations');
 
         $this->actingAs($this->adminBerlin)
             ->get(route('students.create'))
             ->assertOk()
-            ->assertSee(route('center-admin.domaines'), false)
-            ->assertDontSee(route('super-admin.domaines'), false);
+            ->assertSee(route('formations-generales.index'), false);
     }
 
     public function test_no_add_student_link_anywhere_in_dashboard_navigation(): void

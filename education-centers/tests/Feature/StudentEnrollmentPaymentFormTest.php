@@ -52,14 +52,18 @@ class StudentEnrollmentPaymentFormTest extends TestCase
         $this->adminMunich = User::factory()->centerAdmin($this->centerMunich->id)->create(['email' => 'am@test.de']);
 
         // Tarifs fixes pour des assertions financières déterministes.
+        // Nouveau parcours : les formations proposées dans « Ajouter un élève »
+        // doivent être des formations générales officielles (is_official = true),
+        // filtrées par centre. Les anciennes sous-formations legacy ne sont plus
+        // jamais proposées à la sélection.
         $this->formationSanteBerlin = Formation::factory()
-            ->forCenter($this->centerBerlin)->forDomain('sante')
+            ->forCenter($this->centerBerlin)->forDomain('sante')->official('sante')
             ->create(['annual_price' => 5000, 'price' => 500]);
         $this->formationSanteMunich = Formation::factory()
-            ->forCenter($this->centerMunich)->forDomain('sante')
+            ->forCenter($this->centerMunich)->forDomain('sante')->official('sante')
             ->create(['annual_price' => 5000, 'price' => 500]);
         $this->formationInfoBerlin = Formation::factory()
-            ->forCenter($this->centerBerlin)->forDomain('informatique')
+            ->forCenter($this->centerBerlin)->forDomain('informatique')->official('informatique')
             ->create(['annual_price' => 3000, 'price' => 300]);
     }
 
@@ -237,29 +241,34 @@ class StudentEnrollmentPaymentFormTest extends TestCase
     }
 
     // ──────────────────────────────────────────────────────────────────────────
-    //  7. Les domaines sont correctement proposés
+    //  7. Nouveau parcours : aucun champ « Domaine » n'est exposé côté UI
+    //     (la sélection directe Centre → Formation est appliquée partout).
     // ──────────────────────────────────────────────────────────────────────────
 
-    public function test_domains_are_proposed_in_the_form(): void
+    public function test_no_domain_field_is_exposed_in_the_form(): void
     {
         $response = $this->actingAs($this->superAdmin)
             ->get(route('students.create'))
             ->assertOk()
-            ->assertSee('name="domain"', false);
+            ->assertDontSee('name="domain"', false)
+            ->assertDontSee('Domaine de formation', false)
+            ->assertDontSee('Choisir un domaine', false)
+            ->assertDontSee('Centre & domaine', false);
 
-        foreach (['sante', 'informatique'] as $slug) {
-            $response->assertSee('value="'.$slug.'"', false);
-        }
+        // Les formations officielles restent bien proposées à la sélection.
+        $response->assertSee('value="'.$this->formationSanteBerlin->id.'"', false);
+        $response->assertSee('value="'.$this->formationInfoBerlin->id.'"', false);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
-    //  8. Les formations sont filtrées par centre et domaine
+    //  8. Les formations sont filtrées par centre (et uniquement par centre).
     // ──────────────────────────────────────────────────────────────────────────
 
-    public function test_formations_are_scoped_to_center_and_domain(): void
+    public function test_formations_are_scoped_to_center(): void
     {
-        // Le rendu serveur expose centre + domaine de chaque formation pour le
-        // filtrage dynamique (Alpine) et n'inclut que des formations actives.
+        // Le rendu serveur expose le centre de chaque formation officielle pour
+        // le filtrage dynamique (Alpine). Le domaine n'est plus un critère de
+        // sélection : l'attribut data-domain a été retiré du parcours.
         $content = $this->actingAs($this->superAdmin)
             ->get(route('students.create'))
             ->assertOk()
@@ -267,8 +276,8 @@ class StudentEnrollmentPaymentFormTest extends TestCase
 
         $this->assertStringContainsString('data-center-id="'.$this->centerBerlin->id.'"', $content);
         $this->assertStringContainsString('data-center-id="'.$this->centerMunich->id.'"', $content);
-        $this->assertStringContainsString('data-domain="sante"', $content);
-        $this->assertStringContainsString('data-domain="informatique"', $content);
+        $this->assertStringNotContainsString('data-domain="sante"', $content);
+        $this->assertStringNotContainsString('data-domain="informatique"', $content);
 
         // Admin Centre : uniquement les formations de son centre sont rendues.
         $this->actingAs($this->adminBerlin)
@@ -502,7 +511,7 @@ class StudentEnrollmentPaymentFormTest extends TestCase
             ->get(route('students.create'))
             ->assertOk()
             ->assertSee('Informations personnelles')
-            ->assertSee('Centre & domaine de formation')
+            ->assertSee('Centre de formation')
             ->assertSee('Numéro de téléphone WhatsApp');
 
         // Arabe : direction RTL + libellés traduits.

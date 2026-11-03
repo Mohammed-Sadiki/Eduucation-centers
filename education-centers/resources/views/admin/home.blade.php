@@ -9,9 +9,7 @@
     $isCenterAdmin = $user->isCenterAdmin();
     $centerName    = $user->center?->name ?? '';
 
-    $formationsRoute = $isSuperAdmin
-        ? route('super-admin.domaines')
-        : route('center-admin.domaines');
+    $formationsRoute = route('formations-generales.index');
 
     $communicationRoute = route('messages.index');
 
@@ -81,38 +79,90 @@
     </div>
 </section>
 
-{{-- GRILLE 4 CARTES --}}
-<div class="grid gap-6 sm:grid-cols-2" id="admin-home-cards" role="list">
+{{-- GRILLE 4 CARTES
+     Ligne 1 : carte « Formations » pleine largeur intégrant les trois actions
+                 rapides (Ajouter un élève / Ajouter une formation / Plan de
+                 classe) et le bouton d'accès « Accéder aux formations ».
+     Ligne 2 : trois cartes de largeur égales (Gestion des stagiaires,
+               Communication, Gestion financière). --}}
+<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" id="admin-home-cards" role="list">
 
-    {{-- CARTE 1 : FORMATIONS --}}
-    <a href="{{ $formationsRoute }}"
-       id="card-home-formations"
-       role="listitem"
-       class="group relative flex flex-col overflow-hidden rounded-3xl border border-violet-200/70 bg-gradient-to-br from-violet-50/60 to-indigo-50/40 p-6 shadow-sm transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-xl hover:border-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:ring-offset-2 cursor-pointer dark:border-violet-400/20 dark:bg-violet-400/[0.06] dark:hover:border-violet-400/40"
-       aria-label="{{ __('Accéder au module Formations') }}">
-        <div class="pointer-events-none absolute -top-10 -end-10 h-40 w-40 rounded-full bg-violet-300/20 blur-2xl dark:bg-violet-500/10" aria-hidden="true"></div>
-        <div class="relative mb-5 flex items-start justify-between">
-            <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-400 to-violet-600 text-white shadow-lg shadow-violet-500/30">
-                <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 0 0-.491 6.347A48.627 48.627 0 0 1 12 20.904a48.627 48.627 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.57 50.57 0 0 0-2.658-.813A59.905 59.905 0 0 1 12 3.493a59.902 59.902 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
-                </svg>
-            </span>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-700 dark:bg-violet-500/15 dark:text-violet-300">
-                <span class="h-1.5 w-1.5 rounded-full bg-violet-500"></span>
-                {{ __('6 domaines') }}
-            </span>
+    {{-- CARTE 1 : FORMATIONS (pleine largeur, ligne 1) --}}
+    <div class="sm:col-span-2 lg:col-span-3"
+         id="card-home-formations"
+         role="listitem"
+         aria-label="{{ __('Accéder au module Formations') }}">
+        <div class="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-violet-200/70 bg-gradient-to-br from-violet-50/60 to-indigo-50/40 p-6 shadow-sm transition-all duration-200 ease-out hover:shadow-xl hover:border-violet-300 focus-within:ring-2 focus-within:ring-violet-500/40 focus-within:ring-offset-2 dark:border-violet-400/20 dark:bg-violet-400/[0.06] dark:hover:border-violet-400/40">
+            <div class="pointer-events-none absolute -top-10 -end-10 h-40 w-40 rounded-full bg-violet-300/20 blur-2xl dark:bg-violet-500/10" aria-hidden="true"></div>
+
+            {{-- 1. Icône + badge « 6 formations » --}}
+            <div class="relative mb-5 flex items-start justify-between">
+                <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-400 to-violet-600 text-white shadow-lg shadow-violet-500/30">
+                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 0 0-.491 6.347A48.627 48.627 0 0 1 12 20.904a48.627 48.627 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.57 50.57 0 0 0-2.658-.813A59.905 59.905 0 0 1 12 3.493a59.902 59.902 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
+                    </svg>
+                </span>
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-700 dark:bg-violet-500/15 dark:text-violet-300">
+                    <span class="h-1.5 w-1.5 rounded-full bg-violet-500"></span>
+                    {{ __('6 formations') }}
+                </span>
+            </div>
+
+            {{-- 2-3. Titre + description des six formations générales --}}
+            <div class="relative">
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white">{{ __('Formations') }}</h2>
+                <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ __('Gérez les six formations générales du centre (Santé, Informatique, Hôtellerie, Maçonnerie, Design intérieur, Design graphique), les étudiants, les professeurs et les activités pédagogiques.') }}</p>
+            </div>
+
+            {{-- 4. Ligne des trois actions rapides --}}
+            <div class="relative mt-6 flex flex-wrap items-center gap-3">
+                @can('create', \App\Models\Student::class)
+                    <a href="{{ route('students.create') }}"
+                       id="{{ $isSuperAdmin ? 'btn-add-student-domaines' : 'btn-add-student-ca-domaines' }}"
+                       class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:ring-offset-2 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+                       title="{{ __('Ajouter un élève') }}">
+                        <x-icon name="plus" class="h-4 w-4" stroke-width="2" />
+                        {{ __('Ajouter un élève') }}
+                    </a>
+                @endcan
+                @can('create', \App\Models\Formation::class)
+                    {{-- Le bouton ouvre désormais un sélecteur de configuration
+                         dédié aux six formations générales officielles :
+                         édition du prix / durée / description / statut /
+                         professeur responsable. Il ne mène plus à la liste
+                         des six cartes (celle-ci est ouverte par « Accéder
+                         aux formations »). --}}
+                    <a href="{{ route('formations-generales.picker') }}"
+                       id="{{ $isSuperAdmin ? 'btn-add-formation-domaines' : 'btn-add-formation-ca-domaines' }}"
+                       class="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:ring-offset-2 dark:bg-violet-500 dark:hover:bg-violet-600"
+                       title="{{ __('Ajouter une formation') }}">
+                        <x-icon name="plus" class="h-4 w-4" stroke-width="2" />
+                        {{ __('Ajouter une formation') }}
+                    </a>
+                @endcan
+                <a href="{{ route('class-plan.index') }}"
+                   id="{{ $isSuperAdmin ? 'btn-class-plan-domaines' : 'btn-class-plan-ca-domaines' }}"
+                   class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:ring-offset-2 dark:bg-emerald-500 dark:hover:bg-emerald-600"
+                   title="{{ __('Plan de classe') }}">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                    </svg>
+                    {{ __('Plan de classe') }}
+                </a>
+            </div>
+
+            {{-- 5. Bouton pleine largeur « Accéder aux formations » --}}
+            <div class="relative mt-6 pt-1 flex-1 flex flex-col justify-end">
+                <a href="{{ $formationsRoute }}"
+                   class="group/link relative flex items-center justify-between rounded-xl bg-violet-100/70 px-4 py-3 text-sm font-semibold text-violet-700 transition-colors hover:bg-violet-200/60 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:ring-offset-2 dark:bg-violet-500/10 dark:text-violet-300 dark:hover:bg-violet-500/20">
+                    <span>{{ __('Accéder aux formations') }}</span>
+                    <span class="flex h-7 w-7 items-center justify-center rounded-full bg-violet-600 text-white shadow-sm transition-transform group-hover/link:translate-x-1 rtl:rotate-180">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
+                    </span>
+                </a>
+            </div>
         </div>
-        <div class="relative flex-1">
-            <h2 class="text-xl font-bold text-slate-900 transition-colors group-hover:text-violet-700 dark:text-white dark:group-hover:text-violet-300">{{ __('Formations') }}</h2>
-            <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ __('Gérez les domaines de formation, les étudiants, les professeurs et les activités pédagogiques.') }}</p>
-        </div>
-        <div class="relative mt-6 flex items-center justify-between rounded-xl bg-violet-100/70 px-4 py-2.5 text-sm font-semibold text-violet-700 transition-colors group-hover:bg-violet-200/60 dark:bg-violet-500/10 dark:text-violet-300 dark:group-hover:bg-violet-500/20">
-            <span>{{ __('Accéder aux formations') }}</span>
-            <span class="flex h-7 w-7 items-center justify-center rounded-full bg-violet-600 text-white shadow-sm transition-transform group-hover:translate-x-1 rtl:rotate-180">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
-            </span>
-        </div>
-    </a>
+    </div>
 
     {{-- CARTE 2 : STAGIAIRES --}}
     <a href="{{ $stagiairesRoute }}"

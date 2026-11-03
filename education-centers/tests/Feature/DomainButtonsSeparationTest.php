@@ -40,14 +40,15 @@ class DomainButtonsSeparationTest extends TestCase
     }
 
     /**
-     * TEST A : Dans la page Domaines de formation, le bouton « + Ajouter un élève »
-     * ouvre le formulaire d'inscription élève (students.create) avec nom, CIN,
-     * formation et paiement.
+     * TEST A : Sur la page d'accueil admin (admin.home), la carte Formations
+     * expose le bouton « + Ajouter un élève » qui ouvre le formulaire
+     * d'inscription élève (students.create) avec nom, CIN, formation et
+     * paiement. Les boutons ne sont plus portés par la page Domaines.
      */
     public function test_button_add_student_opens_student_form_with_personal_info_and_payment(): void
     {
         // 1. Super Admin
-        $responseSA = $this->actingAs($this->superAdmin)->get(route('super-admin.domaines'));
+        $responseSA = $this->actingAs($this->superAdmin)->get(route('admin.home'));
         $responseSA->assertOk();
         $responseSA->assertSee('id="btn-add-student-domaines"', false);
         $responseSA->assertSee(route('students.create'), false);
@@ -61,7 +62,7 @@ class DomainButtonsSeparationTest extends TestCase
         $formSA->assertSee('Paiement');
 
         // 2. Admin Centre
-        $responseCA = $this->actingAs($this->adminBerlin)->get(route('center-admin.domaines'));
+        $responseCA = $this->actingAs($this->adminBerlin)->get(route('admin.home'));
         $responseCA->assertOk();
         $responseCA->assertSee('id="btn-add-student-ca-domaines"', false);
         $responseCA->assertSee(route('students.create'), false);
@@ -75,45 +76,51 @@ class DomainButtonsSeparationTest extends TestCase
     }
 
     /**
-     * TEST B : Dans la page Domaines de formation, le bouton « + Ajouter une formation »
-     * ouvre le formulaire de création de formation (formations.create) SANS informations d'élève ni paiement.
+     * TEST B : Sur la page d'accueil admin, la carte Formations expose deux
+     * boutons aux destinations strictement distinctes :
+     *  - « + Ajouter une formation » → sélecteur de configuration des six
+     *    formations générales officielles (formations-generales.picker) ;
+     *  - « Accéder aux formations »  → catalogue des six cartes (formations-
+     *    generales.index). Aucun des deux n'expose de champ élève ou paiement.
      */
     public function test_button_add_formation_opens_catalog_formation_form_without_student_fields(): void
     {
-        // 1. Super Admin
-        $responseSA = $this->actingAs($this->superAdmin)->get(route('super-admin.domaines'));
+        // 1. Super Admin : les deux boutons mènent à des pages différentes.
+        $responseSA = $this->actingAs($this->superAdmin)->get(route('admin.home'));
         $responseSA->assertOk();
         $responseSA->assertSee('id="btn-add-formation-domaines"', false);
-        $responseSA->assertSee(route('formations.create'), false);
+        $responseSA->assertSee(route('formations-generales.picker'), false);
+        $responseSA->assertSee(route('formations-generales.index'), false);
+        $responseSA->assertSee('Ajouter une formation');
+        $responseSA->assertSee('Accéder aux formations');
 
-        // Vérification de la cible formations.create
-        $formSA = $this->actingAs($this->superAdmin)->get(route('formations.create'));
-        $formSA->assertOk();
-        $formSA->assertSee('Ajouter une formation');
-        $formSA->assertSee('Intitulé de la formation');
-        $formSA->assertSee('Code formation');
-        $formSA->assertSee('Domaine de formation');
-        // Ne doit JAMAIS afficher de champs élève ni paiement
-        $formSA->assertDontSee('Photos CIN');
-        $formSA->assertDontSee('Numéro WhatsApp');
-        $formSA->assertDontSee('Numéro d\'urgence');
-        $formSA->assertDontSee('Informations personnelles');
-        $formSA->assertDontSee('Paiement : Avance ou Payé');
+        // Le sélecteur de configuration n'expose aucun champ élève ni paiement.
+        $pickerSA = $this->actingAs($this->superAdmin)->get(route('formations-generales.picker'));
+        $pickerSA->assertOk();
+        $pickerSA->assertDontSee('Photos CIN');
+        $pickerSA->assertDontSee('Numéro WhatsApp');
+        $pickerSA->assertDontSee('Numéro d\'urgence');
+        $pickerSA->assertDontSee('Informations personnelles');
+        $pickerSA->assertDontSee('Paiement : Avance ou Payé');
 
-        // 2. Admin Centre
-        $responseCA = $this->actingAs($this->adminBerlin)->get(route('center-admin.domaines'));
+        // Le catalogue des six cartes n'expose pas non plus de champ élève.
+        $catalogSA = $this->actingAs($this->superAdmin)->get(route('formations-generales.index'));
+        $catalogSA->assertOk();
+        $catalogSA->assertDontSee('Photos CIN');
+        $catalogSA->assertDontSee('Informations personnelles');
+
+        // 2. Admin Centre : mêmes destinations distinctes.
+        $responseCA = $this->actingAs($this->adminBerlin)->get(route('admin.home'));
         $responseCA->assertOk();
         $responseCA->assertSee('id="btn-add-formation-ca-domaines"', false);
-        $responseCA->assertSee(route('formations.create'), false);
+        $responseCA->assertSee(route('formations-generales.picker'), false);
+        $responseCA->assertSee(route('formations-generales.index'), false);
 
-        $formCA = $this->actingAs($this->adminBerlin)->get(route('formations.create'));
-        $formCA->assertOk();
-        $formCA->assertSee('Ajouter une formation');
-        $formCA->assertSee('Intitulé de la formation');
-        $formCA->assertSee('Code formation');
-        $formCA->assertDontSee('Photos CIN');
-        $formCA->assertDontSee('Numéro WhatsApp');
-        $formCA->assertDontSee('Numéro d\'urgence');
+        $pickerCA = $this->actingAs($this->adminBerlin)->get(route('formations-generales.picker'));
+        $pickerCA->assertOk();
+        $pickerCA->assertDontSee('Photos CIN');
+        $pickerCA->assertDontSee('Numéro WhatsApp');
+        $pickerCA->assertDontSee('Numéro d\'urgence');
     }
 
     /**

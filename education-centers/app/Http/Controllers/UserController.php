@@ -71,6 +71,7 @@ class UserController extends Controller
     /**
      * Formulaire de création d'un utilisateur.
      * Important : depuis ce formulaire, il doit être possible de créer UNIQUEMENT des comptes Professeurs.
+     * Nouveau parcours : une seule étape « Formation générale » (aucun domaine).
      */
     public function create(Request $request): View
     {
@@ -78,31 +79,23 @@ class UserController extends Controller
 
         $authUser = $request->user();
         $centers = $authUser->isSuperAdmin() ? Center::orderBy('name')->get() : collect();
-        $domains = \App\Models\Domain::ordered()->get();
 
-        // Récupérer les formations actives avec leur centre et domaine
-        $formationsQuery = \App\Models\Formation::query()
-            ->where('status', 'active')
-            ->orderBy('name');
+        // Catalogue : uniquement les six formations générales officielles actives
+        // du (ou des) centre(s) autorisé(s). Aucune sous-formation legacy.
+        $centerIds = $authUser->isCenterAdmin()
+            ? [(int) $authUser->center_id]
+            : null;
 
-        if ($authUser->isCenterAdmin()) {
-            $formationsQuery->where('center_id', $authUser->center_id);
-        }
-
-        $formationsData = $formationsQuery
-            ->get(['id', 'center_id', 'domain', 'name', 'code'])
-            ->map(function ($f) {
-                return [
-                    'id' => $f->id,
-                    'center_id' => $f->center_id,
-                    'domain' => $f->domain,
-                    'name' => method_exists($f, 'translated') ? ($f->translated('name') ?? $f->name) : $f->name,
-                    'code' => $f->code,
-                ];
-            })
+        $formationsData = collect(\App\Models\Formation::selectionForCenters($centerIds))
+            ->map(fn (array $f): array => [
+                'id'        => $f['id'],
+                'center_id' => $f['center_id'],
+                'name'      => $f['name'],
+                'code'      => $f['code'],
+            ])
             ->values();
 
-        return view('users.create', compact('centers', 'domains', 'formationsData'));
+        return view('users.create', compact('centers', 'formationsData'));
     }
 
     /**
@@ -122,6 +115,17 @@ class UserController extends Controller
         $data = $request->validated();
         $domainSlugs = $data['domains'] ?? [];
         unset($data['domains']);
+
+        // Nouveau parcours : le formulaire ne transmet plus de `domain`.
+        // On dérive la métadonnée technique depuis la formation officielle
+        // sélectionnée, pour cohérence des scopes internes (HasDomainScope) et
+        // des filtres historiques, sans réexposer le domaine à l'utilisateur.
+        if (empty($data['domain']) && ! empty($data['formation_id'])) {
+            $formation = \App\Models\Formation::find($data['formation_id']);
+            if ($formation) {
+                $data['domain'] = $formation->official_code ?: $formation->domain;
+            }
+        }
 
         // Règle stricte : seul le rôle Professeur peut être créé via ce formulaire
         $data['role'] = User::ROLE_TEACHER;
@@ -176,30 +180,22 @@ class UserController extends Controller
         $authUser = $request->user();
         $centers = $authUser->isSuperAdmin() ? Center::orderBy('name')->get() : collect();
         $allowedRoles = $this->getAllowedRoles($authUser, $user);
-        $domains = \App\Models\Domain::ordered()->get();
 
-        $formationsQuery = \App\Models\Formation::query()
-            ->where('status', 'active')
-            ->orderBy('name');
+        // Catalogue : uniquement les six formations générales officielles actives.
+        $centerIds = $authUser->isCenterAdmin()
+            ? [(int) $authUser->center_id]
+            : null;
 
-        if ($authUser->isCenterAdmin()) {
-            $formationsQuery->where('center_id', $authUser->center_id);
-        }
-
-        $formationsData = $formationsQuery
-            ->get(['id', 'center_id', 'domain', 'name', 'code'])
-            ->map(function ($f) {
-                return [
-                    'id' => $f->id,
-                    'center_id' => $f->center_id,
-                    'domain' => $f->domain,
-                    'name' => method_exists($f, 'translated') ? ($f->translated('name') ?? $f->name) : $f->name,
-                    'code' => $f->code,
-                ];
-            })
+        $formationsData = collect(\App\Models\Formation::selectionForCenters($centerIds))
+            ->map(fn (array $f): array => [
+                'id'        => $f['id'],
+                'center_id' => $f['center_id'],
+                'name'      => $f['name'],
+                'code'      => $f['code'],
+            ])
             ->values();
 
-        return view('users.edit', compact('user', 'centers', 'allowedRoles', 'domains', 'formationsData'));
+        return view('users.edit', compact('user', 'centers', 'allowedRoles', 'formationsData'));
     }
 
     /**

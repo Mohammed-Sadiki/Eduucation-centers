@@ -15,13 +15,12 @@
 @section('standalone_back_label', __('Retour aux utilisateurs'))
 
 @section('content')
-<div class="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6"
+<div class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6"
      x-data="userTeacherFormApp({
          formations: @js($formationsData),
          isCenterAdmin: @js($isCenterAdmin),
          forcedCenterId: @js($isCenterAdmin ? (int) $authUser->center_id : null),
          initialCenterId: @js(old('center_id', $isCenterAdmin ? $authUser->center_id : '')),
-         initialDomain: @js(old('domain', '')),
          initialFormationId: @js(old('formation_id', '')),
      })">
 
@@ -41,7 +40,8 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('users.store') }}" id="form-create-user" class="space-y-6">
+    <form method="POST" action="{{ route('users.store') }}" id="form-create-user" >
+        <x-ui.form-grid>
         @csrf
 
         {{-- Rôle imposé automatiquement : Professeur (vérifié et sécurisé serveur) --}}
@@ -145,30 +145,15 @@
                     @error('status') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
                 </div>
 
-                {{-- LIGNE 2 : Domaine d'enseignement & Formation enseignée --}}
-                <div class="sm:col-span-1">
-                    <label for="domain" class="ec-label text-[1.0625rem] font-semibold">{{ __('Domaine d\'enseignement') }} <span class="text-red-500">*</span></label>
-                    <select id="domain" name="domain" class="ec-select text-[1.0625rem] @error('domain') is-invalid @enderror"
-                            x-model="domain" x-on:change="applyCascade()" required>
-                        <option value="">{{ __('— Sélectionner le domaine —') }}</option>
-                        @foreach($domains as $dom)
-                            <option value="{{ $dom->slug }}" @selected(old('domain') === $dom->slug)>
-                                {{ method_exists($dom, 'translated') ? ($dom->translated('name') ?? $dom->name) : $dom->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('domain') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
-                </div>
-
-                <div class="sm:col-span-1">
-                    <label for="formation_id" class="ec-label text-[1.0625rem] font-semibold">{{ __('Formation enseignée') }} <span class="text-red-500">*</span></label>
+                {{-- LIGNE 2 : Formation enseignée (sélection directe, sans domaine) --}}
+                <div class="sm:col-span-2">
+                    <label for="formation_id" class="ec-label text-[1.0625rem] font-semibold">{{ __('Formation') }} <span class="text-red-500">*</span></label>
                     <select id="formation_id" name="formation_id" class="ec-select text-[1.0625rem] @error('formation_id') is-invalid @enderror"
                             x-model="formationId" required>
                         <option value="">{{ __('— Sélectionner la formation —') }}</option>
                         @foreach($formationsData as $formation)
                             <option value="{{ $formation['id'] }}"
                                     data-center-id="{{ $formation['center_id'] }}"
-                                    data-domain="{{ $formation['domain'] }}"
                                     @selected(old('formation_id') == $formation['id'])>
                                 {{ $formation['name'] }} ({{ $formation['code'] }})
                             </option>
@@ -176,14 +161,8 @@
                     </select>
                     @error('formation_id') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
 
-                    <p x-show="!domain" class="ec-help mt-1 text-[0.95rem]">
-                        {{ __('Sélectionnez d\'abord le centre et le domaine d\'enseignement.') }}
-                    </p>
-                    <p x-show="domain && visibleCount === 0" x-cloak class="ec-error mt-1 text-[0.95rem]">
-                        {{ __('Aucune formation disponible pour ce domaine.') }}
-                    </p>
-                    <p x-show="domain && visibleCount > 0" x-cloak class="ec-help mt-1 text-[0.95rem]">
-                        <span x-text="visibleCount"></span> {{ __('formation(s) disponible(s) dans ce catalogue.') }}
+                    <p class="ec-help mt-1 text-[0.95rem]">
+                        {{ __('Le professeur est rattaché à une des six formations générales officielles du centre. Les sous-formations legacy ne sont plus proposées.') }}
                     </p>
                 </div>
             </div>
@@ -223,6 +202,7 @@
                 {{ __('Créer le compte professeur') }}
             </button>
         </div>
+        </x-ui.form-grid>
     </form>
 </div>
 
@@ -233,7 +213,6 @@ function userTeacherFormApp(config) {
         isCenterAdmin: config.isCenterAdmin,
         forcedCenterId: config.forcedCenterId,
         centerId: config.initialCenterId ? String(config.initialCenterId) : '',
-        domain: config.initialDomain ? String(config.initialDomain) : '',
         formationId: config.initialFormationId ? String(config.initialFormationId) : '',
         visibleCount: 0,
 
@@ -245,9 +224,10 @@ function userTeacherFormApp(config) {
             this.applyCascade(true);
         },
 
+        // Filtre par centre (Super Admin multi-centres). Aucune étape Domaine :
+        // le catalogue ne contient que des formations générales officielles.
         applyCascade(isInitial = false) {
             const center = this.effectiveCenterId;
-            const currentDomain = this.domain;
             const formationSelect = document.getElementById('formation_id');
             if (!formationSelect) return;
 
@@ -255,8 +235,7 @@ function userTeacherFormApp(config) {
             let currentStillValid = false;
 
             formationSelect.querySelectorAll('option[data-center-id]').forEach((option) => {
-                const match = (center !== '' ? option.dataset.centerId === center : true)
-                    && (currentDomain !== '' ? option.dataset.domain === currentDomain : false);
+                const match = center === '' || option.dataset.centerId === center;
 
                 option.hidden = !match;
                 option.disabled = !match;

@@ -38,6 +38,7 @@
 
                 {{-- Bloc 1 : Centre de rattachement (Super Admin seulement) --}}
                 @if(auth()->user()->isSuperAdmin())
+                    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
                     <div class="card shadow-sm border-0 mb-4">
                         <div class="card-header bg-white py-3 border-bottom">
                             <h5 class="card-title mb-0 fw-bold text-primary">
@@ -174,12 +175,13 @@
                 </div>
 
                 {{-- Actions --}}
-                <div class="d-flex justify-content-end gap-3 mb-5">
+                <div class="d-flex justify-content-end gap-3 mb-5 lg:col-span-2">
                     <a href="{{ route('rooms.index') }}" class="btn btn-outline-secondary px-4">{{ __('Annuler') }}</a>
                     <button type="submit" class="btn btn-primary px-5 shadow-sm" id="btn-submit-room">
                         <i class="bi bi-check-circle-fill me-1"></i>{{ __('Enregistrer la salle') }}
                     </button>
                 </div>
+                    </div>
             </form>
 
         </div>

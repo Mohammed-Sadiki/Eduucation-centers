@@ -96,14 +96,14 @@
     <form method="GET" action="{{ route('super-admin.finance.dashboard') }}"
           class="rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] dark:border-slate-800 dark:bg-slate-900">
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5 items-center">
-            {{-- Filtre Domaine --}}
+            {{-- Filtre Formation (métadonnée technique `domain` conservée en interne) --}}
             <div>
                 <label for="filter-domain" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
-                    {{ __('Domaine') }}
+                    {{ __('Formation') }}
                 </label>
                 <select name="domain" id="filter-domain" onchange="this.form.submit()"
                         class="w-full rounded-lg border-slate-200 bg-slate-50/50 py-1.5 px-2.5 text-xs font-medium text-slate-800 focus:border-[#0DAD98] focus:bg-white focus:ring-1 focus:ring-[#0DAD98] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
-                    <option value="all" {{ $domain === 'all' ? 'selected' : '' }}>{{ __('Tous les domaines') }}</option>
+                    <option value="all" {{ $domain === 'all' ? 'selected' : '' }}>{{ __('Toutes les formations') }}</option>
                     @foreach($domains as $slug => $d)
                         <option value="{{ $slug }}" {{ $domain === $slug ? 'selected' : '' }}>{{ __(is_array($d) ? ($d['name'] ?? $slug) : $d) }}</option>
                     @endforeach

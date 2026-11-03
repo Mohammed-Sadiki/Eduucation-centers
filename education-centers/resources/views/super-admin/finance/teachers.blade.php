@@ -190,14 +190,14 @@
                 </select>
             </div>
 
-            {{-- Domaine --}}
+            {{-- Formation (métadonnée technique `domain` conservée en interne) --}}
             <div>
                 <label for="filter-dom" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                    {{ __('Domaine') }}
+                    {{ __('Formation') }}
                 </label>
                 <select name="domain" id="filter-dom" onchange="this.form.submit()"
                         class="w-full rounded-lg border-slate-200 bg-slate-50/50 py-1.5 px-2.5 text-xs font-medium text-slate-800 focus:border-[#0DAD98] focus:bg-white focus:ring-1 focus:ring-[#0DAD98] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
-                    <option value="all" {{ $domain === 'all' ? 'selected' : '' }}>{{ __('Tous domaines') }}</option>
+                    <option value="all" {{ $domain === 'all' ? 'selected' : '' }}>{{ __('Toutes les formations') }}</option>
                     @foreach($domains as $slug => $d)
                         <option value="{{ $slug }}" {{ $domain === $slug ? 'selected' : '' }}>{{ __(is_array($d) ? ($d['name'] ?? $slug) : $d) }}</option>
                     @endforeach

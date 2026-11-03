@@ -37,6 +37,7 @@
                 @csrf
                 @method('PUT')
 
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 {{-- Bloc 1 : Informations générales --}}
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-header bg-white py-3 border-bottom">
@@ -159,11 +160,12 @@
                 </div>
 
                 {{-- Boutons d'action --}}
-                <div class="d-flex justify-content-end gap-3 mb-5">
+                <div class="d-flex justify-content-end gap-3 mb-5 lg:col-span-2">
                     <a href="{{ route('formations.show', $formation) }}" class="btn btn-outline-secondary px-4">{{ __('Annuler') }}</a>
                     <button type="submit" class="btn btn-primary px-5 shadow-sm" id="btn-update-formation">
                         <i class="bi bi-save me-1"></i>{{ __('Enregistrer les modifications') }}
                     </button>
+                </div>
                 </div>
             </form>
 

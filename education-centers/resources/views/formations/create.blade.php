@@ -15,12 +15,28 @@
 @section('standalone_back_label', __('Retour aux domaines'))
 
 @section('content')
-<div class="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
+<div class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
 
     {{-- Titre de la page (le retour aux domaines est dans la topbar) --}}
     <x-ui.page-header
         :title="__('Ajouter une formation')"
         :description="__('Rattachement au centre et au domaine, puis informations détaillées du programme.')" />
+
+    {{-- Bandeau de clarification : nouveau parcours « Centre → Formation → Classe ».
+         La création libre d'une sous-formation n'est plus le chemin recommandé.
+         Cette page est conservée uniquement pour l'import de données legacy et
+         l'administration technique. Le chemin utilisateur officiel passe par le
+         catalogue des six formations générales. --}}
+    <div class="mb-6 rounded-2xl border border-amber-300 bg-amber-50 px-5 py-4 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+        <div class="flex items-start gap-3">
+            <x-icon name="info" class="mt-0.5 h-5 w-5 shrink-0" />
+            <div>
+                <strong>{{ __('Nouveau parcours') }} :</strong>
+                {{ __('la création libre d\'une sous-formation n\'est plus conseillée. Les six formations générales officielles (Santé, Informatique, Hôtellerie, Maçonnerie, Design intérieur, Design graphique) constituent le catalogue de référence.') }}
+                <a href="{{ route('formations-generales.index') }}" class="ml-1 font-semibold underline">{{ __('Gérer le catalogue officiel →') }}</a>
+            </div>
+        </div>
+    </div>
 
     {{-- Bandeau centre automatique (Admin Centre) : le centre n'est pas modifiable --}}
     @if($isCenterAdmin)
@@ -33,7 +49,8 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('formations.store') }}" id="form-create-formation" class="space-y-6">
+    <form method="POST" action="{{ route('formations.store') }}" id="form-create-formation" >
+        <x-ui.form-grid>
         @csrf
 
         {{-- ══════════════════════════════════════════════════════════════
@@ -181,6 +198,7 @@
                 {{ __('Enregistrer la formation') }}
             </button>
         </div>
+        </x-ui.form-grid>
     </form>
 </div>
 @endsection

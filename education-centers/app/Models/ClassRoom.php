@@ -7,12 +7,43 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Validation\ValidationException;
 
 class ClassRoom extends Model
 {
     use HasFactory;
     use \App\Concerns\HasDomainScope;
     use \App\Models\Concerns\HasContextScope;
+
+    /**
+     * Garde dur (défense en profondeur, règle 3.2) : une formation générale
+     * officielle ne peut pas avoir plus de 2 classes, même si l'interface est
+     * contournée. Les formations héritées (non officielles) ne sont pas bornées.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (self $class): void {
+            if (! $class->formation_id) {
+                return;
+            }
+
+            $formation = Formation::query()->find($class->formation_id);
+
+            if (! $formation || ! $formation->isOfficial()) {
+                return;
+            }
+
+            $existing = static::query()->where('formation_id', $formation->id)->count();
+
+            if ($existing >= Formation::MAX_CLASSES) {
+                throw ValidationException::withMessages([
+                    'formation_id' => __('Une formation générale ne peut pas dépasser :max classes.', [
+                        'max' => Formation::MAX_CLASSES,
+                    ]),
+                ]);
+            }
+        });
+    }
 
     /**
      * Le domaine d'une classe est hérité de sa formation.

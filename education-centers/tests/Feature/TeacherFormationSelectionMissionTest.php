@@ -54,31 +54,33 @@ class TeacherFormationSelectionMissionTest extends TestCase
     }
 
     /**
-     * 1. Le formulaire d'ajout contient les deux Selects liés et n'a plus de cases à cocher pour les domaines.
+     * 1. Le nouveau formulaire ne propose PLUS le champ Domaine : la sélection
+     * de la Formation est directe (parcours « Centre → Formation générale »).
      */
-    public function test_create_form_has_two_selects_and_no_checkboxes(): void
+    public function test_create_form_uses_direct_formation_selection(): void
     {
+        // Créer les six formations générales officielles du centre Berlin pour
+        // alimenter le catalogue du formulaire.
+        foreach (['sante', 'informatique', 'hotellerie', 'maconnerie', 'design-interieur', 'design-graphique'] as $code) {
+            Formation::factory()->forCenter($this->centerBerlin)->forDomain($code)->official($code)->create([
+                'name' => 'Formation ' . ucfirst($code),
+                'code' => strtoupper($code) . '-BER',
+            ]);
+        }
+
         $response = $this->actingAs($this->superAdmin)->get(route('users.create'));
         $response->assertStatus(200);
 
-        // Doit avoir le select Domaine d'enseignement
-        $response->assertSee('name="domain"', false);
-        $response->assertSee('Domaine d\'enseignement');
+        // Ne doit PLUS contenir le champ Domaine (supprimé de l'interface).
+        $response->assertDontSee('name="domain"', false);
+        $response->assertDontSee("Domaine d'enseignement", false);
 
-        // Doit avoir le select Formation enseignée
+        // Doit contenir la sélection directe de Formation.
         $response->assertSee('name="formation_id"', false);
-        $response->assertSee('Formation enseignée');
 
-        // Ne doit plus afficher des cases à cocher 'domains[]'
-        $response->assertDontSee('name="domains[]"', false);
-
-        // Doit contenir les 6 domaines dans le select
-        $response->assertSee('Santé');
-        $response->assertSee('Informatique');
-        $response->assertSee('Hôtellerie');
-        $response->assertSee('Maçonnerie');
-        $response->assertSee('Design intérieur');
-        $response->assertSee('Design graphique');
+        // Les six formations officielles de Berlin sont proposées.
+        $response->assertSee('Formation Sante', false);
+        $response->assertSee('Formation Informatique', false);
     }
 
     /**
@@ -162,29 +164,26 @@ class TeacherFormationSelectionMissionTest extends TestCase
     }
 
     /**
-     * 4. Validation stricte : la formation doit correspondre au domaine sélectionné.
+     * 4. La validation ne dépend plus du domaine : seule l'appartenance au
+     * centre est contrôlée (parcours « Centre → Formation générale »).
      */
-    public function test_formation_must_match_the_selected_domain(): void
+    public function test_formation_belongs_to_the_authorized_center(): void
     {
-        $formationSante = Formation::create([
-            'center_id' => $this->centerBerlin->id,
-            'domain' => 'sante',
+        $formationSante = Formation::factory()->forCenter($this->centerBerlin)->forDomain('sante')->official('sante')->create([
             'name' => 'Soins Infirmiers',
             'code' => 'SOIN-BER',
-            'duration_hours' => 100,
-            'price' => 500,
-            'status' => 'active',
         ]);
 
+        // Super Admin rattache le prof à un centre différent de celui de la
+        // formation -> refus (la règle « centre autorisé » s'applique).
         $payload = [
             'name' => 'Prof Mismatch',
             'email' => 'mismatch@ec.test',
             'password' => 'Secret123!',
             'password_confirmation' => 'Secret123!',
             'role' => User::ROLE_TEACHER,
-            'center_id' => $this->centerBerlin->id,
+            'center_id' => $this->centerMunich->id,
             'status' => 'active',
-            'domain' => 'informatique', // Ne correspond pas à sante !
             'formation_id' => $formationSante->id,
         ];
 
@@ -194,28 +193,18 @@ class TeacherFormationSelectionMissionTest extends TestCase
     }
 
     /**
-     * 5. Modification du domaine et de la formation dans users.edit.
+     * 5. users.edit n'affiche plus le champ Domaine, uniquement la Formation.
      */
-    public function test_edit_user_updates_domain_and_formation(): void
+    public function test_edit_user_updates_formation_only(): void
     {
-        $formation1 = Formation::create([
-            'center_id' => $this->centerBerlin->id,
-            'domain' => 'informatique',
+        $formation1 = Formation::factory()->forCenter($this->centerBerlin)->forDomain('informatique')->official('informatique')->create([
             'name' => 'Formation Info',
             'code' => 'INFO-1',
-            'duration_hours' => 50,
-            'price' => 300,
-            'status' => 'active',
         ]);
 
-        $formation2 = Formation::create([
-            'center_id' => $this->centerBerlin->id,
-            'domain' => 'sante',
+        $formation2 = Formation::factory()->forCenter($this->centerBerlin)->forDomain('sante')->official('sante')->create([
             'name' => 'Formation Sante',
             'code' => 'SANTE-1',
-            'duration_hours' => 60,
-            'price' => 400,
-            'status' => 'active',
         ]);
 
         $teacherUser = User::factory()->teacher($this->centerBerlin->id)->create([
@@ -225,26 +214,24 @@ class TeacherFormationSelectionMissionTest extends TestCase
             'formation_id' => $formation1->id,
         ]);
 
-        // Vérifier l'accès à la page d'édition
-        $responseGet = $this->actingAs($this->adminBerlin)->get(route('users.edit', $teacherUser));
+        // Vérifier l'accès à la page d'édition : plus de champ Domaine.
+        $responseGet = $this->actingAs($this->superAdmin)->get(route('users.edit', $teacherUser));
         $responseGet->assertStatus(200);
-        $responseGet->assertSee('name="domain"', false);
+        $responseGet->assertDontSee('name="domain"', false);
         $responseGet->assertSee('name="formation_id"', false);
 
-        // Mettre à jour vers le domaine Santé et Formation Santé
-        $responsePut = $this->actingAs($this->adminBerlin)->put(route('users.update', $teacherUser), [
+        // Mettre à jour la formation (sans transmettre de domaine).
+        $responsePut = $this->actingAs($this->superAdmin)->put(route('users.update', $teacherUser), [
             'name' => 'Prof Santé Modifié',
             'email' => 'teacher.update@ec.test',
             'role' => User::ROLE_TEACHER,
             'status' => 'active',
-            'domain' => 'sante',
             'formation_id' => $formation2->id,
         ]);
 
         $responsePut->assertRedirect(route('users.show', $teacherUser));
 
         $teacherUser->refresh();
-        $this->assertEquals('sante', $teacherUser->domain);
         $this->assertEquals($formation2->id, $teacherUser->formation_id);
     }
 

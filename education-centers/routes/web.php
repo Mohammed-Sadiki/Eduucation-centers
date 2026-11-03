@@ -17,6 +17,7 @@ use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\FinanceDashboardController;
 use App\Http\Controllers\FormationController;
+use App\Http\Controllers\GeneralFormationController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MessageController;
@@ -235,6 +236,32 @@ Route::middleware('auth')->group(function () {
         Route::resource('formations', FormationController::class);
         Route::patch('formations/{formation}/toggle-status', [FormationController::class, 'toggleStatus'])
             ->name('formations.toggle-status');
+
+        // ── Formations générales officielles (surface additive de la refonte) ──
+        // Portail des 6 cartes + espace par formation officielle (≤2 classes,
+        // 1 professeur responsable). N'affecte pas les routes/domaines historiques.
+        Route::prefix('formations-generales')->name('formations-generales.')->group(function () {
+            Route::get('/', [GeneralFormationController::class, 'index'])->name('index');
+
+            // Configuration des six formations générales officielles.
+            // Le picker liste les 6 emplacements autorisés ; l'édition met à
+            // jour prix/durée/description/statut/professeur responsable sans
+            // jamais permettre de 7ᵉ formation ni de sous-formation.
+            // Ces segments littéraux DOIVENT précéder le joker /{formation}.
+            Route::get('/configurer', [GeneralFormationController::class, 'picker'])
+                ->name('picker');
+            Route::post('/configurer', [GeneralFormationController::class, 'activate'])
+                ->name('activate');
+            Route::get('/{formation}/configurer', [GeneralFormationController::class, 'edit'])
+                ->name('edit');
+            Route::patch('/{formation}/configurer', [GeneralFormationController::class, 'update'])
+                ->name('update');
+
+            Route::get('/{formation}', [GeneralFormationController::class, 'show'])->name('show');
+            Route::post('/{formation}/classes', [GeneralFormationController::class, 'storeClass'])->name('classes.store');
+            Route::post('/{formation}/responsable', [GeneralFormationController::class, 'assignTeacher'])->name('teacher.assign');
+            Route::delete('/{formation}/responsable', [GeneralFormationController::class, 'detachTeacher'])->name('teacher.detach');
+        });
 
         // Classes
         Route::resource('classes', ClassController::class);

@@ -15,7 +15,7 @@
 @section('content')
 <div class="container-fluid px-4">
     <div class="row justify-content-center">
-        <div class="col-xl-8 col-lg-10">
+        <div class="col-12">
 
             {{-- En-tête --}}
             <div class="d-flex align-items-center gap-3 mb-4">
@@ -34,6 +34,7 @@
                 @csrf
                 @method('PUT')
 
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 {{-- ── Informations générales ── --}}
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-header bg-white border-bottom py-3">
@@ -230,7 +231,7 @@
                 </div>
 
                 {{-- ── Boutons ── --}}
-                <div class="d-flex gap-2 justify-content-end mb-5">
+                <div class="d-flex gap-2 justify-content-end mb-5 lg:col-span-2">
                     <a href="{{ route('centers.show', $center) }}" class="btn btn-outline-secondary px-4">
                         {{ __('Annuler') }}
                     </a>
@@ -239,6 +240,7 @@
                     </button>
                 </div>
 
+                </div>
             </form>
         </div>
     </div>

@@ -36,6 +36,7 @@
             <form method="POST" action="{{ route('classes.store') }}" id="form-create-class">
                 @csrf
 
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 {{-- Bloc 1 : Rattachement Centre & Formation --}}
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-header bg-white py-3 border-bottom">
@@ -198,11 +199,12 @@
                 </div>
 
                 {{-- Actions --}}
-                <div class="d-flex justify-content-end gap-3 mb-5">
+                <div class="d-flex justify-content-end gap-3 mb-5 lg:col-span-2">
                     <a href="{{ route('classes.index') }}" class="btn btn-outline-secondary px-4">{{ __('Annuler') }}</a>
                     <button type="submit" class="btn btn-primary px-5 shadow-sm" id="btn-submit-class">
                         <i class="bi bi-check-circle-fill me-1"></i>{{ __('Enregistrer la classe') }}
                     </button>
+                </div>
                 </div>
             </form>
 

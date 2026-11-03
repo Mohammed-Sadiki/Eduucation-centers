@@ -37,7 +37,7 @@
     @endif
 
     <div class="row justify-content-center">
-        <div class="col-lg-10">
+        <div class="col-12">
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
                     <form action="{{ route('enrollments.update', $enrollment) }}" method="POST">

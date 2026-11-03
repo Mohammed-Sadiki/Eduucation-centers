@@ -29,19 +29,20 @@ class StoreUserRequest extends FormRequest
             'role' => ['required', 'string', Rule::in($allowedRoles)],
             'phone' => ['nullable', 'string', 'max:30'],
             'status' => ['required', 'in:active,inactive'],
-            'domain' => ['required', 'string', Rule::exists('domains', 'slug')],
+            // Nouveau parcours : le domaine n'est plus une étape de sélection.
+            // Champ conservé (métadonnée interne) pour compatibilité avec les
+            // comptes historiques et les tests existants, mais plus jamais requis.
+            'domain' => ['nullable', 'string', Rule::exists('domains', 'slug')],
             'formation_id' => [
                 'required',
                 'integer',
                 Rule::exists('formations', 'id')->where(function ($query) use ($isSuperAdmin, $authUser) {
+                    // La formation doit appartenir au centre de rattachement.
                     $centerId = $isSuperAdmin ? $this->input('center_id') : $authUser->center_id;
-                    $domain = $this->input('domain');
                     if ($centerId) {
                         $query->where('center_id', $centerId);
                     }
-                    if ($domain) {
-                        $query->where('domain', $domain);
-                    }
+                    // Le domaine n'est plus un filtre de validation (champ interne).
                 }),
             ],
             // Compatibilité optionnelle si tableau domains fourni

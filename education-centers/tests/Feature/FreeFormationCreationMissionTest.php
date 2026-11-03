@@ -102,13 +102,16 @@ class FreeFormationCreationMissionTest extends TestCase
     }
 
     /**
-     * Test 3 — Ajouter un élève :
-     * Ouvrir « Ajouter un élève », vérifier que « Développement Mobile » est chargé dynamiquement
-     * dans le Select Formation et associé au centre Berlin et au domaine Informatique.
+     * Test 3 — Ajouter un élève (nouveau parcours) :
+     * Seules les six formations générales officielles sont proposées ; une
+     * sous-formation legacy (ex. « Développement Mobile ») ne doit JAMAIS
+     * apparaître dans le select, et l'attribut data-domain a été supprimé.
      */
-    public function test_3_student_create_form_dynamically_contains_newly_created_formation(): void
+    public function test_3_student_create_form_exposes_only_official_formations(): void
     {
-        $formation = Formation::factory()->create([
+        // Une formation legacy (non officielle) créée pour Berlin dans le domaine
+        // informatique : doit être ignorée par le sélecteur du formulaire élève.
+        $legacy = Formation::factory()->create([
             'center_id' => $this->centerBerlin->id,
             'domain' => 'informatique',
             'name' => 'Développement Mobile',
@@ -116,16 +119,43 @@ class FreeFormationCreationMissionTest extends TestCase
             'price' => 7500,
             'annual_price' => 7500,
             'status' => 'active',
+            'is_official' => false,
+        ]);
+
+        // La formation officielle Informatique de Berlin : doit être proposée.
+        $officialInfo = Formation::factory()->official('informatique')->create([
+            'center_id' => $this->centerBerlin->id,
+            'domain' => 'informatique',
+            'name' => 'Informatique',
+            'code' => 'OFF-BER-INF',
+            'status' => 'active',
         ]);
 
         $response = $this->actingAs($this->superAdmin)->get(route('students.create'));
         $response->assertOk();
 
-        // Vérifier que l'option de formation est présente avec ses attributs de cascade data-center-id et data-domain
-        $response->assertSee('value="' . $formation->id . '"', false);
-        $response->assertSee('data-center-id="' . $this->centerBerlin->id . '"', false);
-        $response->assertSee('data-domain="informatique"', false);
-        $response->assertSee('Développement Mobile');
+        $content = $response->getContent();
+
+        // La formation officielle est listée dans le select formation : on
+        // reconnaît son option au couple (value = id formation) + data-center-id.
+        $this->assertMatchesRegularExpression(
+            '/<option\s+value="' . $officialInfo->id . '"\s+data-center-id="' . $this->centerBerlin->id . '"/',
+            $content,
+            'La formation officielle Informatique de Berlin doit être proposée.'
+        );
+
+        // La sous-formation legacy n'apparaît jamais : aucune option avec son id
+        // ne porte l'attribut data-center-id (propre au select Formation), et son
+        // libellé unique n'est pas rendu.
+        $this->assertDoesNotMatchRegularExpression(
+            '/<option\s+value="' . $legacy->id . '"\s+data-center-id/',
+            $content,
+            'Une sous-formation legacy ne doit jamais être proposée dans le parcours.'
+        );
+        $this->assertStringNotContainsString('Développement Mobile', $content);
+
+        // Aucun data-domain n'est rendu dans le nouveau parcours.
+        $this->assertStringNotContainsString('data-domain=', $content);
     }
 
     /**

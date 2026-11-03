@@ -1,1 +1,4 @@
 *.sqlite*
+
+# Sauvegardes SQL : jamais versionnees (contiennent les donnees reelles).
+backups/*.sql

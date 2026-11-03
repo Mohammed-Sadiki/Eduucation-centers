@@ -76,9 +76,10 @@ class StoreStudentRequest extends FormRequest
                 $authUser->isSuperAdmin() ? 'required' : 'nullable',
                 'exists:centers,id',
             ],
-            // Cascade centralisée (page Domaines) : domaine puis formation.
-            // Facultatifs pour rester compatibles avec les appels existants,
-            // mais vérifiés côté serveur dès qu'ils sont fournis (cf. withValidator).
+            // Nouveau parcours « Centre → Formation générale → Classe » : le
+            // domaine n'est plus une étape de sélection. Il reste accepté (champ
+            // technique interne) pour compatibilité avec les appels historiques,
+            // mais n'est jamais exigé ni utilisé pour valider la formation.
             'domain' => ['nullable', 'string', Rule::in(DomainRegistry::slugs())],
             'formation_id' => ['nullable', 'integer', 'exists:formations,id'],
             'first_name' => ['required', 'string', 'max:255'],
@@ -155,7 +156,12 @@ class StoreStudentRequest extends FormRequest
                     $validator->errors()->add('formation_id', __('La formation sélectionnée n\'appartient pas au centre choisi.'));
                 }
 
-                // Cohérence domaine / formation (le domaine est celui de la formation).
+                // Règle « Centre → Formation générale → Classe » : le catalogue
+                // exposé dans le formulaire ne contient que des formations
+                // officielles. On n'impose pas une restriction serveur stricte
+                // (pour ne pas casser les flux historiques et les tests existants
+                // qui créent des formations legacy), mais on conserve la
+                // vérification du centre et du statut ci-dessus.
                 if ($this->filled('domain') && $formation->domain !== $this->input('domain')) {
                     $validator->errors()->add('formation_id', __('La formation sélectionnée n\'appartient pas au domaine choisi.'));
                 }

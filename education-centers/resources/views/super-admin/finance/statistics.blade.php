@@ -37,10 +37,10 @@
           class="rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] dark:border-slate-800 dark:bg-slate-900">
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 items-center">
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Domaine') }}</label>
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Formation') }}</label>
                 <select name="domain" onchange="this.form.submit()"
                         class="w-full rounded-lg border-slate-200 bg-slate-50/50 py-1.5 px-2.5 text-xs font-medium text-slate-800 focus:border-[#0DAD98] focus:bg-white focus:ring-1 focus:ring-[#0DAD98]">
-                    <option value="all" {{ $domain === 'all' ? 'selected' : '' }}>{{ __('Tous domaines') }}</option>
+                    <option value="all" {{ $domain === 'all' ? 'selected' : '' }}>{{ __('Toutes les formations') }}</option>
                     @foreach($domains as $slug => $d)
                         <option value="{{ $slug }}" {{ $domain === $slug ? 'selected' : '' }}>{{ __(is_array($d) ? ($d['name'] ?? $slug) : $d) }}</option>
                     @endforeach

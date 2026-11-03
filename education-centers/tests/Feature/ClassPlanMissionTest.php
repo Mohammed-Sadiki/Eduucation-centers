@@ -106,11 +106,12 @@ class ClassPlanMissionTest extends TestCase
     }
 
     /**
-     * 1. Le bouton « Plan de classe » apparaît dans la page Super Admin Domaines.
+     * 1. Le bouton « Plan de classe » apparaît sur la carte Formations de
+     *    la page d'accueil admin pour le Super Admin.
      */
     public function test_class_plan_button_appears_on_super_admin_domaines(): void
     {
-        $response = $this->actingAs($this->superAdmin)->get(route('super-admin.domaines'));
+        $response = $this->actingAs($this->superAdmin)->get(route('admin.home'));
         $response->assertStatus(200);
         $response->assertSee('btn-class-plan-domaines', false);
         $response->assertSee(route('class-plan.index'));
@@ -118,11 +119,12 @@ class ClassPlanMissionTest extends TestCase
     }
 
     /**
-     * 2. Le bouton « Plan de classe » apparaît dans la page Center Admin Domaines.
+     * 2. Le bouton « Plan de classe » apparaît sur la carte Formations de
+     *    la page d'accueil admin pour l'Admin Centre.
      */
     public function test_class_plan_button_appears_on_center_admin_domaines(): void
     {
-        $response = $this->actingAs($this->adminBerlin)->get(route('center-admin.domaines'));
+        $response = $this->actingAs($this->adminBerlin)->get(route('admin.home'));
         $response->assertStatus(200);
         $response->assertSee('btn-class-plan-ca-domaines', false);
         $response->assertSee(route('class-plan.index'));

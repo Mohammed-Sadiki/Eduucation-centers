@@ -100,10 +100,10 @@
                 @endif
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Domaine') }}</label>
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Formation') }}</label>
                 <select name="domain" onchange="this.form.submit()"
                         class="w-full rounded-lg border-slate-200 bg-slate-50/50 py-1.5 px-2.5 text-xs font-medium text-slate-800 focus:border-[#0DAD98] focus:bg-white focus:ring-1 focus:ring-[#0DAD98]">
-                    <option value="all" {{ $domain === 'all' ? 'selected' : '' }}>{{ __('Tous domaines') }}</option>
+                    <option value="all" {{ $domain === 'all' ? 'selected' : '' }}>{{ __('Toutes les formations') }}</option>
                     @foreach($domains as $slug => $d)
                         <option value="{{ $slug }}" {{ $domain === $slug ? 'selected' : '' }}>{{ __(is_array($d) ? ($d['name'] ?? $slug) : $d) }}</option>
                     @endforeach

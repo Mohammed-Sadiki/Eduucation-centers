@@ -87,7 +87,10 @@ class EnrollmentController extends Controller
         // Données pour les filtres
         $targetCenterId = $authUser->isCenterAdmin() ? $authUser->center_id : $request->input('center_id');
 
-        $formationsQuery = Formation::query()->orderBy('name');
+        $formationsQuery = Formation::query()
+            ->where('is_official', true)
+            ->where('status', 'active')
+            ->orderBy('name');
         $classesQuery = ClassRoom::query()->orderBy('name');
 
         if ($targetCenterId) {
@@ -122,7 +125,12 @@ class EnrollmentController extends Controller
             ->orderBy('last_name')
             ->get();
 
+        // Nouveau parcours : seules les six formations générales officielles
+        // actives sont proposées à l'inscription. Les sous-formations legacy
+        // restent lisibles dans les fiches historiques mais ne peuvent plus
+        // accueillir de nouvelle inscription depuis ce formulaire.
         $formations = Formation::query()
+            ->where('is_official', true)
             ->when($selectedCenterId, fn ($q) => $q->where('center_id', $selectedCenterId))
             ->where('status', 'active')
             ->orderBy('name')
@@ -213,8 +221,16 @@ class EnrollmentController extends Controller
             ->orderBy('last_name')
             ->get();
 
+        // Édition : on conserve la formation courante si elle est legacy (elle
+        // doit rester visible pour ne pas casser l'historique), sinon on filtre
+        // sur les formations officielles du centre.
         $formations = Formation::where('center_id', $enrollment->center_id)
+            ->where(function ($q) use ($enrollment) {
+                $q->where('is_official', true)
+                    ->orWhere('id', $enrollment->formation_id);
+            })
             ->where('status', 'active')
+            ->orderByDesc('is_official')
             ->orderBy('name')
             ->get();
 

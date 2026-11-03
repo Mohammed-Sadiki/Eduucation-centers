@@ -122,50 +122,26 @@
                                 @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
-                            {{-- Domaines d'enseignement & Formation enseignée (Professeur) --}}
-                            @if(isset($domains) && $domains->isNotEmpty())
-                                <div class="col-md-6">
-                                    <label for="edit_domain" class="form-label fw-semibold small text-secondary">
-                                        <i class="bi bi-tags me-1"></i>{{ __('Domaine d\'enseignement') }}
-                                    </label>
-                                    <select id="edit_domain" name="domain" class="form-select @error('domain') is-invalid @enderror">
-                                        <option value="">{{ __('— Sélectionner le domaine —') }}</option>
-                                        @php
-                                            $userDomain = old('domain', $user->domain ?: $user->teacher?->domain);
-                                        @endphp
-                                        @foreach($domains as $dom)
-                                            <option value="{{ $dom->slug }}" @selected($userDomain === $dom->slug)>
-                                                {{ method_exists($dom, 'translated') ? ($dom->translated('name') ?? $dom->name) : $dom->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('domain') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label for="edit_formation_id" class="form-label fw-semibold small text-secondary">
-                                        <i class="bi bi-book me-1"></i>{{ __('Formation enseignée') }}
-                                    </label>
-                                    <select id="edit_formation_id" name="formation_id" class="form-select @error('formation_id') is-invalid @enderror">
-                                        <option value="">{{ __('— Sélectionner la formation —') }}</option>
-                                        @php
-                                            $userFormationId = old('formation_id', $user->formation_id ?: $user->teacher?->formation_id);
-                                        @endphp
-                                        @foreach($formationsData as $formation)
-                                            <option value="{{ $formation['id'] }}"
-                                                    data-center-id="{{ $formation['center_id'] }}"
-                                                    data-domain="{{ $formation['domain'] }}"
-                                                    @selected($userFormationId == $formation['id'])>
-                                                {{ $formation['name'] }} ({{ $formation['code'] }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('formation_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                    <div id="no-formation-alert" class="text-danger small mt-1 d-none">
-                                        {{ __('Aucune formation disponible pour ce domaine.') }}
-                                    </div>
-                                </div>
-                            @endif
+                            {{-- Formation enseignée (sélection directe, sans domaine) --}}
+                            <div class="col-md-6">
+                                <label for="edit_formation_id" class="form-label fw-semibold small text-secondary">
+                                    <i class="bi bi-book me-1"></i>{{ __('Formation') }}
+                                </label>
+                                <select id="edit_formation_id" name="formation_id" class="form-select @error('formation_id') is-invalid @enderror">
+                                    <option value="">{{ __('— Sélectionner la formation —') }}</option>
+                                    @php
+                                        $userFormationId = old('formation_id', $user->formation_id ?: $user->teacher?->formation_id);
+                                    @endphp
+                                    @foreach($formationsData as $formation)
+                                        <option value="{{ $formation['id'] }}"
+                                                data-center-id="{{ $formation['center_id'] }}"
+                                                @selected($userFormationId == $formation['id'])>
+                                            {{ $formation['name'] }} ({{ $formation['code'] }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('formation_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
 
                             <div class="col-12"><hr class="my-1"></div>
 
@@ -216,22 +192,20 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const domainSelect = document.getElementById('edit_domain');
     const formationSelect = document.getElementById('edit_formation_id');
     const centerSelect = document.getElementById('center_id');
-    const noFormationAlert = document.getElementById('no-formation-alert');
 
+    // Filtre par centre uniquement. Aucune étape Domaine : le catalogue est
+    // limité aux six formations générales officielles du centre.
     function applyEditCascade(isInitial = false) {
-        if (!domainSelect || !formationSelect) return;
+        if (!formationSelect) return;
 
-        const currentDomain = domainSelect.value;
         const currentCenter = centerSelect ? centerSelect.value : '{{ $user->center_id }}';
         let count = 0;
         let selectedFound = false;
 
         formationSelect.querySelectorAll('option[data-center-id]').forEach(function (option) {
-            const match = (currentCenter ? option.dataset.centerId === currentCenter : true)
-                && (currentDomain ? option.dataset.domain === currentDomain : false);
+            const match = !currentCenter || option.dataset.centerId === currentCenter;
 
             option.hidden = !match;
             option.disabled = !match;
@@ -244,22 +218,11 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        if (noFormationAlert) {
-            if (currentDomain && count === 0) {
-                noFormationAlert.classList.remove('d-none');
-            } else {
-                noFormationAlert.classList.add('d-none');
-            }
-        }
-
         if (!isInitial && !selectedFound) {
             formationSelect.value = '';
         }
     }
 
-    if (domainSelect) {
-        domainSelect.addEventListener('change', function () { applyEditCascade(false); });
-    }
     if (centerSelect) {
         centerSelect.addEventListener('change', function () { applyEditCascade(false); });
     }

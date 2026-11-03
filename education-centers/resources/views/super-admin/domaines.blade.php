@@ -25,37 +25,11 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
-            @can('create', \App\Models\Student::class)
-                <a href="{{ route('students.create') }}"
-                   id="btn-add-student-domaines"
-                   class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-brand-700 dark:bg-brand-500 dark:hover:bg-brand-600"
-                   title="{{ __('Ajouter un élève') }}"
-                >
-                    <x-icon name="plus" class="h-4 w-4" stroke-width="2" />
-                    {{ __('Ajouter un élève') }}
-                </a>
-            @endcan
-            @can('create', \App\Models\Formation::class)
-                <a href="{{ route('formations.create') }}"
-                   id="btn-add-formation-domaines"
-                   class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-brand-700 dark:bg-brand-500 dark:hover:bg-brand-600"
-                   title="{{ __('Ajouter une formation') }}"
-                >
-                    <x-icon name="plus" class="h-4 w-4" stroke-width="2" />
-                    {{ __('Ajouter une formation') }}
-                </a>
-            @endcan
-            <a href="{{ route('class-plan.index') }}"
-               id="btn-class-plan-domaines"
-               class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600"
-               title="{{ __('Plan de classe') }}"
-            >
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 14a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"/>
-                </svg>
-                {{ __('Plan de classe') }}
-            </a>
+            {{-- Les actions « Ajouter un élève », « Gérer les formations
+                 officielles » et « Plan de classe » ont été déplacées sur la
+                 carte Formations de la page d'accueil (admin.home) pour éviter
+                 toute duplication. On conserve uniquement le retour à
+                 l'accueil sur cette page technique. --}}
             <a href="{{ route('admin.home') }}"
                id="domaines-back-home"
                class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:border-slate-300 hover:bg-slate-50 hover:text-brand-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:text-brand-400 transition"

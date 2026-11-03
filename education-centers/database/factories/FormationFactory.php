@@ -66,6 +66,20 @@ class FormationFactory extends Factory
         ]);
     }
 
+    /**
+     * Formation générale officielle (nouvelle architecture « Centre →
+     * Formation → Classe »). Le code officiel reprend le slug du domaine
+     * pour cohérence avec `OfficialFormationsSeeder`.
+     */
+    public function official(?string $officialCode = null): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_official'   => true,
+            'official_code' => $officialCode ?? $attributes['domain'],
+            'teacher_id'    => null,
+        ]);
+    }
+
     public function inactive(): static
     {
         return $this->state(fn (array $attributes) => [

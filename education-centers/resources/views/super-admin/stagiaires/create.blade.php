@@ -28,7 +28,7 @@
 @endsection
 
 @section('content')
-<div class="max-w-5xl mx-auto py-8"
+<div class="max-w-7xl mx-auto py-8"
      x-data="stagiaireFormApp()">
 
     {{-- En-tête de page --}}
@@ -79,10 +79,12 @@
     <form method="POST" action="{{ route('stagiaires.store') }}" enctype="multipart/form-data" id="form-create-stagiaire" data-stagiaire-form novalidate>
         @csrf
 
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+
         {{-- ══════════════════════════════════════════════════════════════
              CARTE 1 — INFORMATIONS PERSONNELLES
         ══════════════════════════════════════════════════════════════ --}}
-        <section class="ec-card mb-6 overflow-hidden">
+        <section class="ec-card overflow-hidden lg:col-span-2">
             <header class="border-b border-slate-100 bg-slate-50/60 px-6 py-5 dark:border-slate-800 dark:bg-slate-800/40">
                 <h2 class="flex items-center gap-3 text-2xl font-extrabold tracking-tight text-brand-700 dark:text-brand-300">
                     <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-[1.0625rem] font-extrabold text-brand-700 dark:bg-brand-500/20 dark:text-brand-300">1</span>
@@ -242,7 +244,7 @@
         {{-- ══════════════════════════════════════════════════════════════
              CARTE 2 — ENTREPRISE OÙ LE STAGIAIRE EFFECTUERA SON STAGE
         ══════════════════════════════════════════════════════════════ --}}
-        <section class="ec-card mb-6 overflow-hidden">
+        <section class="ec-card overflow-hidden">
             <header class="border-b border-slate-100 bg-slate-50/60 px-6 py-5 dark:border-slate-800 dark:bg-slate-800/40">
                 <h2 class="flex items-center gap-3 text-2xl font-extrabold tracking-tight text-brand-700 dark:text-brand-300">
                     <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-[1.0625rem] font-extrabold text-brand-700 dark:bg-brand-500/20 dark:text-brand-300">2</span>
@@ -276,12 +278,13 @@
         </section>
 
         {{-- Boutons d'action --}}
-        <div class="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+        <div class="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800 lg:col-span-2">
             <a href="{{ route('stagiaires.index') }}" class="ec-btn-secondary text-[1.0625rem] px-6">{{ __('Annuler') }}</a>
             <button type="submit" id="btn-submit-stagiaire" class="ec-btn-primary px-6 text-[1.0625rem]">
                 <x-icon name="check" class="h-5 w-5" />
                 {{ __('Enregistrer le stagiaire') }}
             </button>
+        </div>
         </div>
     </form>
 </div>

@@ -1,22 +1,23 @@
 @extends('layouts.standalone')
 
 @section('title', __('Ajouter un élève') . ' — ' . config('app.name'))
-@section('description', __('Inscription d\'un élève à une formation avec paiement intégré.'))
+@section('description', __('Inscription d\'un élève à une formation générale avec paiement intégré.'))
 @section('standalone_title', __('Ajouter un élève'))
 
 @php
     $authUser = auth()->user();
     $isCenterAdmin = $authUser->isCenterAdmin();
     $forcedCenter = $isCenterAdmin ? $authUser->center : null;
-    $backUrl = $isCenterAdmin ? route('center-admin.domaines') : route('super-admin.domaines');
+    $backUrl = $isCenterAdmin ? route('formations-generales.index') : route('formations-generales.index');
     $currencySymbol = config('currency.symbol', 'DH');
+    $preselected = $preselectedFormationId ?? null;
 @endphp
 
 @section('standalone_back_url', $backUrl)
-@section('standalone_back_label', __('Retour aux domaines'))
+@section('standalone_back_label', __('Retour aux formations'))
 
 @section('content')
-<div class="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6"
+<div class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6"
      x-data="enrollmentFormApp({
          formations: @js($formationsData),
          isCenterAdmin: @js($isCenterAdmin),
@@ -27,7 +28,7 @@
     {{-- Titre de page --}}
     <x-ui.page-header
         :title="__('Ajouter un élève')"
-        :description="__('Renseignez l\'élève, choisissez le centre, le domaine et la formation, puis enregistrez le paiement — tout sera transmis à Gestion financière.')" />
+        :description="__('Renseignez l\'élève, choisissez le centre et la formation générale, puis enregistrez le paiement — tout sera transmis à Gestion financière.')" />
 
     {{-- Bandeau centre automatique (Admin Centre) : le centre n'est pas modifiable --}}
     @if($isCenterAdmin)
@@ -41,8 +42,10 @@
     @endif
 
     <form method="POST" action="{{ route('students.store') }}" enctype="multipart/form-data"
-          id="form-create-student" class="space-y-6">
+          id="form-create-student">
         @csrf
+
+        <x-ui.form-grid>
 
         {{-- ══════════════════════════════════════════════════════════════
              SECTION 1 — INFORMATIONS PERSONNELLES
@@ -175,14 +178,14 @@
         </section>
 
         {{-- ══════════════════════════════════════════════════════════════
-             SECTION 3 — CENTRE & DOMAINE DE FORMATION
+             SECTION 3 — CENTRE DE FORMATION
         ══════════════════════════════════════════════════════════════ --}}
         <section class="ec-card overflow-hidden">
             <header class="border-b border-slate-100 bg-slate-50/60 px-6 py-5 dark:border-slate-800 dark:bg-slate-800/40">
                 <h2 class="flex items-center gap-3 text-2xl font-extrabold tracking-tight text-brand-700 dark:text-brand-300">
                     <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-base font-extrabold text-brand-700 dark:bg-brand-500/20 dark:text-brand-300">3</span>
                     <x-icon name="building" class="h-6 w-6" />
-                    {{ __('Centre & domaine de formation') }}
+                    {{ __('Centre de formation') }}
                 </h2>
             </header>
             <div class="grid gap-5 p-6 sm:grid-cols-2">
@@ -197,7 +200,7 @@
                         <p class="ec-help text-[0.95rem]">{{ __('L\'élève sera rattaché exclusivement à ce centre.') }}</p>
                     </div>
                 @else
-                    <div>
+                    <div class="sm:col-span-2">
                         <label for="center_id" class="ec-label text-[1.0625rem] font-semibold">{{ __('Centre de formation') }} <span class="text-red-500">*</span></label>
                         <select id="center_id" name="center_id" class="ec-select text-[1.0625rem] @error('center_id') is-invalid @enderror" required>
                             <option value="">{{ __('— Sélectionner le centre —') }}</option>
@@ -210,17 +213,6 @@
                         @error('center_id') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
                     </div>
                 @endif
-
-                <div class="{{ $isCenterAdmin ? 'sm:col-span-2' : '' }}">
-                    <label for="domain" class="ec-label text-[1.0625rem] font-semibold">{{ __('Domaine de formation') }} <span class="text-red-500">*</span></label>
-                    <select id="domain" name="domain" class="ec-select text-[1.0625rem] @error('domain') is-invalid @enderror" required>
-                        <option value="">{{ __('— Sélectionner le domaine —') }}</option>
-                        @foreach($domains as $domain)
-                            <option value="{{ $domain->slug }}" @selected(old('domain') === $domain->slug)>{{ $domain->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('domain') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
-                </div>
             </div>
         </section>
 
@@ -243,23 +235,37 @@
                     @foreach($formationsData as $formation)
                         <option value="{{ $formation['id'] }}"
                                 data-center-id="{{ $formation['center_id'] }}"
-                                data-domain="{{ $formation['domain'] }}"
-                                @selected(old('formation_id') == $formation['id'])>
+                                @selected((string) old('formation_id', (string) ($preselected ?? '')) === (string) $formation['id'])>
                             {{ $formation['name'] }}
                         </option>
                     @endforeach
                 </select>
                 @error('formation_id') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
 
-                <p x-show="!needCenterDomain" class="ec-help mt-2 text-[0.95rem]">
-                    {{ __('Sélectionnez d\'abord le centre et le domaine : seules les formations correspondantes seront proposées.') }}
+                <p class="ec-help mt-2 text-[0.95rem]">
+                    {{ __('Choisissez la formation générale du centre. Les classes associées apparaissent automatiquement (maximum 2 par formation).') }}
                 </p>
-                <div x-show="noFormation" x-cloak class="mt-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-[1rem] text-slate-500 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400">
-                    {{ __('Aucune formation n\'est disponible pour ce centre et ce domaine.') }}
+
+                {{-- Aperçu en lecture seule des classes de la formation sélectionnée (≤ 2) --}}
+                <div x-show="selectedClasses.length > 0" x-cloak class="mt-3 rounded-xl border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-700 dark:bg-slate-800/50">
+                    <p class="text-[0.95rem] font-semibold text-slate-600 dark:text-slate-300">
+                        {{ __('Classes de cette formation') }}
+                        <span class="ms-2 rounded-full bg-brand-100 px-2 py-0.5 text-[0.85rem] font-bold text-brand-700 dark:bg-brand-500/20 dark:text-brand-300">
+                            <span x-text="selectedClasses.length"></span>/{{ \App\Models\Formation::MAX_CLASSES }}
+                        </span>
+                    </p>
+                    <ul class="mt-2 flex flex-wrap gap-2">
+                        <template x-for="cls in selectedClasses" :key="cls.id">
+                            <li class="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 text-[0.95rem] text-slate-700 shadow-sm dark:bg-slate-900 dark:text-slate-200">
+                                <span x-text="cls.name"></span>
+                                <span class="text-[0.85rem] text-slate-500 dark:text-slate-400" x-text="'(' + cls.code + ')'"></span>
+                            </li>
+                        </template>
+                    </ul>
                 </div>
-                <p x-show="formationOk" x-cloak class="ec-help mt-2 text-[0.95rem]">
-                    <span x-text="visibleFormationCount"></span> {{ __('formation(s) disponible(s) pour ce centre et ce domaine.') }}
-                </p>
+                <div x-show="formationId && selectedClasses.length === 0" x-cloak class="mt-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-[0.95rem] text-slate-500 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400">
+                    {{ __('Aucune classe n\'est encore ouverte pour cette formation.') }}
+                </div>
 
                 {{-- A. Tarif officiel (lecture seule, source = base de données) --}}
                 <div x-show="selectedFormation" x-cloak class="mt-4 flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-[1.0625rem] dark:border-slate-700 dark:bg-slate-800/50">
@@ -302,7 +308,7 @@
         {{-- ══════════════════════════════════════════════════════════════
              SECTION 5 — PAIEMENT
         ══════════════════════════════════════════════════════════════ --}}
-        <section class="ec-card overflow-hidden">
+        <section class="ec-card overflow-hidden lg:col-span-2">
             <header class="border-b border-slate-100 bg-slate-50/60 px-6 py-5 dark:border-slate-800 dark:bg-slate-800/40">
                 <h2 class="flex items-center gap-3 text-2xl font-extrabold tracking-tight text-brand-700 dark:text-brand-300">
                     <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-base font-extrabold text-brand-700 dark:bg-brand-500/20 dark:text-brand-300">5</span>
@@ -356,13 +362,15 @@
         </section>
 
         {{-- Actions --}}
-        <div class="flex flex-wrap items-center justify-end gap-3 pb-6">
+        <div class="flex flex-wrap items-center justify-end gap-3 pb-6 lg:col-span-2">
             <a href="{{ route('students.index') }}" class="ec-btn-secondary text-[1.0625rem]">{{ __('Annuler') }}</a>
             <button type="submit" class="ec-btn-primary px-6 text-[1.0625rem]" id="btn-submit-student">
                 <x-icon name="check" class="h-5 w-5" />
                 {{ __('Enregistrer l\'élève') }}
             </button>
         </div>
+
+        </x-ui.form-grid>
     </form>
 </div>
 @endsection
@@ -377,8 +385,7 @@
             currencySymbol: config.currencySymbol || 'DH',
 
             centerId: document.getElementById('center_id')?.value || (config.isCenterAdmin ? String(config.forcedCenterId) : ''),
-            domain: document.getElementById('domain')?.value || '',
-            formationId: @js((string) old('formation_id', '')),
+            formationId: @js((string) old('formation_id', (string) ($preselected ?? ''))),
             visibleFormationCount: 0,
 
             // Prix final accordé : initialisé sur le tarif officiel de la formation
@@ -396,23 +403,18 @@
             get effectiveCenterId() {
                 return this.isCenterAdmin ? String(this.forcedCenterId) : String(this.centerId || '');
             },
-            get needCenterDomain() {
-                return this.effectiveCenterId !== '' && this.domain !== '';
-            },
             get availableFormations() {
-                if (!this.needCenterDomain) return [];
-                return this.formations.filter(f =>
-                    String(f.center_id) === this.effectiveCenterId && f.domain === this.domain
-                );
-            },
-            get noFormation() {
-                return this.needCenterDomain && this.availableFormations.length === 0;
-            },
-            get formationOk() {
-                return this.needCenterDomain && this.availableFormations.length > 0;
+                // Nouveau parcours : le select propose directement les six
+                // formations générales officielles du centre (aucune étape Domaine).
+                const center = this.effectiveCenterId;
+                if (center === '') return this.formations;
+                return this.formations.filter(f => String(f.center_id) === center);
             },
             get selectedFormation() {
                 return this.formations.find(f => String(f.id) === String(this.formationId)) || null;
+            },
+            get selectedClasses() {
+                return this.selectedFormation ? (this.selectedFormation.classes || []) : [];
             },
             get formationPrice() {
                 return this.selectedFormation ? Number(this.selectedFormation.price) : 0;
@@ -443,9 +445,7 @@
 
             init() {
                 const centerSelect = document.getElementById('center_id');
-                const domainSelect = document.getElementById('domain');
                 centerSelect?.addEventListener('change', () => { this.centerId = centerSelect.value; this.applyCascade(); });
-                domainSelect?.addEventListener('change', () => { this.domain = domainSelect.value; this.applyCascade(); });
                 if (this.isCenterAdmin && centerSelect) this.centerId = this.forcedCenterId;
                 this.applyCascade();
 
@@ -456,8 +456,8 @@
                     this.finalPriceInput = this.selectedFormation ? Number(this.selectedFormation.price) : '';
                 });
 
-                // Première synchronisation (formation pré-sélectionnée après échec de
-                // validation) : ne jamais écraser une saisie déjà conservée.
+                // Première synchronisation (formation pré-sélectionnée depuis la carte
+                // ou après échec de validation) : ne jamais écraser une saisie déjà conservée.
                 if (this.selectedFormation && (this.finalPriceInput === '' || this.finalPriceInput === null)) {
                     this.finalPriceInput = Number(this.selectedFormation.price);
                 }
@@ -472,27 +472,25 @@
                 this.finalPriceInput = Math.max(0, Math.min(n, this.formationPrice));
             },
 
+            // Filtre par centre uniquement (Super Admin multi-centres). L'Admin
+            // Centre reçoit déjà un catalogue filtré serveur.
             applyCascade() {
                 const center = this.effectiveCenterId;
                 const formationSelect = document.getElementById('formation_id');
                 if (!formationSelect) return;
                 let visible = 0;
                 formationSelect.querySelectorAll('option[data-center-id]').forEach((option) => {
-                    const match = center !== '' && option.dataset.centerId === center
-                        && (this.domain === '' || option.dataset.domain === this.domain);
+                    const match = center === '' || option.dataset.centerId === center;
                     option.hidden = !match;
                     option.disabled = !match;
                     if (match) visible++;
                 });
                 this.visibleFormationCount = visible;
 
-                // Réinitialiser la formation si elle n'est plus valide (changement centre/domaine).
+                // Réinitialiser la formation si elle ne fait plus partie du
+                // catalogue après changement de centre.
                 const selected = formationSelect.selectedOptions[0];
                 if (selected && selected.dataset.centerId && (selected.hidden || selected.disabled)) {
-                    formationSelect.value = '';
-                    this.formationId = '';
-                }
-                if (this.domain === '' && selected?.dataset?.centerId) {
                     formationSelect.value = '';
                     this.formationId = '';
                 }

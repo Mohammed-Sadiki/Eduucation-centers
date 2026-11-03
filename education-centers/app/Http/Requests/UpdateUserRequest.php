@@ -37,18 +37,17 @@ class UpdateUserRequest extends FormRequest
             'role' => ['required', 'string', Rule::in($allowedRoles)],
             'phone' => ['nullable', 'string', 'max:30'],
             'status' => ['required', 'in:active,inactive'],
+            // Nouveau parcours : le domaine n'est plus une étape de sélection.
             'domain' => ['nullable', 'string', Rule::exists('domains', 'slug')],
             'formation_id' => [
                 'nullable',
                 'integer',
                 Rule::exists('formations', 'id')->where(function ($query) use ($isSuperAdmin, $authUser, $targetUser) {
+                    // La formation doit appartenir au centre ; le domaine n'est
+                    // plus utilisé comme filtre de validation (métadonnée interne).
                     $centerId = $isSuperAdmin ? ($this->input('center_id') ?: $targetUser?->center_id) : $authUser->center_id;
-                    $domain = $this->input('domain') ?: $targetUser?->domain;
                     if ($centerId) {
                         $query->where('center_id', $centerId);
-                    }
-                    if ($domain) {
-                        $query->where('domain', $domain);
                     }
                 }),
             ],

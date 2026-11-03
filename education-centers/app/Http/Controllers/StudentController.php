@@ -80,8 +80,10 @@ class StudentController extends Controller
 
     /**
      * Formulaire de création indépendante d'un élève (centralisé depuis la page
-     * Domaines). Aucun compte de connexion n'est requis : le dossier est créé
-     * directement. Cascade : centre (Super Admin) → domaine → formation → dossier.
+     * des Formations générales). Aucun compte de connexion n'est requis : le dossier
+     * est créé directement. Nouveau parcours « Centre → Formation générale → Classe »,
+     * sans étape Domaine : le catalogue des six formations officielles du centre est
+     * proposé directement. Une préselection est possible via `?formation_id=`.
      */
     public function create(Request $request): View
     {
@@ -92,40 +94,35 @@ class StudentController extends Controller
         // Liste des centres : sélectionnable uniquement par le Super Admin.
         $centers = $authUser->isCenterAdmin() ? collect() : Center::orderBy('name')->get();
 
-        // Catalogue des domaines (commun aux centres, source de vérité `domains`).
-        $domains = $authUser->isCenterAdmin()
-            ? DomainRegistry::visibleForCenter((int) $authUser->center_id)
-            : DomainRegistry::visible();
+        // Catalogue des formations : uniquement les formations générales
+        // officielles actives, filtrées par le centre autorisé.
+        // Admin Centre → son centre ; Super Admin → tous les centres (le select
+        // est filtré côté client dès qu'un centre est choisi).
+        $centerIds = $authUser->isCenterAdmin()
+            ? [(int) $authUser->center_id]
+            : null;
 
-        // Catalogue des formations actives, restreint au centre pour un Admin Centre.
-        $formationsQuery = Formation::query()
-            ->where('status', 'active')
-            ->orderBy('name');
+        $formationsData = Formation::selectionForCenters($centerIds);
 
-        if ($authUser->isCenterAdmin()) {
-            $formationsQuery->where('center_id', $authUser->center_id);
+        // Préselection depuis la carte d'une formation générale
+        // (`formations-generales/{id}?...`) -> ?formation_id= transmis à l'URL.
+        $preselectedFormationId = $request->filled('formation_id')
+            ? (int) $request->input('formation_id')
+            : null;
+
+        // Sécurité : on ne préselectionne que si la formation est bien
+        // dans le catalogue autorisé pour l'utilisateur courant.
+        if ($preselectedFormationId !== null) {
+            $allowed = array_column($formationsData, 'id');
+            if (! in_array($preselectedFormationId, $allowed, true)) {
+                $preselectedFormationId = null;
+            }
         }
-
-        // Données plates pour la cascade dynamique (Alpine) centre → domaine → formation.
-        // Le tarif annuel (configuration financière existante) est transmis pour la
-        // section « Paiement » : total affiché et calcul dynamique du reste à payer.
-        $formationsData = $formationsQuery
-            ->get(['id', 'center_id', 'domain', 'name', 'price', 'annual_price'])
-            ->map(function (Formation $formation): array {
-                return [
-                    'id'        => $formation->id,
-                    'center_id' => $formation->center_id,
-                    'domain'    => $formation->domain,
-                    'name'      => $formation->translated('name'),
-                    'price'     => FinanceService::getFormationAnnualPrice($formation),
-                ];
-            })
-            ->values();
 
         return view('students.create', compact(
             'centers',
-            'domains',
             'formationsData',
+            'preselectedFormationId',
         ));
     }
 
