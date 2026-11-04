@@ -69,25 +69,25 @@
         {{-- KPI Journal --}}
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div class="finance-card p-4.5">
-                <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Total recettes (Crédit)') }}</span>
+                <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Total recettes (Crédit)') }}</span>
                 <div class="mt-2 text-2xl font-extrabold text-[#0DAD98] whitespace-nowrap">
                     {{ format_price($totalProducts, 'MAD') }}
                 </div>
             </div>
             <div class="finance-card p-4.5">
-                <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Total dépenses (Débit)') }}</span>
+                <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Total dépenses (Débit)') }}</span>
                 <div class="mt-2 text-2xl font-extrabold text-rose-600 whitespace-nowrap">
                     {{ format_price($totalCharges, 'MAD') }}
                 </div>
             </div>
             <div class="finance-card p-4.5">
-                <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Solde net') }}</span>
+                <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Solde net') }}</span>
                 <div class="mt-2 text-2xl font-extrabold {{ $netResult >= 0 ? 'text-[#0DAD98]' : 'text-rose-600' }} whitespace-nowrap">
                     {{ format_price($netResult, 'MAD') }}
                 </div>
             </div>
             <div class="finance-card p-4.5">
-                <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Opérations comptables') }}</span>
+                <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Opérations comptables') }}</span>
                 <div class="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white whitespace-nowrap">
                     {{ $entries->count() }}
                 </div>
@@ -102,7 +102,7 @@
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-start text-xs">
-                    <thead class="bg-slate-50/80 text-[10px] uppercase font-bold text-slate-400 border-b border-slate-100">
+                    <thead class="bg-slate-50/80 text-2xs uppercase font-bold text-slate-400 border-b border-slate-100">
                         <tr>
                             <th class="py-3 px-4">{{ __('N° Pièce') }}</th>
                             <th class="py-3 px-4">{{ __('Date') }}</th>
@@ -116,9 +116,9 @@
                     <tbody class="divide-y divide-slate-100">
                         @forelse($entries as $entry)
                             <tr class="hover:bg-slate-50/50">
-                                <td class="py-3 px-4 font-mono text-[11px] font-bold text-slate-800">{{ $entry->piece_number }}</td>
+                                <td class="py-3 px-4 font-mono text-xs font-bold text-slate-800">{{ $entry->piece_number }}</td>
                                 <td class="py-3 px-4 text-slate-600">{{ $entry->entry_date ? format_date($entry->entry_date, 'd/m/Y') : '—' }}</td>
-                                <td class="py-3 px-4"><span class="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">{{ translate_label($entry->entry_type) }}</span></td>
+                                <td class="py-3 px-4"><span class="rounded bg-slate-100 px-1.5 py-0.5 text-2xs font-semibold text-slate-700">{{ translate_label($entry->entry_type) }}</span></td>
                                 <td class="py-3 px-4 font-semibold text-slate-900">{{ translate_label($entry->label) }}</td>
                                 <td class="py-3 px-4 text-slate-600">{{ translate_label($entry->third_party ?? '—') }}</td>
                                 <td class="py-3 px-4 text-end font-bold text-rose-600">{{ $entry->debit > 0 ? format_price($entry->debit, 'MAD') : '—' }}</td>
@@ -172,7 +172,7 @@
 
         <div class="finance-card p-5 flex items-center justify-between bg-slate-50/50">
             <div>
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ __('RÉSULTAT NET COMPTABLE') }}</span>
+                <span class="text-2xs font-bold uppercase tracking-wider text-slate-400">{{ __('RÉSULTAT NET COMPTABLE') }}</span>
                 <div class="text-xl font-extrabold {{ $netResult >= 0 ? 'text-[#0DAD98]' : 'text-rose-600' }}">
                     {{ format_price($netResult, 'MAD') }}
                 </div>
@@ -228,14 +228,14 @@
                         <span>{{ __('Compte 5141 — Banques') }}</span>
                         <span class="text-[#0DAD98]">{{ __('Solde débiteur :') }} {{ format_price($netResult, 'MAD') }}</span>
                     </div>
-                    <p class="text-[11px] text-slate-400">{{ __('Total des flux de trésorerie bancaire de la période.') }}</p>
+                    <p class="text-xs text-slate-400">{{ __('Total des flux de trésorerie bancaire de la période.') }}</p>
                 </div>
                 <div class="rounded-xl border border-slate-100 p-4">
                     <div class="flex justify-between text-xs font-bold text-slate-800 border-b pb-2 mb-2">
                         <span>{{ __('Compte 7124 — Scolarités perçues') }}</span>
                         <span class="text-[#0DAD98]">{{ __('Solde créditeur :') }} {{ format_price($totalProducts, 'MAD') }}</span>
                     </div>
-                    <p class="text-[11px] text-slate-400">{{ __('Total des encaissements d\'inscriptions et formations.') }}</p>
+                    <p class="text-xs text-slate-400">{{ __('Total des encaissements d\'inscriptions et formations.') }}</p>
                 </div>
             </div>
         </div>

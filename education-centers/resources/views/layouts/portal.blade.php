@@ -42,7 +42,7 @@
                 <span class="text-base font-bold tracking-tight text-slate-900 dark:text-white">
                     {{ __('Education Centers') }}
                 </span>
-                <span class="hidden sm:inline-block ms-2 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                <span class="hidden sm:inline-block ms-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                     {{ $user?->isCenterAdmin() ? __('Portail Admin Centre') : __('Portail Super Admin') }}
                 </span>
             </div>

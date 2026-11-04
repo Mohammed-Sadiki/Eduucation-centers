@@ -111,13 +111,13 @@
                                 <span class="text-base font-bold text-slate-900 dark:text-white">{{ format_number($grade->grade, 2) }}</span>
                             @else
                                 <span class="text-slate-400">—</span>
-                                <span class="mt-0.5 block text-[11px] text-slate-400">{{ __('Non notée') }}</span>
+                                <span class="mt-0.5 block text-xs text-slate-400">{{ __('Non notée') }}</span>
                             @endif
                         </td>
                         <td class="whitespace-nowrap text-end text-sm text-slate-600 dark:text-slate-300">
                             {{ format_number($evaluation->max_grade, 2) }}
                             @if((float) $evaluation->coefficient !== 1.0)
-                                <span class="mt-0.5 block text-[11px] text-slate-400">×{{ format_number($evaluation->coefficient, 2) }}</span>
+                                <span class="mt-0.5 block text-xs text-slate-400">×{{ format_number($evaluation->coefficient, 2) }}</span>
                             @endif
                         </td>
                         <td class="whitespace-nowrap text-end text-sm text-slate-600 dark:text-slate-300">

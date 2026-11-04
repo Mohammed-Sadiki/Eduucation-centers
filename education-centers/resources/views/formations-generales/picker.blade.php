@@ -74,12 +74,12 @@
                             {{ __($domain->name) }}
                         </h2>
                         @if ($configured)
-                            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+                            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-2xs font-semibold uppercase tracking-wide text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
                                 <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                                 {{ __('Configurée') }}
                             </span>
                         @else
-                            <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                            <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-2xs font-semibold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                                 <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
                                 {{ __('À configurer') }}
                             </span>
@@ -128,7 +128,7 @@
     @if ($customFormations->isNotEmpty())
         <h2 class="mt-10 mb-4 text-sm font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
             {{ __('Formations personnalisées') }}
-            <span class="ms-2 inline-flex items-center rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-semibold text-brand-700 dark:bg-brand-500/20 dark:text-brand-300">{{ $customFormations->count() }}</span>
+            <span class="ms-2 inline-flex items-center rounded-full bg-brand-100 px-2 py-0.5 text-2xs font-semibold text-brand-700 dark:bg-brand-500/20 dark:text-brand-300">{{ $customFormations->count() }}</span>
         </h2>
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3" role="list" id="picker-custom-formations">
             @foreach ($customFormations as $custom)
@@ -140,7 +140,7 @@
                             <h2 class="text-base font-bold text-slate-900 dark:text-white">
                                 {{ $custom->translated('name') ?? $custom->name }}
                             </h2>
-                            <span class="inline-flex items-center gap-1 rounded-full {{ $custom->status === 'active' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300' }} px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
+                            <span class="inline-flex items-center gap-1 rounded-full {{ $custom->status === 'active' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300' }} px-2 py-0.5 text-2xs font-semibold uppercase tracking-wide">
                                 <span class="h-1.5 w-1.5 rounded-full {{ $custom->status === 'active' ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
                                 {{ $custom->status === 'active' ? __('Active') : __('Inactive') }}
                             </span>

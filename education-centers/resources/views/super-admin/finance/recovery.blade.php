@@ -44,31 +44,31 @@
     {{-- 3 KPI Épurés (Capture 6 Cad Syndic) --}}
     <div class="grid gap-4 sm:grid-cols-3">
         <div class="finance-card p-4.5">
-            <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Créance totale') }}</span>
+            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Créance totale') }}</span>
             <div class="mt-2 text-2xl lg:text-3xl font-extrabold text-rose-600 dark:text-rose-400 whitespace-nowrap">
                 {{ format_price($totalDebt, 'MAD') }}
             </div>
-            <div class="mt-3 text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 {{ __('Cumul des montants restant dus') }}
             </div>
         </div>
 
         <div class="finance-card p-4.5">
-            <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Dossiers débiteurs') }}</span>
+            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Dossiers débiteurs') }}</span>
             <div class="mt-2 text-2xl lg:text-3xl font-extrabold text-amber-600 dark:text-amber-400 whitespace-nowrap">
                 {{ $debtorsCount }} <span class="text-xs font-normal text-slate-400">{{ __('étudiants') }}</span>
             </div>
-            <div class="mt-3 text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 {{ __('Avec solde scolarité positif') }}
             </div>
         </div>
 
         <div class="finance-card p-4.5">
-            <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Impayés totaux') }}</span>
+            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Impayés totaux') }}</span>
             <div class="mt-2 text-2xl lg:text-3xl font-extrabold text-slate-900 dark:text-white whitespace-nowrap">
                 {{ $unpaidCount }} <span class="text-xs font-normal text-slate-400">{{ __('sans aucun versement') }}</span>
             </div>
-            <div class="mt-3 text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 {{ __('Dossiers à relancer d\'urgence') }}
             </div>
         </div>
@@ -79,12 +79,12 @@
           class="rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] dark:border-slate-800 dark:bg-slate-900">
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 items-center">
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Recherche') }}</label>
+                <label class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Recherche') }}</label>
                 <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="{{ __('Nom, matricule, formation...') }}"
                        class="w-full rounded-lg border-slate-200 bg-slate-50/50 py-1.5 px-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-[#0DAD98] focus:bg-white focus:ring-1 focus:ring-[#0DAD98]">
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Centre') }}</label>
+                <label class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Centre') }}</label>
                 @if(user_context()->canSwitchCenter())
                     <select name="center_id" onchange="this.form.submit()"
                             class="w-full rounded-lg border-slate-200 bg-slate-50/50 py-1.5 px-2.5 text-xs font-medium text-slate-800 focus:border-[#0DAD98] focus:bg-white focus:ring-1 focus:ring-[#0DAD98]">
@@ -100,7 +100,7 @@
                 @endif
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Formation') }}</label>
+                <label class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Formation') }}</label>
                 <select name="domain" onchange="this.form.submit()"
                         class="w-full rounded-lg border-slate-200 bg-slate-50/50 py-1.5 px-2.5 text-xs font-medium text-slate-800 focus:border-[#0DAD98] focus:bg-white focus:ring-1 focus:ring-[#0DAD98]">
                     <option value="all" {{ $domain === 'all' ? 'selected' : '' }}>{{ __('Toutes les formations') }}</option>
@@ -110,7 +110,7 @@
                 </select>
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Année') }}</label>
+                <label class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Année') }}</label>
                 <select name="school_year" onchange="this.form.submit()"
                         class="w-full rounded-lg border-slate-200 bg-slate-50/50 py-1.5 px-2.5 text-xs font-medium text-slate-800 focus:border-[#0DAD98] focus:bg-white focus:ring-1 focus:ring-[#0DAD98]">
                     @foreach($schoolYears as $sy)
@@ -130,7 +130,7 @@
 
         <div class="overflow-x-auto">
             <table class="w-full text-start text-xs">
-                <thead class="bg-slate-50/80 text-[10px] uppercase font-bold text-slate-400 border-b border-slate-100 dark:bg-slate-800/50 dark:border-slate-800">
+                <thead class="bg-slate-50/80 text-2xs uppercase font-bold text-slate-400 border-b border-slate-100 dark:bg-slate-800/50 dark:border-slate-800">
                     <tr>
                         <th class="py-3 px-4">{{ __('Étudiant') }}</th>
                         <th class="py-3 px-4">{{ __('Centre') }}</th>
@@ -150,7 +150,7 @@
                         <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
                             <td class="py-3 px-4 font-semibold text-slate-900 dark:text-white whitespace-nowrap">
                                 {{ $debtor->student->full_name }}
-                                <span class="block text-[10px] text-slate-400 font-mono">{{ $debtor->student->student_number ?? 'ID: '.$debtor->student->id }}</span>
+                                <span class="block text-2xs text-slate-400 font-mono">{{ $debtor->student->student_number ?? 'ID: '.$debtor->student->id }}</span>
                             </td>
                             <td class="py-3 px-4 text-slate-600 whitespace-nowrap">
                                 {{ $debtor->center->name ?? __('Centre') }}
@@ -170,7 +170,7 @@
                             <td class="py-3 px-4 text-center whitespace-nowrap">
                                 <button type="button"
                                         x-on:click="openWhatsApp('{{ $phone }}', '{{ addslashes($debtor->student->full_name) }}', '{{ number_format($debtor->remaining_amount, 2) }}', '{{ addslashes($debtor->formation->name) }}')"
-                                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#25D366]/10 hover:bg-[#25D366]/20 px-2.5 py-1 text-[11px] font-bold text-[#128C7E] transition-colors"
+                                        class="inline-flex items-center gap-1.5 rounded-lg bg-[#25D366]/10 hover:bg-[#25D366]/20 px-2.5 py-1 text-xs font-bold text-[#128C7E] transition-colors"
                                         title="{{ $phone ? __('Relancer sur WhatsApp') . ' (' . $phone . ')' : __('Aucun numéro disponible') }}">
                                     <span>💬</span>
                                     <span>{{ __('WhatsApp') }}</span>
@@ -178,7 +178,7 @@
                             </td>
                             <td class="py-3 px-4 text-end whitespace-nowrap">
                                 <a href="{{ route('super-admin.finance.students', ['search' => $debtor->student->full_name, 'view' => 'students']) }}"
-                                   class="finance-btn-secondary py-1 px-2.5 text-[11px]">
+                                   class="finance-btn-secondary py-1 px-2.5 text-xs">
                                     <span>{{ __('Encaisser') }}</span>
                                 </a>
                             </td>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
 use App\Models\Center;
+use App\Models\ClassRoom;
 use App\Models\Document;
 use App\Models\Enrollment;
 use App\Models\Formation;
@@ -422,26 +423,238 @@ class StudentController extends Controller
 
     /**
      * Formulaire d'édition d'un dossier étudiant.
+     *
+     * Interface strictement identique à « Ajouter un élève » : mêmes composants
+     * Blade partagés, mêmes sections dans le même ordre, mêmes champs. Seules les
+     * valeurs préremplies changent (dossier enregistré, puis old() après une
+     * erreur de validation).
      */
     public function edit(Student $student): View
     {
         Gate::authorize('update', $student);
 
-        $student->load(['user', 'center']);
+        $student->load(['user', 'center', 'documents']);
 
-        return view('students.edit', compact('student'));
+        // Catalogue identique à la création : les formations générales officielles
+        // actives, limitées au centre du dossier (le centre n'est pas modifiable).
+        $formationsData = Formation::selectionForCenters([(int) $student->center_id]);
+
+        // Inscription de référence : formation, classe, prix accordé et solde.
+        $enrollment = $student->currentEnrollment();
+
+        // Le catalogue est celui de la création. Une formation déjà inscrite au
+        // dossier mais sortie du catalogue (inactive / non officielle / héritée)
+        // est réajoutée : le champ reste fidèlement prérempli.
+        if ($enrollment?->formation_id) {
+            $formationIds = array_column($formationsData, 'id');
+
+            if (! in_array((int) $enrollment->formation_id, $formationIds, true)) {
+                $legacy = $enrollment->formation ?? Formation::find($enrollment->formation_id);
+
+                if ($legacy) {
+                    $formationsData[] = [
+                        'id'        => (int) $legacy->id,
+                        'center_id' => (int) $legacy->center_id,
+                        'name'      => $legacy->translated('name') ?? $legacy->name,
+                        'code'      => $legacy->code,
+                        'price'     => FinanceService::getFormationAnnualPrice($legacy),
+                        'classes'   => ClassRoom::query()
+                            ->where('formation_id', $legacy->id)
+                            ->orderBy('name')
+                            ->get(['id', 'formation_id', 'name', 'code'])
+                            ->map(fn (ClassRoom $c): array => [
+                                'id'   => (int) $c->id,
+                                'name' => $c->name,
+                                'code' => $c->code,
+                            ])
+                            ->all(),
+                    ];
+                }
+            }
+        }
+
+        // Versements déjà encaissés, par formation : sert uniquement à l'affichage
+        // du reste à payer. Aucune écriture financière existante n'est modifiée.
+        $paidByFormation = Payment::query()
+            ->where('center_id', $student->center_id)
+            ->where('student_id', $student->id)
+            ->where('status', 'paid')
+            ->selectRaw('formation_id, SUM(amount) as total')
+            ->whereNotNull('formation_id')
+            ->groupBy('formation_id')
+            ->pluck('total', 'formation_id')
+            ->map(fn ($total) => (float) $total)
+            ->all();
+
+        return view('students.edit', [
+            'student' => $student,
+            'formationsData' => $formationsData,
+            'enrollment' => $enrollment,
+            'paidByFormation' => $paidByFormation,
+            'paidAmount' => $enrollment ? $enrollment->paidAmount() : 0.0,
+            'remainingAmount' => $enrollment ? $enrollment->getRemainingAmount() : 0.0,
+            'paymentsCount' => $enrollment ? $enrollment->paidPayments()->count() : 0,
+        ]);
     }
 
     /**
      * Mettre à jour un dossier étudiant.
+     *
+     * Le formulaire étant celui de la création, la mise à jour doit rester
+     * conservatrice : l'identité du dossier (numéro, centre, compte), les
+     * inscriptions et leur historique, les paiements, présences, certificats et
+     * documents existants ne sont jamais recréés ni réinitialisés.
      */
     public function update(UpdateStudentRequest $request, Student $student): RedirectResponse
     {
-        $student->update($request->validated());
+        $authUser = $request->user();
+        $validated = $request->validated();
+
+        // Clés hors-colonnes du tableur students : traitées ci-dessous.
+        $data = collect($validated)
+            ->except([
+                'formation_id', 'payment_option', 'avance_amount', 'final_price',
+                'profile_photo', 'cin_files', 'other_files',
+            ])
+            ->all();
+
+        // Un statut absent ou vide ne doit jamais effacer celui déjà enregistré :
+        // la bascule passe par la route students.toggle-status.
+        if (($data['status'] ?? null) === null || $data['status'] === '') {
+            unset($data['status']);
+        }
+
+        $formationId = $validated['formation_id'] ?? null;
+        $paymentOption = $validated['payment_option'] ?? null;
+
+        // Ces deux valeurs sont lues hors de la fermeture : `$validated` n'existe
+        // pas dans sa portée, et un `?? null` y masquerait silencieusement la
+        // saisie (le prix accordé et l'avance ne seraient jamais enregistrés).
+        $finalPriceInput = $validated['final_price'] ?? null;
+        $avanceAmount = $validated['avance_amount'] ?? null;
+
+        // Inscription de référence AVANT la mise à jour : on la modifie en place,
+        // on n'en crée jamais une seconde pour la même formation.
+        $enrollment = $student->currentEnrollment();
+
+        $recordedPayment = null;
+
+        DB::transaction(function () use ($request, $student, $authUser, $data, $formationId, $paymentOption, $finalPriceInput, $avanceAmount, $enrollment, &$recordedPayment): void {
+            // ── Identité du dossier : uniquement les colonnes transmises ──
+            $student->update($data);
+
+            // ── Photo : remplacée seulement si un nouveau fichier est fourni ──
+            if ($request->hasFile('profile_photo')) {
+                $oldDisk = $student->profilePhotoDisk();
+                $oldPath = $student->profile_photo_path;
+
+                $student->update([
+                    'profile_photo_path' => $request->file('profile_photo')
+                        ->store("students/{$student->center_id}/{$student->id}/profile", 'private'),
+                ]);
+
+                // L'ancien fichier n'est supprimé qu'après succès du nouvel envoi.
+                if ($oldDisk && $oldPath && $oldPath !== $student->profile_photo_path) {
+                    Storage::disk($oldDisk)->delete($oldPath);
+                }
+            }
+
+            // ── Pièces : ajout des seuls fichiers réellement fournis ──
+            // Rien d'existant n'est supprimé (convention du module Documents).
+            foreach ((array) $request->file('cin_files', []) as $cin) {
+                if ($cin instanceof UploadedFile) {
+                    $this->recordStudentDocument($cin, $student, (int) $student->center_id, $authUser->id, 'identity', __('CIN'));
+                }
+            }
+
+            foreach ((array) $request->file('other_files', []) as $file) {
+                if ($file instanceof UploadedFile) {
+                    $this->recordStudentDocument($file, $student, (int) $student->center_id, $authUser->id, 'other', $file->getClientOriginalName());
+                }
+            }
+
+            // ── Formation / inscription ──
+            if ($formationId) {
+                $formation = Formation::findOrFail($formationId);
+                $officialPrice = FinanceService::getFormationAnnualPrice($formation);
+
+                // Le prix final enregistré est conservé tant que la formation ne
+                // change pas et qu'aucun nouveau montant n'est transmis
+                // ($finalPriceInput, résolue hors de la fermeture).
+                $sameFormation = $enrollment && (int) $enrollment->formation_id === (int) $formationId;
+
+                $finalPrice = $finalPriceInput !== null && $finalPriceInput !== ''
+                    ? min((float) $finalPriceInput, $officialPrice)
+                    : ($sameFormation && $enrollment->final_price !== null
+                        ? (float) $enrollment->final_price
+                        : $officialPrice);
+
+                if ($enrollment) {
+                    $enrollment->formation_id = $formationId;
+                    $enrollment->final_price = $finalPrice;
+
+                    if (! $sameFormation) {
+                        // Réaffectation : la référence officielle et la classe
+                        // suivent la nouvelle formation. Le numéro d'inscription,
+                        // la date de demande et le statut restent intacts.
+                        $enrollment->official_price = $officialPrice;
+                        $enrollment->class_id = null;
+                    }
+
+                    $enrollment->save();
+                } else {
+                    // Dossier sans inscription : création à la demande, avec la
+                    // même logique que la création d'un élève.
+                    $enrollment = Enrollment::create([
+                        'center_id'           => $student->center_id,
+                        'student_id'          => $student->id,
+                        'formation_id'        => $formationId,
+                        'application_date'    => now()->toDateString(),
+                        'status'              => Enrollment::STATUS_PENDING,
+                        'registration_number' => Enrollment::generateRegistrationNumber($student->center),
+                        'official_price'      => $officialPrice,
+                        'final_price'         => $finalPrice,
+                    ]);
+                }
+            }
+
+            // ── Paiement : uniquement si une option est expressément choisie ──
+            // Un enregistrement simple du dossier ne recrée jamais de versement et
+            // ne touche pas aux avances/soldes déjà comptabilisés.
+            if ($paymentOption && $enrollment) {
+                $amount = $paymentOption === 'paye'
+                    ? $enrollment->getRemainingAmount()
+                    : min((float) ($avanceAmount ?? 0), $enrollment->getRemainingAmount());
+
+                if ($amount > 0.01) {
+                    $recordedPayment = Payment::create([
+                        'center_id'     => $student->center_id,
+                        'student_id'    => $student->id,
+                        'enrollment_id' => $enrollment->id,
+                        'formation_id'  => $enrollment->formation_id,
+                        'school_year'   => config('app.school_year', '2026/2027'),
+                        'domain'        => $enrollment->formation?->domain,
+                        'amount'        => $amount,
+                        'currency'      => default_currency(),
+                        'payment_date'  => now()->toDateString(),
+                        'method'        => 'cash',
+                        'reference'     => Payment::generateReference($student->center),
+                        'status'        => 'paid',
+                        'recorded_by'   => $authUser->id,
+                    ]);
+                }
+            }
+        });
+
+        $message = __('Le dossier étudiant :student_number a été mis à jour avec succès.', ['student_number' => $student->student_number]);
+
+        if ($recordedPayment) {
+            $message .= ' ' . __('Le nouveau versement a été enregistré dans Gestion financière.');
+        }
 
         return redirect()
             ->route('students.show', $student)
-            ->with('success', __('Le dossier étudiant :student_number a été mis à jour avec succès.', ['student_number' => $student->student_number]));
+            ->with('success', $message);
     }
 
     /**

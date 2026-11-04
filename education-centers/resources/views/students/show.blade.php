@@ -238,7 +238,7 @@
                                 <h3 class="text-sm font-bold text-slate-900 dark:text-white">
                                     {{ $enrollment->formation?->name ?? __('Formation inconnue') }}
                                 </h3>
-                                <span class="rounded-md bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                                <span class="rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
                                     {{ ucfirst($enrollment->status) }}
                                 </span>
                             </div>

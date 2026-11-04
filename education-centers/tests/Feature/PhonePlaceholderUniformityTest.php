@@ -32,8 +32,10 @@ class PhonePlaceholderUniformityTest extends TestCase
     private function phoneViews(): array
     {
         return [
-            'students/create'            => 'resources/views/students/create.blade.php',
-            'students/edit'              => 'resources/views/students/edit.blade.php',
+            // Formulaire élève unique : les pages « Ajouter un élève » et
+            // « Modifier le dossier élève » partagent le même composant, qui porte
+            // donc désormais le placeholder (plus de duplication FR/AR possible).
+            'students/form (create + edit)' => 'resources/views/components/students/form/personal.blade.php',
             'super-admin/stagiaires/create' => 'resources/views/super-admin/stagiaires/create.blade.php',
             'super-admin/stagiaires/edit'   => 'resources/views/super-admin/stagiaires/edit.blade.php',
             'teachers/create'            => 'resources/views/teachers/create.blade.php',

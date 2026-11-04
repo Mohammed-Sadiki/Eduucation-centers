@@ -12,7 +12,7 @@
     {{-- ── EN-TÊTE ────────────────────────────────────────────────────── --}}
     <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-            <h1 class="text-[1.9rem] font-extrabold tracking-tight text-slate-900 sm:text-[2.15rem] dark:text-white">
+            <h1 class="ec-page-title text-slate-900 dark:text-white">
                 {{ __('Bonjour,') }} {{ $user->name }} 👋
             </h1>
             <p class="mt-1.5 text-base text-slate-500 dark:text-slate-400">
@@ -95,7 +95,7 @@
                     <div class="flex items-center gap-3 px-5 py-3">
                         <div class="flex w-14 shrink-0 flex-col items-center rounded-lg bg-brand-50 py-1.5 text-center dark:bg-brand-500/15">
                             <span class="text-xs font-bold text-brand-700 dark:text-brand-300">{{ substr($s->start_time, 0, 5) }}</span>
-                            <span class="text-[10px] text-slate-400">{{ substr($s->end_time, 0, 5) }}</span>
+                            <span class="text-2xs text-slate-400">{{ substr($s->end_time, 0, 5) }}</span>
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="truncate text-sm font-semibold text-slate-800 dark:text-white">{{ $s->classRoom?->name ?? '—' }}</p>

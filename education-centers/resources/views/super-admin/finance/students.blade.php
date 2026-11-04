@@ -69,7 +69,7 @@
         <div class="finance-card p-4.5">
             <div class="flex items-start justify-between">
                 <div>
-                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Total attendu') }}</span>
+                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Total attendu') }}</span>
                     <div class="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white whitespace-nowrap">
                         {{ format_price($stats['total_expected'] ?? 0, 'MAD') }}
                     </div>
@@ -78,7 +78,7 @@
                     <x-icon name="clipboard-document-list" class="h-5 w-5" />
                 </div>
             </div>
-            <div class="mt-3 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 <span>{{ __('Étudiants inscrits') }}</span>
                 <span class="font-bold text-slate-800 dark:text-slate-200">{{ $stats['total_students'] ?? 0 }}</span>
             </div>
@@ -88,7 +88,7 @@
         <div class="finance-card p-4.5">
             <div class="flex items-start justify-between">
                 <div>
-                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Total encaissé') }}</span>
+                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Total encaissé') }}</span>
                     <div class="mt-2 text-2xl font-extrabold text-[#0DAD98] whitespace-nowrap">
                         {{ format_price($stats['total_paid'] ?? 0, 'MAD') }}
                     </div>
@@ -97,7 +97,7 @@
                     <x-icon name="check-circle" class="h-5 w-5" />
                 </div>
             </div>
-            <div class="mt-3 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 <span>{{ __('Taux de recouvrement') }}</span>
                 <span class="font-bold text-[#0DAD98]">{{ $stats['recovery_rate'] ?? 0 }}%</span>
             </div>
@@ -107,7 +107,7 @@
         <div class="finance-card p-4.5">
             <div class="flex items-start justify-between">
                 <div>
-                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Reste à encaisser') }}</span>
+                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Reste à encaisser') }}</span>
                     <div class="mt-2 text-2xl font-extrabold text-amber-600 dark:text-amber-400 whitespace-nowrap">
                         {{ format_price($stats['total_remaining'] ?? 0, 'MAD') }}
                     </div>
@@ -116,7 +116,7 @@
                     <x-icon name="clock" class="h-5 w-5" />
                 </div>
             </div>
-            <div class="mt-3 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 <span>{{ __('Partiellement payés') }}</span>
                 <span class="font-bold text-amber-600">{{ $stats['count_partial'] ?? 0 }}</span>
             </div>
@@ -126,7 +126,7 @@
         <div class="finance-card p-4.5">
             <div class="flex items-start justify-between">
                 <div>
-                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Non payés') }}</span>
+                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Non payés') }}</span>
                     <div class="mt-2 text-2xl font-extrabold text-rose-600 dark:text-rose-400 whitespace-nowrap">
                         {{ $stats['count_unpaid'] ?? 0 }} <span class="text-xs font-normal text-slate-400">{{ __('étudiants') }}</span>
                     </div>
@@ -135,7 +135,7 @@
                     <x-icon name="exclamation-circle" class="h-5 w-5" />
                 </div>
             </div>
-            <div class="mt-3 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 <span>{{ __('Soldés intégralement') }}</span>
                 <span class="font-bold text-emerald-600">{{ $stats['count_paid'] ?? 0 }}</span>
             </div>
@@ -176,7 +176,7 @@
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 items-center">
             {{-- Recherche --}}
             <div class="col-span-2 sm:col-span-1">
-                <label for="filter-search" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <label for="filter-search" class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">
                     {{ __('Recherche') }}
                 </label>
                 <input type="text" name="search" id="filter-search" value="{{ $search ?? '' }}"
@@ -186,7 +186,7 @@
 
             {{-- Année scolaire --}}
             <div>
-                <label for="filter-sy" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <label for="filter-sy" class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">
                     {{ __('Année') }}
                 </label>
                 <select name="school_year" id="filter-sy" onchange="this.form.submit()"
@@ -199,7 +199,7 @@
 
             {{-- Centre (sélecteur réservé au Super Admin) --}}
             <div>
-                <label for="filter-cnt" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <label for="filter-cnt" class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">
                     {{ __('Centre') }}
                 </label>
                 @if(user_context()->canSwitchCenter())
@@ -220,7 +220,7 @@
             {{-- Domaine technique (métadonnée interne) : le parcours officiel
                  passe par le sélecteur « Formation » ci-dessous. --}}
             <div>
-                <label for="filter-dom" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <label for="filter-dom" class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">
                     {{ __('Famille technique') }}
                 </label>
                 <select name="domain" id="filter-dom" onchange="this.form.submit()"
@@ -234,7 +234,7 @@
 
             {{-- Formation --}}
             <div>
-                <label for="filter-form" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <label for="filter-form" class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">
                     {{ __('Formation') }}
                 </label>
                 <select name="formation_id" id="filter-form" onchange="this.form.submit()"
@@ -248,7 +248,7 @@
 
             {{-- Statut --}}
             <div>
-                <label for="filter-st" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <label for="filter-st" class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">
                     {{ __('Statut') }}
                 </label>
                 <select name="status" id="filter-st" onchange="this.form.submit()"
@@ -278,7 +278,7 @@
                         <div class="flex items-center gap-3.5 min-w-0">
                             {{-- Badge du mois --}}
                             <div class="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-[#ECFDF5] text-[#0DAD98] dark:bg-[#0DAD98]/15 dark:text-[#0DAD98]">
-                                <span class="text-[10px] font-extrabold uppercase leading-none">{{ Str::substr($group->period_label, 0, 4) }}</span>
+                                <span class="text-2xs font-extrabold uppercase leading-none">{{ Str::substr($group->period_label, 0, 4) }}</span>
                                 <span class="text-xs font-black leading-none mt-1">{{ Str::after($group->period_label, ' ') }}</span>
                             </div>
 
@@ -296,7 +296,7 @@
 
                         <div class="flex items-center gap-5">
                             <div class="text-end">
-                                <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ __('Encaissé ce mois') }}</span>
+                                <span class="block text-2xs font-bold uppercase tracking-wider text-slate-400">{{ __('Encaissé ce mois') }}</span>
                                 <span class="text-base sm:text-lg font-extrabold text-[#0DAD98] whitespace-nowrap">
                                     {{ format_price($group->total_collected, 'MAD') }}
                                 </span>
@@ -312,7 +312,7 @@
                     <div x-show="expanded" x-collapse>
                         <div class="border-t border-slate-100 dark:border-slate-800 overflow-x-auto">
                             <table class="w-full text-start text-xs">
-                                <thead class="bg-slate-50/70 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:bg-slate-800/40">
+                                <thead class="bg-slate-50/70 text-2xs font-bold uppercase tracking-wider text-slate-400 dark:bg-slate-800/40">
                                     <tr>
                                         <th class="py-2.5 px-4">{{ __('Date') }}</th>
                                         <th class="py-2.5 px-4">{{ __('Réf Versement') }}</th>
@@ -329,7 +329,7 @@
                                             <td class="py-3 px-4 text-slate-600 dark:text-slate-300 whitespace-nowrap">
                                                 {{ $pay->payment_date ? format_date($pay->payment_date, 'd/m/Y') : '—' }}
                                             </td>
-                                            <td class="py-3 px-4 font-mono text-[11px] font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap">
+                                            <td class="py-3 px-4 font-mono text-xs font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap">
                                                 {{ $pay->reference ?? ('ENC-'.str_pad($pay->id, 5, '0', STR_PAD_LEFT)) }}
                                             </td>
                                             <td class="py-3 px-4 font-semibold text-slate-900 dark:text-white whitespace-nowrap">
@@ -337,10 +337,10 @@
                                             </td>
                                             <td class="py-3 px-4 text-slate-600 dark:text-slate-300 whitespace-nowrap">
                                                 {{ $pay->formation->name }}
-                                                <span class="text-slate-400 text-[11px]">({{ $pay->formation->center->name ?? '' }})</span>
+                                                <span class="text-slate-400 text-xs">({{ $pay->formation->center->name ?? '' }})</span>
                                             </td>
                                             <td class="py-3 px-4 whitespace-nowrap">
-                                                <span class="inline-flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-300">
+                                                <span class="inline-flex items-center gap-1 text-xs text-slate-600 dark:text-slate-300">
                                                     @if($pay->method === 'cash') {{ __('💵 Espèces') }}
                                                     @elseif($pay->method === 'bank_transfer') {{ __('🏦 Virement') }}
                                                     @elseif($pay->method === 'credit_card') {{ __('💳 Carte') }}
@@ -355,11 +355,11 @@
                                                 @if($pay->receipt_number)
                                                     <a href="{{ route('super-admin.finance.receipt.pdf', $pay->id) }}"
                                                        target="_blank"
-                                                       class="inline-flex items-center gap-1 rounded-md bg-slate-100 hover:bg-slate-200 px-2 py-1 text-[10px] font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                                                       class="inline-flex items-center gap-1 rounded-md bg-slate-100 hover:bg-slate-200 px-2 py-1 text-2xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                                                         <span>{{ __('Reçu #') }}{{ $pay->receipt_number }}</span>
                                                     </a>
                                                 @else
-                                                    <span class="text-slate-400 text-[11px]">{{ __('Validé') }}</span>
+                                                    <span class="text-slate-400 text-xs">{{ __('Validé') }}</span>
                                                 @endif
                                             </td>
                                         </tr>
@@ -386,7 +386,7 @@
         <div class="finance-card overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-start text-xs">
-                    <thead class="bg-slate-50/80 border-b border-slate-100 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:bg-slate-800/50 dark:border-slate-800">
+                    <thead class="bg-slate-50/80 border-b border-slate-100 text-2xs font-bold uppercase tracking-wider text-slate-400 dark:bg-slate-800/50 dark:border-slate-800">
                         <tr>
                             <th class="py-3 px-4">{{ __('Étudiant') }}</th>
                             <th class="py-3 px-4">{{ __('Formation & Centre') }}</th>
@@ -405,7 +405,7 @@
                                     <div class="font-bold text-slate-900 dark:text-white whitespace-nowrap">
                                         {{ $row->student->full_name }}
                                     </div>
-                                    <div class="text-[10px] text-slate-400 font-mono">
+                                    <div class="text-2xs text-slate-400 font-mono">
                                         {{ $row->student->student_number ?? ('ID: '.$row->student->id) }}
                                     </div>
                                 </td>
@@ -413,7 +413,7 @@
                                     <div class="font-medium text-slate-800 dark:text-slate-200">
                                         {{ $row->formation->name }}
                                     </div>
-                                    <div class="text-[10px] text-slate-400">
+                                    <div class="text-2xs text-slate-400">
                                         {{ $row->formation->center->name ?? '' }} · {{ $row->enrollment->school_year }}
                                     </div>
                                 </td>
@@ -428,7 +428,7 @@
                                 </td>
                                 <td class="py-3 px-4 text-center whitespace-nowrap">
                                     <div class="w-20 mx-auto">
-                                        <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
+                                        <div class="flex items-center justify-between text-2xs text-slate-400 mb-1">
                                             <span>{{ $row->payment_percentage ?? 0 }}%</span>
                                         </div>
                                         <div class="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden dark:bg-slate-800">
@@ -449,11 +449,11 @@
                                     @if($row->remaining_amount > 0)
                                         <button type="button"
                                                 x-on:click="openQuickPayment('{{ $row->student->id }}', '{{ $row->formation->id }}', '{{ $row->remaining_amount }}')"
-                                                class="finance-btn-primary py-1 px-2.5 text-[11px]">
+                                                class="finance-btn-primary py-1 px-2.5 text-xs">
                                             <span>{{ __('Encaisser') }}</span>
                                         </button>
                                     @else
-                                        <span class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">{{ __('Soldé ✓') }}</span>
+                                        <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{{ __('Soldé ✓') }}</span>
                                     @endif
                                 </td>
                             </tr>
@@ -479,7 +479,7 @@
                     <h3 class="text-xs font-bold text-rose-900 dark:text-rose-200">
                         {{ __('Priorité de recouvrement des créances scolarité') }}
                     </h3>
-                    <p class="text-[11px] text-rose-700/80 dark:text-rose-300/80">
+                    <p class="text-xs text-rose-700/80 dark:text-rose-300/80">
                         {{ __('Liste ordonnée des étudiants ayant un reliquat supérieur à 0 DH.') }}
                     </p>
                 </div>
@@ -490,7 +490,7 @@
 
             <div class="overflow-x-auto">
                 <table class="w-full text-start text-xs">
-                    <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:bg-slate-800">
+                    <thead class="bg-slate-50 text-2xs font-bold uppercase tracking-wider text-slate-400 dark:bg-slate-800">
                         <tr>
                             <th class="py-3 px-4">{{ __('Étudiant débiteur') }}</th>
                             <th class="py-3 px-4">{{ __('Formation & Centre') }}</th>
@@ -508,13 +508,13 @@
                                     <div class="font-bold text-slate-900 dark:text-white whitespace-nowrap">
                                         {{ $debtor->student->full_name }}
                                     </div>
-                                    <div class="text-[10px] text-slate-400 font-mono">
+                                    <div class="text-2xs text-slate-400 font-mono">
                                         {{ $debtor->student->student_number ?? ('ID: '.$debtor->student->id) }}
                                     </div>
                                 </td>
                                 <td class="py-3 px-4 whitespace-nowrap">
                                     <div class="font-medium text-slate-800 dark:text-slate-200">{{ $debtor->formation->name }}</div>
-                                    <div class="text-[10px] text-slate-400">{{ $debtor->formation->center->name ?? '' }}</div>
+                                    <div class="text-2xs text-slate-400">{{ $debtor->formation->center->name ?? '' }}</div>
                                 </td>
                                 <td class="py-3 px-4 text-end text-slate-600 dark:text-slate-300 whitespace-nowrap">
                                     {{ format_price($debtor->annual_price, 'MAD') }}
@@ -531,7 +531,7 @@
                                 <td class="py-3 px-4 text-end whitespace-nowrap">
                                     <button type="button"
                                             x-on:click="openQuickPayment('{{ $debtor->student->id }}', '{{ $debtor->formation->id }}', '{{ $debtor->remaining_amount }}')"
-                                            class="finance-btn-primary py-1 px-2.5 text-[11px]">
+                                            class="finance-btn-primary py-1 px-2.5 text-xs">
                                         <span>{{ __('Encaisser créance') }}</span>
                                     </button>
                                 </td>
@@ -572,7 +572,7 @@
                     </span>
                     <div>
                         <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ __('Encaisser un versement') }}</h3>
-                        <p class="text-[11px] text-slate-500">{{ __('Scolarité annuelle · Frais de scolarité') }}</p>
+                        <p class="text-xs text-slate-500">{{ __('Scolarité annuelle · Frais de scolarité') }}</p>
                     </div>
                 </div>
                 <button type="button" x-on:click="paymentModalOpen = false" class="text-slate-400 hover:text-slate-600">

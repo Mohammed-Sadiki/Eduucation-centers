@@ -15,7 +15,7 @@
         <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">
             {{ __('Notifications') }}
             @if($unreadCount > 0)
-                <span class="ms-1 inline-flex items-center justify-center rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold text-white">{{ $unreadCount }}</span>
+                <span class="ms-1 inline-flex items-center justify-center rounded-full bg-red-600 px-1.5 py-0.5 text-2xs font-bold text-white">{{ $unreadCount }}</span>
             @endif
         </p>
         @if($unreadCount > 0)
@@ -40,12 +40,12 @@
                            class="block {{ $n->isRead() ? 'font-medium text-slate-600 dark:text-slate-300' : 'font-semibold text-slate-900 dark:text-white' }}">
                             <span class="line-clamp-1">{{ $n->title }}</span>
                             <span class="mt-0.5 line-clamp-2 block text-xs font-normal text-slate-500 dark:text-slate-400">{{ $n->message }}</span>
-                            <span class="mt-1 block text-[11px] text-slate-400">{{ $n->created_at?->diffForHumans() }}</span>
+                            <span class="mt-1 block text-xs text-slate-400">{{ $n->created_at?->diffForHumans() }}</span>
                         </a>
                         @unless($n->isRead())
                             <form method="POST" action="{{ route('notifications.read', $n) }}" class="mt-1">
                                 @csrf @method('PATCH')
-                                <button type="submit" class="text-[11px] font-medium text-brand-700 hover:underline dark:text-brand-300">{{ __('Marquer comme lu') }}</button>
+                                <button type="submit" class="text-xs font-medium text-brand-700 hover:underline dark:text-brand-300">{{ __('Marquer comme lu') }}</button>
                             </form>
                         @endunless
                     </div>

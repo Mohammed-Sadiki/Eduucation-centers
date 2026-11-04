@@ -374,9 +374,10 @@ class StagiaireInternFormTest extends TestCase
         // Titres de sections : 22–26 px (text-2xl = 24 px).
         $this->assertMatchesRegularExpression('/<h2\b[^>]*class="[^"]*text-2xl/', $html);
 
-        // Labels, champs et boutons : 16–18 px (text-[1.0625rem] = 17 px).
-        $this->assertGreaterThanOrEqual(10, substr_count($html, 'text-[1.0625rem]'));
-        $this->assertMatchesRegularExpression('/<button\b[^>]*class="[^"]*text-\[1\.0625rem\]/', $html);
+        // Labels, champs et boutons : 16–18 px. L'échelle typographique centrale
+        // des coquilles internes (.ec-admin / .ec-type) résout text-base en 17 px.
+        $this->assertGreaterThanOrEqual(10, substr_count($html, 'text-base'));
+        $this->assertMatchesRegularExpression('/<button\b[^>]*class="[^"]*text-base/', $html);
     }
 
     // ──────────────────────────────────────────────────────────────────────────

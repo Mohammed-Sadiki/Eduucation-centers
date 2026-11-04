@@ -68,22 +68,22 @@
             <x-ui.form-section :number="1" :title="__('Identité de la formation')">
                 <div class="grid gap-5 p-6 sm:grid-cols-2">
                     <div class="sm:col-span-2">
-                        <label for="name" class="ec-label text-[1.0625rem] font-semibold">{{ __('Nom de la formation') }} <span class="text-red-500">*</span></label>
+                        <label for="name" class="ec-label text-base font-semibold">{{ __('Nom de la formation') }} <span class="text-red-500">*</span></label>
                         <input type="text" id="name" name="name"
                                value="{{ old('name', $formation->name ?? '') }}"
                                required
-                               class="ec-input text-[1.0625rem] @error('name') is-invalid @enderror"
+                               class="ec-input text-base @error('name') is-invalid @enderror"
                                placeholder="{{ __('Ex : Assistance médicale') }}">
-                        @error('name') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
-                        <p class="ec-help mt-1 text-[0.95rem]">{{ __('Le nom doit être unique dans le centre. Les six formations officielles restent en place.') }}</p>
+                        @error('name') <p class="ec-error text-sm">{{ $message }}</p> @enderror
+                        <p class="ec-help mt-1 text-sm">{{ __('Le nom doit être unique dans le centre. Les six formations officielles restent en place.') }}</p>
                     </div>
 
                     <div class="sm:col-span-2">
-                        <label for="description" class="ec-label text-[1.0625rem] font-semibold">{{ __('Description') }}</label>
+                        <label for="description" class="ec-label text-base font-semibold">{{ __('Description') }}</label>
                         <textarea id="description" name="description" rows="4" maxlength="2000"
-                                  class="ec-input text-[1.0625rem] @error('description') is-invalid @enderror"
+                                  class="ec-input text-base @error('description') is-invalid @enderror"
                                   placeholder="{{ __('Décrivez brièvement le programme…') }}">{{ old('description', $formation->description ?? '') }}</textarea>
-                        @error('description') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                        @error('description') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                     </div>
                 </div>
             </x-ui.form-section>
@@ -92,44 +92,44 @@
             <x-ui.form-section :number="2" :title="__('Tarif et durée')">
                 <div class="grid gap-5 p-6 sm:grid-cols-2">
                     <div>
-                        <label for="annual_price" class="ec-label text-[1.0625rem] font-semibold">{{ __('Prix officiel (annuel)') }} <span class="text-red-500">*</span></label>
+                        <label for="annual_price" class="ec-label text-base font-semibold">{{ __('Prix officiel (annuel)') }} <span class="text-red-500">*</span></label>
                         <div class="relative">
                             <input type="number" step="0.01" min="0" id="annual_price" name="annual_price"
                                    value="{{ old('annual_price', $formation->annual_price ?? '') }}"
                                    required
-                                   class="ec-input text-[1.0625rem] pe-14 @error('annual_price') is-invalid @enderror"
+                                   class="ec-input text-base pe-14 @error('annual_price') is-invalid @enderror"
                                    placeholder="0.00">
                             <span class="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-3 text-sm font-semibold text-slate-400">DH</span>
                         </div>
-                        @error('annual_price') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                        @error('annual_price') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
-                        <label for="duration_weeks" class="ec-label text-[1.0625rem] font-semibold">{{ __('Durée (semaines)') }}</label>
+                        <label for="duration_weeks" class="ec-label text-base font-semibold">{{ __('Durée (semaines)') }}</label>
                         <input type="number" min="1" max="520" id="duration_weeks" name="duration_weeks"
                                value="{{ old('duration_weeks', $formation->duration_weeks ?? '') }}"
-                               class="ec-input text-[1.0625rem] @error('duration_weeks') is-invalid @enderror"
+                               class="ec-input text-base @error('duration_weeks') is-invalid @enderror"
                                placeholder="{{ __('Ex : 24') }}">
-                        @error('duration_weeks') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                        @error('duration_weeks') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
-                        <label for="duration_hours" class="ec-label text-[1.0625rem] font-semibold">{{ __('Durée (heures)') }}</label>
+                        <label for="duration_hours" class="ec-label text-base font-semibold">{{ __('Durée (heures)') }}</label>
                         <input type="number" min="1" max="10000" id="duration_hours" name="duration_hours"
                                value="{{ old('duration_hours', $formation->duration_hours ?? '') }}"
-                               class="ec-input text-[1.0625rem] @error('duration_hours') is-invalid @enderror"
+                               class="ec-input text-base @error('duration_hours') is-invalid @enderror"
                                placeholder="{{ __('Ex : 360') }}">
-                        @error('duration_hours') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                        @error('duration_hours') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
-                        <label for="status" class="ec-label text-[1.0625rem] font-semibold">{{ __('Statut') }} <span class="text-red-500">*</span></label>
+                        <label for="status" class="ec-label text-base font-semibold">{{ __('Statut') }} <span class="text-red-500">*</span></label>
                         <select id="status" name="status" required
-                                class="ec-select text-[1.0625rem] @error('status') is-invalid @enderror">
+                                class="ec-select text-base @error('status') is-invalid @enderror">
                             <option value="active" @selected(old('status', $formation->status ?? 'active') === 'active')>{{ __('Active') }}</option>
                             <option value="inactive" @selected(old('status', $formation->status ?? 'active') === 'inactive')>{{ __('Inactive') }}</option>
                         </select>
-                        @error('status') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                        @error('status') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                     </div>
                 </div>
             </x-ui.form-section>
@@ -138,9 +138,9 @@
             <x-ui.form-section :number="3" :title="__('Professeur responsable et image')" span="full">
                 <div class="grid gap-5 p-6 sm:grid-cols-2">
                     <div>
-                        <label for="teacher_id" class="ec-label text-[1.0625rem] font-semibold">{{ __('Professeur responsable') }}</label>
+                        <label for="teacher_id" class="ec-label text-base font-semibold">{{ __('Professeur responsable') }}</label>
                         <select id="teacher_id" name="teacher_id"
-                                class="ec-select text-[1.0625rem] @error('teacher_id') is-invalid @enderror">
+                                class="ec-select text-base @error('teacher_id') is-invalid @enderror">
                             <option value="">— {{ __('Non assigné') }} —</option>
                             @foreach ($centerTeachers as $t)
                                 <option value="{{ $t->id }}" @selected((int) old('teacher_id', $formation->teacher_id ?? 0) === (int) $t->id)>
@@ -148,19 +148,19 @@
                                 </option>
                             @endforeach
                         </select>
-                        @error('teacher_id') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
-                        <p class="ec-help mt-1 text-[0.95rem]">{{ __('Facultatif à la création. Un seul responsable, obligatoirement du centre.') }}</p>
+                        @error('teacher_id') <p class="ec-error text-sm">{{ $message }}</p> @enderror
+                        <p class="ec-help mt-1 text-sm">{{ __('Facultatif à la création. Un seul responsable, obligatoirement du centre.') }}</p>
                     </div>
 
                     <div>
-                        <label for="image" class="ec-label text-[1.0625rem] font-semibold">{{ __('Image de la carte (facultative)') }}</label>
+                        <label for="image" class="ec-label text-base font-semibold">{{ __('Image de la carte (facultative)') }}</label>
                         <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png,.webp"
-                               class="ec-input w-full text-[1rem] @error('image') is-invalid @enderror file:me-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:text-[1rem] file:font-semibold file:text-slate-700 hover:file:bg-slate-200 dark:file:bg-slate-800 dark:file:text-slate-200">
-                        @error('image') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
-                        <p class="ec-help mt-1 text-[0.95rem]">{{ __('JPG, PNG ou WebP — 2 Mo maximum. Sans image, une icône générique habille la carte.') }}</p>
+                               class="ec-input w-full text-base @error('image') is-invalid @enderror file:me-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:text-base file:font-semibold file:text-slate-700 hover:file:bg-slate-200 dark:file:bg-slate-800 dark:file:text-slate-200">
+                        @error('image') <p class="ec-error text-sm">{{ $message }}</p> @enderror
+                        <p class="ec-help mt-1 text-sm">{{ __('JPG, PNG ou WebP — 2 Mo maximum. Sans image, une icône générique habille la carte.') }}</p>
 
                         @if (!empty($formation?->image_path))
-                            <div class="mt-2 flex items-center gap-2 text-[0.95rem] text-slate-600 dark:text-slate-300">
+                            <div class="mt-2 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
                                 <img src="{{ asset('storage/' . $formation->image_path) }}" alt="{{ __('Image actuelle') }}"
                                      class="h-12 w-20 rounded-lg object-cover border border-slate-200 dark:border-slate-700">
                                 <span>{{ __('Image actuelle — envoyez un fichier pour la remplacer.') }}</span>
@@ -173,8 +173,8 @@
             {{-- Barre d'actions --}}
             <div class="flex flex-wrap items-center justify-end gap-3 pt-2 lg:col-span-2">
                 <a href="{{ route('formations-generales.picker', ['center_id' => $center->id]) }}"
-                   class="ec-btn-secondary text-[1.0625rem]">{{ __('Annuler') }}</a>
-                <button type="submit" id="btn-save-custom-formation" class="ec-btn-primary px-6 text-[1.0625rem]">
+                   class="ec-btn-secondary text-base">{{ __('Annuler') }}</a>
+                <button type="submit" id="btn-save-custom-formation" class="ec-btn-primary px-6 text-base">
                     <x-icon name="check" class="h-5 w-5" />
                     {{ $editing ? __('Enregistrer les modifications') : __('Créer la formation') }}
                 </button>

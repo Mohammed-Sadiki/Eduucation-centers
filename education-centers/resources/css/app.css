@@ -10,6 +10,12 @@
 @theme {
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
 
+    /* Taille la plus fine de l'échelle : puces de compteurs, sur-titres
+       uppercase. Volontairement sous --text-xs pour rester réservée aux
+       micro-libellés ; sa valeur est relevée dans la coquille interne. */
+    --text-2xs: 0.6875rem;
+    --text-2xs--line-height: 1.35;
+
     --color-brand-50: #eef2ff;
     --color-brand-100: #e0e7ff;
     --color-brand-200: #c7d2fe;
@@ -59,6 +65,21 @@
     .ec-select.is-invalid,
     .ec-textarea.is-invalid {
         @apply border-red-400 focus:border-red-500 focus:ring-red-500/20;
+    }
+
+    /* Champs des coquilles internes : texte à 17 px et respiration latérale
+       légèrement accrue. Le hors-périmètre (vitrine, connexion) garde sa
+       taille d'origine. Déclaré dans @layer components pour que les utilitaires
+       posés sur le champ (text-base, text-[…]) restent maîtres. */
+    .ec-admin .ec-input,
+    .ec-admin .ec-select,
+    .ec-admin .ec-textarea,
+    .ec-admin .form-control,
+    .ec-admin .form-select,
+    .ec-type .ec-input,
+    .ec-type .ec-select,
+    .ec-type .ec-textarea {
+        @apply px-3.5 text-base;
     }
 
     .ec-error {
@@ -113,6 +134,16 @@
         @apply rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900;
     }
 
+    /* Plancher des titres de cartes et panneaux internes : 19 px (18–20 visés).
+       Déclaré dans @layer components : un titre portant déjà une taille
+       explicite (text-xl / text-2xl des grandes cartes) garde la sienne, la
+       règle ne rattrape que les titres restés en text-sm/text-base. */
+    .ec-admin :is(h2, h3),
+    .ec-type :is(h2, h3) {
+        font-size: var(--text-lg);
+        line-height: var(--text-lg--line-height);
+    }
+
     .ec-table-wrap {
         @apply overflow-x-auto rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900;
     }
@@ -150,8 +181,10 @@
         @apply bg-brand-50 text-brand-700 hover:bg-brand-50 dark:bg-brand-500/15 dark:text-brand-200;
     }
 
+    /* Colonne de navigation : +1 rem pour absorber les liens à 17 px sans
+       retour à la ligne ni libellé tronqué. */
     .ec-sidebar {
-        width: 16.5rem;
+        width: 17.5rem;
     }
 
     .ec-sidebar-collapsed {
@@ -176,11 +209,11 @@
     }
 
     .finance-btn-primary {
-        @apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#0DAD98] hover:bg-[#0b9683] text-white px-3.5 py-2 text-xs font-semibold shadow-xs transition-colors;
+        @apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#0DAD98] hover:bg-[#0b9683] text-white px-3.5 py-2 text-sm font-semibold shadow-xs transition-colors;
     }
 
     .finance-btn-secondary {
-        @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-3.5 py-2 text-xs font-semibold shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors;
+        @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-3.5 py-2 text-sm font-semibold shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors;
     }
 }
 
@@ -298,7 +331,7 @@ nav[role='navigation'] a {
 .text-secondary { @apply text-slate-500; }
 .fw-bold, .fw-semibold { @apply font-semibold; }
 .small, .form-text { @apply text-xs text-slate-500; }
-.h3 { @apply text-2xl font-semibold; }
+.h3 { @apply text-3xl font-semibold; }
 .h5, .fs-5 { @apply text-lg; }
 .fs-6 { @apply text-base; }
 .font-monospace { @apply font-mono text-xs; }
@@ -520,6 +553,42 @@ html[dir='rtl'] .ltr {
    Public + auth pages do NOT carry this class and are therefore unaffected.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* ── ÉCHELLE TYPOGRAPHIQUE CENTRALISÉE ─────────────────────────────────────
+   Tailwind v4 compile `text-sm` en `font-size: var(--text-sm)` : redéfinir
+   les tokens sur la racine de la coquille interne agrandit d'un coup tous les
+   textes concernés (dashboards, tableaux, cartes, formulaires, menus) sans
+   retoucher les vues et sans toucher la vitrine publique ni la page de
+   connexion, hors de ce périmètre. La hiérarchie reste ouverte : chaque niveau
+   garde son écart, aucune taille n'est uniformisée.
+   Les `--text-*--line-height` sont recalculés pour conserver la hauteur de
+   ligne ABSOLUE d'aujourd'hui (≈ 20 px pour xs/sm) : le texte grandit
+   légèrement sans décaler les rythmes verticaux ni faire déborder les puces.
+   .ec-type = même échelle pour les coquilles internes sans design system
+   (Communication, formulaires autonome, dossier élève). */
+.ec-admin,
+.ec-type {
+    --text-2xs: 0.8125rem;   /* 13 px — compteurs, sur-titres uppercase */
+    --text-xs: 0.875rem;     /* 14 px — textes secondaires, en-têtes de tableaux, badges */
+    --text-sm: 0.9375rem;    /* 15 px — lignes de tableaux, labels, boutons */
+    --text-base: 1.0625rem;  /* 17 px — texte principal, champs de saisie, sidebar */
+    --text-lg: 1.1875rem;    /* 19 px — titres de cartes */
+    --text-xl: 1.375rem;     /* 22 px — titres de sections */
+    --text-2xl: 1.625rem;    /* 26 px — titres de sections, gros chiffres */
+    --text-3xl: 2rem;        /* 32 px — titres de pages */
+    --text-4xl: 2.375rem;    /* 38 px — valeurs KPI isolées */
+    --text-5xl: 3rem;        /* 48 px — grands chiffres internes */
+
+    --text-2xs--line-height: 1.35;
+    --text-xs--line-height: 1.43;
+    --text-sm--line-height: 1.34;
+    --text-base--line-height: 1.45;
+    --text-lg--line-height: 1.45;
+    --text-xl--line-height: 1.3;
+    --text-2xl--line-height: 1.25;
+    --text-3xl--line-height: 1.22;
+    --text-4xl--line-height: 1.16;
+}
+
 /* Base typography enlargement for the internal app (content ~16px). */
 .ec-admin {
     font-size: 16px;
@@ -529,14 +598,37 @@ html[dir='rtl'] .ltr {
     color: #e2e8f0;
 }
 
-/* Larger table text inside the admin shell only. */
-.ec-admin .ec-table td {
-    font-size: 0.95rem;
-    padding-top: 0.85rem;
-    padding-bottom: 0.85rem;
+/* Titre de page partagé : une seule source pour les dashboard Blades et le
+   composant x-ui.page-header (30–34 px sur desktop, 28 px sur mobile). */
+.ec-page-title {
+    font-size: 1.75rem;
+    line-height: 1.22;
+    font-weight: 800;
+    letter-spacing: -0.02em;
 }
-.ec-admin .ec-table th {
-    font-size: 0.75rem;
+@media (min-width: 640px) {
+    .ec-page-title {
+        font-size: 2.05rem;
+    }
+}
+
+/* ── Tableaux (coquille interne) : texte 16 px, en-têtes 14 px, lignes
+   légèrement plus hautes pour une lecture confortable. ─────────────────── */
+.ec-admin .ec-table td,
+.ec-type .ec-table td,
+.ec-admin .table td,
+.ec-type .table td {
+    font-size: 1rem;
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+}
+.ec-admin .ec-table th,
+.ec-type .ec-table th,
+.ec-admin .table th,
+.ec-type .table th {
+    font-size: 0.875rem;
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
 }
 
 /* Soft, modern scrollbars for the admin shell. */
@@ -581,7 +673,7 @@ html[dir='rtl'] .ltr {
     flex-shrink: 0;
 }
 .ec-kpi__label {
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 600;
     color: #334155;
 }
@@ -589,8 +681,8 @@ html[dir='rtl'] .ltr {
     color: #cbd5e1;
 }
 .ec-kpi__value {
-    font-size: 1.9rem;
-    line-height: 1.1;
+    font-size: 2.1rem;
+    line-height: 1.15;
     font-weight: 800;
     letter-spacing: -0.02em;
     color: #0f172a;
@@ -602,7 +694,7 @@ html[dir='rtl'] .ltr {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    font-size: 0.8rem;
+    font-size: 0.875rem;
     font-weight: 700;
 }
 .ec-kpi__spark {
@@ -640,7 +732,7 @@ html[dir='rtl'] .ltr {
     display: flex;
     align-items: center;
     gap: 0.65rem;
-    font-size: 1.15rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: #0f172a;
 }
@@ -648,10 +740,13 @@ html[dir='rtl'] .ltr {
     color: #fff;
 }
 
-/* ── Sidebar (admin) refinements ──────────────────────────────────────── */
-.ec-admin .ec-nav-link {
-    font-size: 0.95rem;
-    padding: 0.55rem 0.75rem;
+/* ── Sidebar (admin) refinements — liens à 17 px, icônes de 20 px toujours
+   alignées (flex items-center), libellés sur une ligne grâce à la colonne
+   légèrement élargie. ──────────────────────────────────────────────────── */
+.ec-admin .ec-nav-link,
+.ec-type .ec-nav-link {
+    font-size: 1.0625rem;
+    padding: 0.6rem 0.75rem;
     border-radius: 0.75rem;
 }
 .ec-admin .ec-nav-link-active {
@@ -664,8 +759,8 @@ html[dir='rtl'] .ltr {
     color: #a5b4fc;
 }
 .ec-admin .ec-nav-section {
-    font-size: 0.7rem;
-    letter-spacing: 0.09em;
+    font-size: 0.8125rem;
+    letter-spacing: 0.08em;
     font-weight: 800;
     text-transform: uppercase;
     color: #94a3b8;
@@ -686,7 +781,7 @@ html[dir='rtl'] .ltr {
 }
 .ec-lang-pill a {
     padding: 0.25rem 0.6rem;
-    font-size: 0.8rem;
+    font-size: 0.875rem;
     font-weight: 700;
     border-radius: 0.5rem;
     color: #64748b;

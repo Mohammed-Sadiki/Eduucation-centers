@@ -30,7 +30,7 @@
                         : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-700' }}">
             {{ $label }}
             @if($key === 'unread' && $unreadCount > 0)
-                <span class="ms-1 inline-flex items-center justify-center rounded-full bg-red-600 px-1.5 text-[11px] font-bold text-white">{{ $unreadCount }}</span>
+                <span class="ms-1 inline-flex items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-bold text-white">{{ $unreadCount }}</span>
             @endif
         </a>
     @endforeach

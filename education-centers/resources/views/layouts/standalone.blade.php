@@ -45,7 +45,7 @@
     </script>
     @stack('styles')
 </head>
-<body id="standalone-layout" class="flex min-h-screen flex-col bg-slate-100 text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-100">
+<body id="standalone-layout" class="ec-type flex min-h-screen flex-col bg-slate-100 text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-100">
 
     {{-- ════════════════════════════════════════════════════════════════════
          TOPBAR PROPRE (indépendante du dashboard pédagogique)

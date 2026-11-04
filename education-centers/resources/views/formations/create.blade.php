@@ -68,17 +68,17 @@
                 @if($isCenterAdmin)
                     {{-- Aucun champ de sélection du centre : rattachement automatique --}}
                     <div class="sm:col-span-2">
-                        <label class="ec-label text-[1.0625rem] font-semibold">{{ __('Centre de formation') }}</label>
-                        <div class="ec-input flex items-center justify-between bg-slate-50 text-[1.0625rem] text-slate-600 dark:bg-slate-800/60 dark:text-slate-300">
+                        <label class="ec-label text-base font-semibold">{{ __('Centre de formation') }}</label>
+                        <div class="ec-input flex items-center justify-between bg-slate-50 text-base text-slate-600 dark:bg-slate-800/60 dark:text-slate-300">
                             <span>{{ $forcedCenter?->translated('name') ?? $forcedCenter?->name }}</span>
                             <span class="ec-badge bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400">{{ __('Automatique') }}</span>
                         </div>
-                        <p class="ec-help text-[0.95rem]">{{ __('La formation sera rattachée exclusivement à ce centre.') }}</p>
+                        <p class="ec-help text-sm">{{ __('La formation sera rattachée exclusivement à ce centre.') }}</p>
                     </div>
                 @else
                     <div>
-                        <label for="center_id" class="ec-label text-[1.0625rem] font-semibold">{{ __('Centre de formation') }} <span class="text-red-500">*</span></label>
-                        <select id="center_id" name="center_id" class="ec-select text-[1.0625rem] @error('center_id') is-invalid @enderror" required>
+                        <label for="center_id" class="ec-label text-base font-semibold">{{ __('Centre de formation') }} <span class="text-red-500">*</span></label>
+                        <select id="center_id" name="center_id" class="ec-select text-base @error('center_id') is-invalid @enderror" required>
                             <option value="">{{ __('— Sélectionner le centre —') }}</option>
                             @foreach($centers as $center)
                                 <option value="{{ $center->id }}" @selected(old('center_id') == $center->id)>
@@ -86,20 +86,20 @@
                                 </option>
                             @endforeach
                         </select>
-                        @error('center_id') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
-                        <p class="ec-help text-[0.95rem]">{{ __('Le code formation doit être unique au sein du centre choisi.') }}</p>
+                        @error('center_id') <p class="ec-error text-sm">{{ $message }}</p> @enderror
+                        <p class="ec-help text-sm">{{ __('Le code formation doit être unique au sein du centre choisi.') }}</p>
                     </div>
                 @endif
 
                 <div class="{{ $isCenterAdmin ? 'sm:col-span-2' : '' }}">
-                    <label for="domain" class="ec-label text-[1.0625rem] font-semibold">{{ __('Domaine de formation') }} <span class="text-red-500">*</span></label>
-                    <select id="domain" name="domain" class="ec-select text-[1.0625rem] @error('domain') is-invalid @enderror" required>
+                    <label for="domain" class="ec-label text-base font-semibold">{{ __('Domaine de formation') }} <span class="text-red-500">*</span></label>
+                    <select id="domain" name="domain" class="ec-select text-base @error('domain') is-invalid @enderror" required>
                         <option value="">{{ __('— Sélectionner le domaine —') }}</option>
                         @foreach($domains as $domain)
                             <option value="{{ $domain->slug }}" @selected(old('domain') === $domain->slug)>{{ $domain->name }}</option>
                         @endforeach
                     </select>
-                    @error('domain') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                    @error('domain') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                 </div>
             </div>
         </section>
@@ -117,23 +117,23 @@
             </header>
             <div class="grid gap-5 p-6 sm:grid-cols-2">
                 <div class="sm:col-span-1">
-                    <label for="name" class="ec-label text-[1.0625rem] font-semibold">{{ __('Intitulé de la formation') }} <span class="text-red-500">*</span></label>
-                    <input type="text" id="name" name="name" class="ec-input text-[1.0625rem] @error('name') is-invalid @enderror"
+                    <label for="name" class="ec-label text-base font-semibold">{{ __('Intitulé de la formation') }} <span class="text-red-500">*</span></label>
+                    <input type="text" id="name" name="name" class="ec-input text-base @error('name') is-invalid @enderror"
                            value="{{ old('name') }}" placeholder="{{ __('Ex : Deutsch A1 — Débutant') }}" required>
-                    @error('name') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                    @error('name') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                 </div>
                 <div class="sm:col-span-1">
-                    <label for="code" class="ec-label text-[1.0625rem] font-semibold">{{ __('Code formation') }} <span class="text-red-500">*</span></label>
-                    <input type="text" id="code" name="code" class="ec-input uppercase text-[1.0625rem] @error('code') is-invalid @enderror"
+                    <label for="code" class="ec-label text-base font-semibold">{{ __('Code formation') }} <span class="text-red-500">*</span></label>
+                    <input type="text" id="code" name="code" class="ec-input uppercase text-base @error('code') is-invalid @enderror"
                            value="{{ old('code') }}" placeholder="{{ __('Ex : DE-A1') }}" required>
-                    @error('code') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
-                    <p class="ec-help text-[0.95rem]">{{ __('Unique au sein du centre (ex : DE-A1).') }}</p>
+                    @error('code') <p class="ec-error text-sm">{{ $message }}</p> @enderror
+                    <p class="ec-help text-sm">{{ __('Unique au sein du centre (ex : DE-A1).') }}</p>
                 </div>
                 <div class="sm:col-span-2">
-                    <label for="description" class="ec-label text-[1.0625rem] font-semibold">{{ __('Description du programme') }}</label>
-                    <textarea id="description" name="description" rows="4" class="ec-textarea text-[1.0625rem] @error('description') is-invalid @enderror"
+                    <label for="description" class="ec-label text-base font-semibold">{{ __('Description du programme') }}</label>
+                    <textarea id="description" name="description" rows="4" class="ec-textarea text-base @error('description') is-invalid @enderror"
                               placeholder="{{ __('Objectifs pédagogiques, public visé, prérequis…') }}">{{ old('description') }}</textarea>
-                    @error('description') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                    @error('description') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                 </div>
             </div>
         </section>
@@ -151,49 +151,49 @@
             </header>
             <div class="grid gap-5 p-6 sm:grid-cols-3">
                 <div>
-                    <label for="duration_hours" class="ec-label text-[1.0625rem] font-semibold">{{ __('Volume horaire (heures)') }}</label>
-                    <input type="number" id="duration_hours" name="duration_hours" min="0" step="1" class="ec-input text-[1.0625rem] @error('duration_hours') is-invalid @enderror"
+                    <label for="duration_hours" class="ec-label text-base font-semibold">{{ __('Volume horaire (heures)') }}</label>
+                    <input type="number" id="duration_hours" name="duration_hours" min="0" step="1" class="ec-input text-base @error('duration_hours') is-invalid @enderror"
                            value="{{ old('duration_hours') }}" placeholder="{{ __('Ex : 120') }}">
-                    @error('duration_hours') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                    @error('duration_hours') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label for="duration_weeks" class="ec-label text-[1.0625rem] font-semibold">{{ __('Durée (semaines)') }}</label>
-                    <input type="number" id="duration_weeks" name="duration_weeks" min="0" step="1" class="ec-input text-[1.0625rem] @error('duration_weeks') is-invalid @enderror"
+                    <label for="duration_weeks" class="ec-label text-base font-semibold">{{ __('Durée (semaines)') }}</label>
+                    <input type="number" id="duration_weeks" name="duration_weeks" min="0" step="1" class="ec-input text-base @error('duration_weeks') is-invalid @enderror"
                            value="{{ old('duration_weeks') }}" placeholder="{{ __('Ex : 8') }}">
-                    @error('duration_weeks') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                    @error('duration_weeks') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label for="price" class="ec-label text-[1.0625rem] font-semibold">{{ __('Prix / Tarif') }}</label>
-                    <input type="number" id="price" name="price" min="0" step="0.01" class="ec-input text-[1.0625rem] @error('price') is-invalid @enderror"
+                    <label for="price" class="ec-label text-base font-semibold">{{ __('Prix / Tarif') }}</label>
+                    <input type="number" id="price" name="price" min="0" step="0.01" class="ec-input text-base @error('price') is-invalid @enderror"
                            value="{{ old('price') }}" placeholder="{{ __('Ex : 450.00') }}">
-                    @error('price') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                    @error('price') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label for="currency" class="ec-label text-[1.0625rem] font-semibold">{{ __('Devise') }}</label>
-                    <select id="currency" name="currency" class="ec-select text-[1.0625rem] @error('currency') is-invalid @enderror">
+                    <label for="currency" class="ec-label text-base font-semibold">{{ __('Devise') }}</label>
+                    <select id="currency" name="currency" class="ec-select text-base @error('currency') is-invalid @enderror">
                         <option value="MAD" @selected(old('currency', 'MAD') === 'MAD')>{{ __('MAD (DH)') }}</option>
                         <option value="EUR" @selected(old('currency') === 'EUR')>{{ __('EUR (€)') }}</option>
                         <option value="USD" @selected(old('currency') === 'USD')>USD ($)</option>
                         <option value="GBP" @selected(old('currency') === 'GBP')>{{ __('GBP (£)') }}</option>
                         <option value="CHF" @selected(old('currency') === 'CHF')>{{ __('CHF (CHF)') }}</option>
                     </select>
-                    @error('currency') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                    @error('currency') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                 </div>
                 <div class="sm:col-span-2">
-                    <label for="status" class="ec-label text-[1.0625rem] font-semibold">{{ __('Statut de la formation') }} <span class="text-red-500">*</span></label>
-                    <select id="status" name="status" class="ec-select text-[1.0625rem] @error('status') is-invalid @enderror" required>
+                    <label for="status" class="ec-label text-base font-semibold">{{ __('Statut de la formation') }} <span class="text-red-500">*</span></label>
+                    <select id="status" name="status" class="ec-select text-base @error('status') is-invalid @enderror" required>
                         <option value="active" @selected(old('status', 'active') === 'active')>{{ __('Actif') }}</option>
                         <option value="inactive" @selected(old('status') === 'inactive')>{{ __('Inactif') }}</option>
                     </select>
-                    @error('status') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                    @error('status') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                 </div>
             </div>
         </section>
 
         {{-- Actions --}}
         <div class="flex flex-wrap items-center justify-end gap-3 pb-6">
-            <a href="{{ route('formations.index') }}" class="ec-btn-secondary text-[1.0625rem]">{{ __('Annuler') }}</a>
-            <button type="submit" class="ec-btn-primary px-6 text-[1.0625rem]" id="btn-submit-formation">
+            <a href="{{ route('formations.index') }}" class="ec-btn-secondary text-base">{{ __('Annuler') }}</a>
+            <button type="submit" class="ec-btn-primary px-6 text-base" id="btn-submit-formation">
                 <x-icon name="check" class="h-5 w-5" />
                 {{ __('Enregistrer la formation') }}
             </button>

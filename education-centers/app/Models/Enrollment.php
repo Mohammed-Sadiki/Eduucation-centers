@@ -121,6 +121,45 @@ class Enrollment extends Model
     }
 
     /**
+     * Versements réellement encaissés pour CETTE inscription : ceux qui y sont
+     * rattachés, ainsi que ceux enregistrés sur la même formation sans
+     * identifiant d'inscription (écritures antérieures). En lecture seule : la
+     * mise à jour d'un dossier étudiant ne modifie jamais ces versements.
+     */
+    public function paidPayments(): \Illuminate\Database\Eloquent\Collection
+    {
+        return Payment::query()
+            ->where('center_id', $this->center_id)
+            ->where('student_id', $this->student_id)
+            ->where('status', 'paid')
+            ->where(function ($q): void {
+                $q->where('enrollment_id', $this->id)
+                    ->orWhere(function ($q2): void {
+                        $q2->whereNull('enrollment_id')
+                            ->where('formation_id', $this->formation_id);
+                    });
+            })
+            ->orderByDesc('payment_date')
+            ->get();
+    }
+
+    /**
+     * Total déjà encaissé (solde conservé tel quel).
+     */
+    public function paidAmount(): float
+    {
+        return (float) $this->paidPayments()->sum('amount');
+    }
+
+    /**
+     * Reste réellement dû après les versements déjà enregistrés.
+     */
+    public function getRemainingAmount(): float
+    {
+        return max(0.0, $this->getPayableAmount() - $this->paidAmount());
+    }
+
+    /**
      * Relation : Une inscription appartient à un centre.
      */
     public function center(): BelongsTo

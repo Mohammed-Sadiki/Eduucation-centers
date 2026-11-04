@@ -61,39 +61,39 @@
             <div class="grid gap-5 p-6 sm:grid-cols-2">
                 {{-- Nom complet --}}
                 <div class="sm:col-span-1">
-                    <label for="name" class="ec-label text-[1.0625rem] font-semibold">{{ __('Nom complet') }} <span class="text-red-500">*</span></label>
-                    <input type="text" id="name" name="name" class="ec-input text-[1.0625rem] @error('name') is-invalid @enderror"
+                    <label for="name" class="ec-label text-base font-semibold">{{ __('Nom complet') }} <span class="text-red-500">*</span></label>
+                    <input type="text" id="name" name="name" class="ec-input text-base @error('name') is-invalid @enderror"
                            value="{{ old('name') }}" placeholder="{{ __('Ex : Jean Dupont') }}" required autocomplete="name" autofocus>
-                    @error('name') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                    @error('name') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                 </div>
 
                 {{-- Adresse e-mail --}}
                 <div class="sm:col-span-1">
-                    <label for="email" class="ec-label text-[1.0625rem] font-semibold">{{ __('Adresse e-mail') }} <span class="text-red-500">*</span></label>
-                    <input type="email" id="email" name="email" class="ec-input text-[1.0625rem] @error('email') is-invalid @enderror"
+                    <label for="email" class="ec-label text-base font-semibold">{{ __('Adresse e-mail') }} <span class="text-red-500">*</span></label>
+                    <input type="email" id="email" name="email" class="ec-input text-base @error('email') is-invalid @enderror"
                            value="{{ old('email') }}" placeholder="{{ __('professeur@education-centers.de') }}" required autocomplete="email">
-                    @error('email') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                    @error('email') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                 </div>
 
                 {{-- Téléphone --}}
                 <div class="sm:col-span-1">
-                    <label for="phone" class="ec-label text-[1.0625rem] font-semibold">{{ __('Numéro de téléphone') }}</label>
-                    <input type="tel" id="phone" name="phone" class="ec-input text-[1.0625rem] @error('phone') is-invalid @enderror"
+                    <label for="phone" class="ec-label text-base font-semibold">{{ __('Numéro de téléphone') }}</label>
+                    <input type="tel" id="phone" name="phone" class="ec-input text-base @error('phone') is-invalid @enderror"
                            value="{{ old('phone') }}" placeholder="+212 XXXXXXXXX" autocomplete="tel">
-                    @error('phone') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                    @error('phone') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                 </div>
 
                 {{-- Type de compte (Fixé à Professeur) --}}
                 <div class="sm:col-span-1">
-                    <label class="ec-label text-[1.0625rem] font-semibold">{{ __('Type de compte') }}</label>
-                    <div class="ec-input flex items-center justify-between bg-slate-50 text-[1.0625rem] text-slate-700 dark:bg-slate-800/60 dark:text-slate-200 font-bold">
+                    <label class="ec-label text-base font-semibold">{{ __('Type de compte') }}</label>
+                    <div class="ec-input flex items-center justify-between bg-slate-50 text-base text-slate-700 dark:bg-slate-800/60 dark:text-slate-200 font-bold">
                         <span class="inline-flex items-center gap-2">
                             <span class="h-2.5 w-2.5 rounded-full bg-blue-500"></span>
                             {{ __('Professeur') }}
                         </span>
                         <span class="ec-badge bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">{{ __('Automatique') }}</span>
                     </div>
-                    <p class="ec-help text-[0.95rem]">{{ __('Ce formulaire permet de créer uniquement des comptes professeurs.') }}</p>
+                    <p class="ec-help text-sm">{{ __('Ce formulaire permet de créer uniquement des comptes professeurs.') }}</p>
                 </div>
             </div>
         </section>
@@ -113,16 +113,16 @@
                 {{-- LIGNE 1 : Centre de rattachement & Statut du compte --}}
                 @if($isCenterAdmin)
                     <div class="sm:col-span-1">
-                        <label class="ec-label text-[1.0625rem] font-semibold">{{ __('Centre de rattachement') }}</label>
-                        <div class="ec-input flex items-center justify-between bg-slate-50 text-[1.0625rem] text-slate-600 dark:bg-slate-800/60 dark:text-slate-300">
+                        <label class="ec-label text-base font-semibold">{{ __('Centre de rattachement') }}</label>
+                        <div class="ec-input flex items-center justify-between bg-slate-50 text-base text-slate-600 dark:bg-slate-800/60 dark:text-slate-300">
                             <span>{{ $forcedCenter?->translated('name') ?? $forcedCenter?->name }}</span>
                             <span class="ec-badge bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400">{{ __('Automatique') }}</span>
                         </div>
                     </div>
                 @else
                     <div class="sm:col-span-1">
-                        <label for="center_id" class="ec-label text-[1.0625rem] font-semibold">{{ __('Centre de rattachement') }} <span class="text-red-500">*</span></label>
-                        <select id="center_id" name="center_id" class="ec-select text-[1.0625rem] @error('center_id') is-invalid @enderror"
+                        <label for="center_id" class="ec-label text-base font-semibold">{{ __('Centre de rattachement') }} <span class="text-red-500">*</span></label>
+                        <select id="center_id" name="center_id" class="ec-select text-base @error('center_id') is-invalid @enderror"
                                 x-model="centerId" x-on:change="applyCascade()" required>
                             <option value="">{{ __('— Sélectionner le centre —') }}</option>
                             @foreach($centers as $center)
@@ -131,24 +131,24 @@
                                 </option>
                             @endforeach
                         </select>
-                        @error('center_id') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                        @error('center_id') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                     </div>
                 @endif
 
                 {{-- Statut du compte --}}
                 <div class="sm:col-span-1">
-                    <label for="status" class="ec-label text-[1.0625rem] font-semibold">{{ __('Statut du compte') }} <span class="text-red-500">*</span></label>
-                    <select id="status" name="status" class="ec-select text-[1.0625rem] @error('status') is-invalid @enderror" required>
+                    <label for="status" class="ec-label text-base font-semibold">{{ __('Statut du compte') }} <span class="text-red-500">*</span></label>
+                    <select id="status" name="status" class="ec-select text-base @error('status') is-invalid @enderror" required>
                         <option value="active" @selected(old('status', 'active') === 'active')>{{ __('Actif') }}</option>
                         <option value="inactive" @selected(old('status') === 'inactive')>{{ __('Inactif') }}</option>
                     </select>
-                    @error('status') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                    @error('status') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                 </div>
 
                 {{-- LIGNE 2 : Formation enseignée (sélection directe, sans domaine) --}}
                 <div class="sm:col-span-2">
-                    <label for="formation_id" class="ec-label text-[1.0625rem] font-semibold">{{ __('Formation') }} <span class="text-red-500">*</span></label>
-                    <select id="formation_id" name="formation_id" class="ec-select text-[1.0625rem] @error('formation_id') is-invalid @enderror"
+                    <label for="formation_id" class="ec-label text-base font-semibold">{{ __('Formation') }} <span class="text-red-500">*</span></label>
+                    <select id="formation_id" name="formation_id" class="ec-select text-base @error('formation_id') is-invalid @enderror"
                             x-model="formationId" required>
                         <option value="">{{ __('— Sélectionner la formation —') }}</option>
                         @foreach($formationsData as $formation)
@@ -159,9 +159,9 @@
                             </option>
                         @endforeach
                     </select>
-                    @error('formation_id') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                    @error('formation_id') <p class="ec-error text-sm">{{ $message }}</p> @enderror
 
-                    <p class="ec-help mt-1 text-[0.95rem]">
+                    <p class="ec-help mt-1 text-sm">
                         {{ __('Le professeur est rattaché à une des six formations générales officielles du centre. Les sous-formations legacy ne sont plus proposées.') }}
                     </p>
                 </div>
@@ -181,14 +181,14 @@
             </header>
             <div class="grid gap-5 p-6 sm:grid-cols-2">
                 <div>
-                    <label for="password" class="ec-label text-[1.0625rem] font-semibold">{{ __('Mot de passe') }} <span class="text-red-500">*</span></label>
-                    <input type="password" id="password" name="password" class="ec-input text-[1.0625rem] @error('password') is-invalid @enderror"
+                    <label for="password" class="ec-label text-base font-semibold">{{ __('Mot de passe') }} <span class="text-red-500">*</span></label>
+                    <input type="password" id="password" name="password" class="ec-input text-base @error('password') is-invalid @enderror"
                            placeholder="{{ __('Min. 8 caractères') }}" required autocomplete="new-password">
-                    @error('password') <p class="ec-error text-[0.95rem]">{{ $message }}</p> @enderror
+                    @error('password') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label for="password_confirmation" class="ec-label text-[1.0625rem] font-semibold">{{ __('Confirmer le mot de passe') }} <span class="text-red-500">*</span></label>
-                    <input type="password" id="password_confirmation" name="password_confirmation" class="ec-input text-[1.0625rem]"
+                    <label for="password_confirmation" class="ec-label text-base font-semibold">{{ __('Confirmer le mot de passe') }} <span class="text-red-500">*</span></label>
+                    <input type="password" id="password_confirmation" name="password_confirmation" class="ec-input text-base"
                            placeholder="{{ __('Répéter le mot de passe') }}" required autocomplete="new-password">
                 </div>
             </div>
@@ -196,8 +196,8 @@
 
         {{-- Actions --}}
         <div class="flex flex-wrap items-center justify-end gap-3 pb-6">
-            <a href="{{ route('users.index') }}" class="ec-btn-secondary text-[1.0625rem]">{{ __('Annuler') }}</a>
-            <button type="submit" class="ec-btn-primary px-7 text-[1.0625rem]" id="btn-submit-user">
+            <a href="{{ route('users.index') }}" class="ec-btn-secondary text-base">{{ __('Annuler') }}</a>
+            <button type="submit" class="ec-btn-primary px-7 text-base" id="btn-submit-user">
                 <x-icon name="check" class="h-5 w-5" />
                 {{ __('Créer le compte professeur') }}
             </button>

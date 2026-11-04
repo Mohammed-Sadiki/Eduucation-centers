@@ -10,11 +10,11 @@
 --}}
 <div {{ $attributes->merge(['class' => 'flex flex-wrap items-center justify-end gap-3 pt-2 lg:col-span-2']) }}>
     @if ($cancelUrl)
-        <a href="{{ $cancelUrl }}" class="ec-btn-secondary text-[1.0625rem]">
+        <a href="{{ $cancelUrl }}" class="ec-btn-secondary text-base">
             {{ $cancelLabel ?? __('Annuler') }}
         </a>
     @endif
-    <button type="submit" class="ec-btn-primary px-6 text-[1.0625rem]" {{ $attributes->only('id') }}>
+    <button type="submit" class="ec-btn-primary px-6 text-base" {{ $attributes->only('id') }}>
         <x-icon name="check" class="h-5 w-5" />
         {{ $submitLabel ?? __('Enregistrer') }}
     </button>

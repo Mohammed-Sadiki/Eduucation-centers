@@ -26,7 +26,7 @@
                 <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
                     {{ __('Gestion des utilisateurs') }}
                 </h1>
-                <p class="text-[1.0625rem] text-slate-500 dark:text-slate-400 mt-1">
+                <p class="text-base text-slate-500 dark:text-slate-400 mt-1">
                     {{ __('Administration des comptes d\'accès — Super Admin, Admin Centre et Professeurs.') }}
                 </p>
             </div>
@@ -36,7 +36,7 @@
             @can('create', \App\Models\User::class)
                 <a href="{{ route('users.create') }}"
                    id="btn-add-user"
-                   class="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-6 py-3.5 text-[1.0625rem] font-bold text-white shadow-md transition-all hover:bg-brand-700 hover:shadow-lg dark:bg-brand-500 dark:hover:bg-brand-600">
+                   class="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-6 py-3.5 text-base font-bold text-white shadow-md transition-all hover:bg-brand-700 hover:shadow-lg dark:bg-brand-500 dark:hover:bg-brand-600">
                     <x-icon name="plus" class="h-5 w-5" stroke-width="2.2" />
                     <span>{{ __('+ Ajouter un utilisateur') }}</span>
                 </a>
@@ -44,7 +44,7 @@
 
             <a href="{{ route('admin.home') }}"
                id="btn-users-back-home"
-               class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-[1.0625rem] font-semibold text-slate-700 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 hover:text-brand-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:text-brand-400">
+               class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-base font-semibold text-slate-700 shadow-xs transition hover:border-slate-300 hover:bg-slate-50 hover:text-brand-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:text-brand-400">
                 <x-icon name="arrow-left" class="h-5 w-5 rtl:rotate-180" stroke-width="2" />
                 <span>{{ __('Retour à l\'accueil') }}</span>
             </a>
@@ -53,7 +53,7 @@
 
     {{-- Messages flash --}}
     @if(session('success'))
-        <div class="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-[1.0625rem] font-medium text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
+        <div class="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-base font-medium text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
             <x-icon name="check" class="h-6 w-6 shrink-0 text-emerald-600 dark:text-emerald-400" />
             <div>{{ session('success') }}</div>
         </div>
@@ -90,10 +90,10 @@
         <form method="GET" action="{{ route('users.index') }}" class="grid gap-4 md:grid-cols-4">
             {{-- Recherche --}}
             <div class="{{ $isSuperAdmin ? 'md:col-span-1' : 'md:col-span-2' }}">
-                <label for="search" class="ec-label text-[1rem] font-semibold">{{ __('Rechercher') }}</label>
+                <label for="search" class="ec-label text-base font-semibold">{{ __('Rechercher') }}</label>
                 <div class="relative">
                     <input type="text" id="search" name="search" value="{{ request('search') }}"
-                           class="ec-input text-[1.0625rem] ps-10" placeholder="{{ __('Nom ou adresse e-mail…') }}">
+                           class="ec-input text-base ps-10" placeholder="{{ __('Nom ou adresse e-mail…') }}">
                     <span class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-slate-400">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
@@ -105,8 +105,8 @@
             {{-- Filtre Centre (Super Admin uniquement) --}}
             @if($isSuperAdmin)
                 <div>
-                    <label for="center_id" class="ec-label text-[1rem] font-semibold">{{ __('Centre') }}</label>
-                    <select id="center_id" name="center_id" class="ec-select text-[1.0625rem]">
+                    <label for="center_id" class="ec-label text-base font-semibold">{{ __('Centre') }}</label>
+                    <select id="center_id" name="center_id" class="ec-select text-base">
                         <option value="">{{ __('Tous les centres') }}</option>
                         @foreach($centers as $center)
                             <option value="{{ $center->id }}" @selected(request('center_id') == $center->id)>
@@ -119,8 +119,8 @@
 
             {{-- Filtre Rôle (Super Admin, Admin Centre, Professeur uniquement) --}}
             <div>
-                <label for="role" class="ec-label text-[1rem] font-semibold">{{ __('Rôle') }}</label>
-                <select id="role" name="role" class="ec-select text-[1.0625rem]">
+                <label for="role" class="ec-label text-base font-semibold">{{ __('Rôle') }}</label>
+                <select id="role" name="role" class="ec-select text-base">
                     <option value="">{{ __('Tous les rôles') }}</option>
                     @if($isSuperAdmin)
                         <option value="super_admin" @selected(request('role') === 'super_admin')>{{ __('Super Admin') }}</option>
@@ -132,14 +132,14 @@
 
             {{-- Actions de filtre --}}
             <div class="flex items-end gap-2">
-                <button type="submit" class="ec-btn-primary w-full text-[1.0625rem] py-3">
+                <button type="submit" class="ec-btn-primary w-full text-base py-3">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                     </svg>
                     <span>{{ __('Filtrer') }}</span>
                 </button>
                 @if(request()->hasAny(['search', 'role', 'status', 'center_id']))
-                    <a href="{{ route('users.index') }}" class="ec-btn-secondary py-3 text-[1.0625rem]" title="{{ __('Réinitialiser') }}">
+                    <a href="{{ route('users.index') }}" class="ec-btn-secondary py-3 text-base" title="{{ __('Réinitialiser') }}">
                         <x-icon name="x" class="h-5 w-5" />
                     </a>
                 @endif
@@ -158,7 +158,7 @@
         </header>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-start border-collapse text-[1.0625rem]" id="table-users">
+            <table class="w-full text-start border-collapse text-base" id="table-users">
                 <thead>
                     <tr class="border-b border-slate-200/80 bg-slate-50/50 text-start text-sm font-bold uppercase tracking-wider text-slate-500 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-400">
                         <th class="px-6 py-4">{{ __('Nom') }}</th>

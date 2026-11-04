@@ -37,7 +37,7 @@
     $commHomeUrl = ($user && !$user->isTeacher()) ? route('admin.home') : route('dashboard');
     $unreadNotifCount = \App\Models\AppNotification::where('user_id', $user?->id)->whereNull('read_at')->count();
 @endphp
-<body class="h-screen overflow-hidden bg-slate-100 text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-100 flex flex-col">
+<body class="ec-type h-screen overflow-hidden bg-slate-100 text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-100 flex flex-col">
 
     {{-- ════════════════════════════════════════════════════════════════════
          TOPBAR PROPRE AU MODULE COMMUNICATION (indépendante du dashboard)
@@ -127,7 +127,7 @@
                         :aria-expanded="notifOpen">
                     <x-icon name="bell" class="h-5 w-5" />
                     <span x-show="unread > 0" x-cloak x-text="unread > 9 ? '9+' : unread"
-                          class="absolute end-1 top-1 inline-flex min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-semibold text-white"></span>
+                          class="absolute end-1 top-1 inline-flex min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-2xs font-semibold text-white"></span>
                 </button>
                 <div x-ref="body" x-show="notifOpen" x-cloak
                      x-transition:enter="transition ease-out duration-200"

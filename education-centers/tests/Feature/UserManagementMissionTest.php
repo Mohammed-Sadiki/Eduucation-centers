@@ -259,9 +259,10 @@ class UserManagementMissionTest extends TestCase
         $response = $this->actingAs($superAdmin)->get(route('users.create'));
         $response->assertStatus(200);
 
-        // Grandes écritures : classes text-[1.0625rem], text-2xl font-extrabold
+        // Grandes écritures : classes text-base (17 px via l'échelle centrale),
+        // text-2xl font-extrabold
         $response->assertSee('text-2xl font-extrabold', false);
-        $response->assertSee('text-[1.0625rem]', false);
+        $response->assertSee('text-base', false);
         $response->assertSee('ec-card', false);
         $response->assertSee('ec-input', false);
         $response->assertSee('ec-label', false);

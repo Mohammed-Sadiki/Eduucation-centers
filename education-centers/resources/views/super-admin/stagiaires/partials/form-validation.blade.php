@@ -117,7 +117,7 @@
         }
 
         const error = document.createElement('p');
-        error.className = 'ec-error text-[0.95rem]';
+        error.className = 'ec-error text-sm';
         error.dataset.stagiaireError = '1';
         error.textContent = message;
         holder.appendChild(error);

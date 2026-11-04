@@ -95,7 +95,7 @@
                     </span>
                     <span class="text-lg font-bold text-purple-200">{{ currency_symbol($stagiaire->currency ?? default_currency()) }}</span>
                 </div>
-                <span class="mt-1 text-[11px] text-purple-200">{{ __('Montant convenu pour la totalité du stage') }}</span>
+                <span class="mt-1 text-xs text-purple-200">{{ __('Montant convenu pour la totalité du stage') }}</span>
             </div>
         </div>
     </div>
@@ -261,9 +261,9 @@
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs font-bold text-slate-800 dark:text-slate-200">{{ __('CIN — Recto') }}</span>
                             @if($stagiaire->cin_recto_path)
-                                <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">{{ __('Fichier présent') }}</span>
+                                <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-2xs font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">{{ __('Fichier présent') }}</span>
                             @else
-                                <span class="rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-700 dark:text-slate-400">{{ __('Non fourni') }}</span>
+                                <span class="rounded bg-slate-200 px-1.5 py-0.5 text-2xs font-bold text-slate-600 dark:bg-slate-700 dark:text-slate-400">{{ __('Non fourni') }}</span>
                             @endif
                         </div>
                         @if($stagiaire->cin_recto_path)
@@ -280,9 +280,9 @@
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs font-bold text-slate-800 dark:text-slate-200">{{ __('CIN — Verso') }}</span>
                             @if($stagiaire->cin_verso_path)
-                                <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">{{ __('Fichier présent') }}</span>
+                                <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-2xs font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">{{ __('Fichier présent') }}</span>
                             @else
-                                <span class="rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-700 dark:text-slate-400">{{ __('Non fourni') }}</span>
+                                <span class="rounded bg-slate-200 px-1.5 py-0.5 text-2xs font-bold text-slate-600 dark:bg-slate-700 dark:text-slate-400">{{ __('Non fourni') }}</span>
                             @endif
                         </div>
                         @if($stagiaire->cin_verso_path)
@@ -330,7 +330,7 @@
                                             <span>{{ __('Consulter le diplôme') }}</span>
                                         </a>
                                     @else
-                                        <span class="text-[11px] text-slate-400 italic">{{ __('Sans justificatif') }}</span>
+                                        <span class="text-xs text-slate-400 italic">{{ __('Sans justificatif') }}</span>
                                     @endif
                                 </div>
                             </div>
@@ -359,11 +359,11 @@
                                 <div class="space-y-0.5">
                                     <div class="flex items-center gap-2">
                                         <h4 class="text-sm font-bold text-slate-900 dark:text-white">{{ $doc->title }}</h4>
-                                        <span class="rounded bg-teal-100 px-1.5 py-0.5 text-[10px] font-semibold text-teal-800 dark:bg-teal-950 dark:text-teal-300">
+                                        <span class="rounded bg-teal-100 px-1.5 py-0.5 text-2xs font-semibold text-teal-800 dark:bg-teal-950 dark:text-teal-300">
                                             {{ ucfirst($doc->type) }}
                                         </span>
                                     </div>
-                                    <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">
                                         {{ __('Déposé le') }} {{ format_date($doc->created_at, 'd/m/Y H:i') }}
                                     </p>
                                 </div>

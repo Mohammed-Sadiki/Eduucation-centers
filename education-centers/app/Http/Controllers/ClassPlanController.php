@@ -157,9 +157,11 @@ class ClassPlanController extends Controller
                 'full_name' => trim("{$s->first_name} {$s->last_name}"),
                 'first_name' => $s->first_name,
                 'last_name' => $s->last_name,
-                'profile_photo_url' => $s->profile_photo_path
-                    ? asset('storage/' . $s->profile_photo_path)
-                    : null,
+                // Même mécanisme que la fiche de l'élève : le fichier vit sur le
+                // disque privé, donc asset('storage/…') serait une image cassée.
+                // profilePhotoUrl() null en l'absence de photo valide → l'avatar
+                // par défaut est affiché.
+                'profile_photo_url' => $s->profilePhotoUrl(),
                 'status' => $s->status,
             ]);
 

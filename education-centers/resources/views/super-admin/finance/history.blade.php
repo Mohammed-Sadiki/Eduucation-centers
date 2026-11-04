@@ -47,7 +47,7 @@
         <div class="finance-card p-4.5">
             <div class="flex items-start justify-between">
                 <div>
-                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Total écritures') }}</span>
+                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Total écritures') }}</span>
                     <div class="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white whitespace-nowrap">
                         {{ $stats['total_count'] ?? 0 }}
                     </div>
@@ -56,7 +56,7 @@
                     <x-icon name="document-text" class="h-5 w-5" />
                 </div>
             </div>
-            <div class="mt-3 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 <span>{{ __('Volume audité') }}</span>
                 <span class="font-bold text-slate-800 dark:text-slate-200">{{ __('100% tracé') }}</span>
             </div>
@@ -66,7 +66,7 @@
         <div class="finance-card p-4.5">
             <div class="flex items-start justify-between">
                 <div>
-                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Total encaissé') }}</span>
+                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Total encaissé') }}</span>
                     <div class="mt-2 text-2xl font-extrabold text-[#0DAD98] whitespace-nowrap">
                         {{ format_price($stats['total_amount'] ?? 0, 'MAD') }}
                     </div>
@@ -75,7 +75,7 @@
                     <x-icon name="banknotes" class="h-5 w-5" />
                 </div>
             </div>
-            <div class="mt-3 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 <span>{{ __('Trésorerie perçue') }}</span>
                 <span class="font-bold text-[#0DAD98]">{{ __('Validée') }}</span>
             </div>
@@ -85,7 +85,7 @@
         <div class="finance-card p-4.5">
             <div class="flex items-start justify-between">
                 <div>
-                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Règlements espèces') }}</span>
+                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Règlements espèces') }}</span>
                     <div class="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white whitespace-nowrap">
                         {{ format_price($stats['cash_total'] ?? 0, 'MAD') }}
                     </div>
@@ -94,7 +94,7 @@
                     💵
                 </div>
             </div>
-            <div class="mt-3 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 <span>{{ __('Caisse centres') }}</span>
                 <span class="font-semibold text-slate-700 dark:text-slate-300">{{ __('Encaissé sur place') }}</span>
             </div>
@@ -104,7 +104,7 @@
         <div class="finance-card p-4.5">
             <div class="flex items-start justify-between">
                 <div>
-                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Virements & Cartes') }}</span>
+                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Virements & Cartes') }}</span>
                     <div class="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white whitespace-nowrap">
                         {{ format_price(($stats['transfer_total'] ?? 0) + ($stats['card_total'] ?? 0), 'MAD') }}
                     </div>
@@ -113,7 +113,7 @@
                     🏦
                 </div>
             </div>
-            <div class="mt-3 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 <span>{{ __('Compte bancaire') }}</span>
                 <span class="font-semibold text-slate-700 dark:text-slate-300">{{ __('Flux bancarisés') }}</span>
             </div>
@@ -128,7 +128,7 @@
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5 items-center">
             {{-- Recherche --}}
             <div class="col-span-2 sm:col-span-1">
-                <label for="filter-search" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <label for="filter-search" class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">
                     {{ __('Recherche') }}
                 </label>
                 <input type="text" name="search" id="filter-search" value="{{ $search ?? '' }}"
@@ -138,7 +138,7 @@
 
             {{-- Année scolaire --}}
             <div>
-                <label for="filter-sy" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <label for="filter-sy" class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">
                     {{ __('Année') }}
                 </label>
                 <select name="school_year" id="filter-sy" onchange="this.form.submit()"
@@ -152,7 +152,7 @@
 
             {{-- Mode de règlement --}}
             <div>
-                <label for="filter-method" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <label for="filter-method" class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">
                     {{ __('Mode de règlement') }}
                 </label>
                 <select name="payment_method" id="filter-method" onchange="this.form.submit()"
@@ -167,7 +167,7 @@
 
             {{-- Centre --}}
             <div>
-                <label for="filter-cnt" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <label for="filter-cnt" class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">
                     {{ __('Centre') }}
                 </label>
                 <select name="center_id" id="filter-cnt" onchange="this.form.submit()"
@@ -181,7 +181,7 @@
 
             {{-- Formation (métadonnée technique `domain` conservée en interne) --}}
             <div>
-                <label for="filter-dom" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <label for="filter-dom" class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">
                     {{ __('Formation') }}
                 </label>
                 <select name="domain" id="filter-dom" onchange="this.form.submit()"
@@ -201,7 +201,7 @@
     <div class="finance-card overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-start text-xs">
-                <thead class="bg-slate-50/80 border-b border-slate-100 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:bg-slate-800/50 dark:border-slate-800">
+                <thead class="bg-slate-50/80 border-b border-slate-100 text-2xs font-bold uppercase tracking-wider text-slate-400 dark:bg-slate-800/50 dark:border-slate-800">
                     <tr>
                         <th class="py-3 px-4">{{ __('Référence') }}</th>
                         <th class="py-3 px-4">{{ __('Date') }}</th>
@@ -225,7 +225,7 @@
                                 {{ $payment->payment_date ? format_date($payment->payment_date, 'd/m/Y') : '—' }}
                             </td>
                             <td class="py-3 px-4 whitespace-nowrap">
-                                <span class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">
                                     {{ __('Encaissement') }}
                                 </span>
                             </td>
@@ -239,7 +239,7 @@
                                 {{ $payment->enrollment->formation->center->name ?? '—' }}
                             </td>
                             <td class="py-3 px-4 whitespace-nowrap">
-                                <span class="text-[11px] text-slate-600 dark:text-slate-300 font-medium">
+                                <span class="text-xs text-slate-600 dark:text-slate-300 font-medium">
                                     @if($payment->payment_method === 'cash') {{ __('Espèces') }}
                                     @elseif($payment->payment_method === 'bank_transfer') {{ __('Virement') }}
                                     @elseif($payment->payment_method === 'credit_card') {{ __('Carte bancaire') }}
@@ -258,11 +258,11 @@
                                 @if($payment->receipt_number)
                                     <a href="{{ route('super-admin.finance.receipt.pdf', $payment->id) }}"
                                        target="_blank"
-                                       class="inline-flex items-center gap-1 rounded-md bg-slate-100 hover:bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                                       class="inline-flex items-center gap-1 rounded-md bg-slate-100 hover:bg-slate-200 px-2 py-0.5 text-2xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                                         <span>PDF</span>
                                     </a>
                                 @else
-                                    <span class="text-slate-400 text-[11px]">—</span>
+                                    <span class="text-slate-400 text-xs">—</span>
                                 @endif
                             </td>
                         </tr>

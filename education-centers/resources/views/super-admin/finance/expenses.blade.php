@@ -85,22 +85,22 @@
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {{-- Budget annuel alloué --}}
         <div class="finance-card p-4.5">
-            <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Budget alloué') }}</span>
+            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Budget alloué') }}</span>
             <div class="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white whitespace-nowrap">
                 {{ format_price($annualBudget, 'MAD') }}
             </div>
-            <div class="mt-3 text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 {{ __('Plafond prévisionnel annuel') }}
             </div>
         </div>
 
         {{-- Dépenses & charges engagées (dépenses + salaires) --}}
         <div class="finance-card p-4.5">
-            <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Charges engagées') }}</span>
+            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Charges engagées') }}</span>
             <div class="mt-2 text-2xl font-extrabold text-rose-600 dark:text-rose-400 whitespace-nowrap">
                 {{ format_price($totalExpenses, 'MAD') }}
             </div>
-            <div class="mt-3 text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 {{ $chargeRows->count() }} {{ __('charge(s) (achats + salaires)') }} ·
                 <span class="text-emerald-600 dark:text-emerald-400">{{ __('versé :') }} {{ format_price($realizedTotal, 'MAD') }}</span> ·
                 <span class="text-amber-600 dark:text-amber-400">{{ __('reste :') }} {{ format_price($dueTotal, 'MAD') }}</span>
@@ -109,22 +109,22 @@
 
         {{-- Budget restant (calculé automatiquement) --}}
         <div class="finance-card p-4.5">
-            <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Budget restant') }}</span>
+            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Budget restant') }}</span>
             <div class="mt-2 text-2xl font-extrabold text-[#0DAD98] whitespace-nowrap">
                 {{ format_price($remainingBudget, 'MAD') }}
             </div>
-            <div class="mt-3 text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 {{ __('Solde disponible déduit en temps réel') }}
             </div>
         </div>
 
         {{-- Taux de consommation --}}
         <div class="finance-card p-4.5">
-            <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Taux de consommation') }}</span>
+            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Taux de consommation') }}</span>
             <div class="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white whitespace-nowrap">
                 {{ $consumptionRate }}%
             </div>
-            <div class="mt-3 text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 {{ __('Consommé sur budget initial') }}
             </div>
         </div>
@@ -135,12 +135,12 @@
           class="rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] dark:border-slate-800 dark:bg-slate-900">
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 items-center">
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Recherche') }}</label>
+                <label class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Recherche') }}</label>
                 <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="{{ __('Libellé, fournisseur, réf...') }}"
                        class="w-full rounded-lg border-slate-200 bg-slate-50/50 py-1.5 px-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-[#0DAD98] focus:bg-white focus:ring-1 focus:ring-[#0DAD98]">
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Centre') }}</label>
+                <label class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Centre') }}</label>
                 @if(user_context()->canSwitchCenter())
                     <select name="center_id" onchange="this.form.submit()"
                             class="w-full rounded-lg border-slate-200 bg-slate-50/50 py-1.5 px-2.5 text-xs font-medium text-slate-800 focus:border-[#0DAD98] focus:bg-white focus:ring-1 focus:ring-[#0DAD98]">
@@ -156,7 +156,7 @@
                 @endif
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Catégorie') }}</label>
+                <label class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Catégorie') }}</label>
                 <select name="category_id" onchange="this.form.submit()"
                         class="w-full rounded-lg border-slate-200 bg-slate-50/50 py-1.5 px-2.5 text-xs font-medium text-slate-800 focus:border-[#0DAD98] focus:bg-white focus:ring-1 focus:ring-[#0DAD98]">
                     <option value="" {{ empty($categoryId) ? 'selected' : '' }}>{{ __('Toutes catégories') }}</option>
@@ -166,7 +166,7 @@
                 </select>
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Année') }}</label>
+                <label class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Année') }}</label>
                 <select name="school_year" onchange="this.form.submit()"
                         class="w-full rounded-lg border-slate-200 bg-slate-50/50 py-1.5 px-2.5 text-xs font-medium text-slate-800 focus:border-[#0DAD98] focus:bg-white focus:ring-1 focus:ring-[#0DAD98]">
                     @foreach($schoolYears as $sy)
@@ -192,7 +192,7 @@
                             <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
                                 {{ $group->period_label }}
                             </h3>
-                            <p class="text-[11px] text-slate-400">
+                            <p class="text-xs text-slate-400">
                                 {{ $group->expenses_count }} {{ __('charge(s) enregistrée(s)') }}
                             </p>
                         </div>
@@ -203,7 +203,7 @@
                             <span class="text-xs sm:text-sm font-extrabold text-rose-600 dark:text-rose-400 whitespace-nowrap">
                                 {{ format_price($group->total_amount, 'MAD') }}
                             </span>
-                            <span class="block text-[10px] text-slate-400">{{ __('Total mois') }}</span>
+                            <span class="block text-2xs text-slate-400">{{ __('Total mois') }}</span>
                         </div>
                         <span class="text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': open }">
                             ▼
@@ -214,7 +214,7 @@
                 {{-- Tableau à l'ouverture --}}
                 <div x-show="open" class="overflow-x-auto">
                     <table class="w-full text-start text-xs">
-                        <thead class="bg-slate-50/80 text-[10px] uppercase font-bold text-slate-400 border-b border-slate-100 dark:bg-slate-800/50 dark:border-slate-800">
+                        <thead class="bg-slate-50/80 text-2xs uppercase font-bold text-slate-400 border-b border-slate-100 dark:bg-slate-800/50 dark:border-slate-800">
                             <tr>
                                 <th class="py-2.5 px-4">{{ __('Date') }}</th>
                                 <th class="py-2.5 px-4">{{ __('Nature') }}</th>
@@ -233,7 +233,7 @@
                                     <td class="py-3 px-4 text-slate-600 whitespace-nowrap">
                                         {{ $row->date ? format_date($row->date, 'd/m/Y') : '—' }}
                                         @if($row->is_salary && ! empty($row->period_label))
-                                            <span class="block text-[10px] text-slate-400">{{ $row->period_label }}</span>
+                                            <span class="block text-2xs text-slate-400">{{ $row->period_label }}</span>
                                         @endif
                                     </td>
                                     <td class="py-3 px-4 font-semibold text-slate-900 dark:text-white whitespace-nowrap">
@@ -244,14 +244,14 @@
                                             {{ $row->nature }}
                                         </span>
                                         @if($row->party && ! $row->is_salary)
-                                            <span class="text-[#0DAD98] text-[10px] font-medium block">🏢 {{ $row->party }}</span>
+                                            <span class="text-[#0DAD98] text-2xs font-medium block">🏢 {{ $row->party }}</span>
                                         @endif
                                         @if($row->reference)
-                                            <span class="text-slate-400 text-[10px] font-normal block font-mono">{{ __('Réf:') }} {{ $row->reference }}</span>
+                                            <span class="text-slate-400 text-2xs font-normal block font-mono">{{ __('Réf:') }} {{ $row->reference }}</span>
                                         @endif
                                     </td>
                                     <td class="py-3 px-4 whitespace-nowrap">
-                                        <span class="inline-flex items-center rounded-full {{ $row->is_salary ? 'bg-violet-100 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300' }} px-2 py-0.5 text-[10px] font-semibold">
+                                        <span class="inline-flex items-center rounded-full {{ $row->is_salary ? 'bg-violet-100 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300' }} px-2 py-0.5 text-2xs font-semibold">
                                             {{ $row->category_label }}
                                         </span>
                                     </td>
@@ -274,58 +274,58 @@
                                                 default => 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
                                             };
                                         @endphp
-                                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold {{ $badge }}">
+                                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-2xs font-bold {{ $badge }}">
                                             {{ $row->status_label }}
                                         </span>
                                         @if($row->is_salary && $row->due_amount > 0)
-                                            <span class="block text-[9px] text-slate-400 no-underline">{{ __('reste :') }} {{ format_price($row->due_amount, 'MAD') }}</span>
+                                            <span class="block text-2xs text-slate-400 no-underline">{{ __('reste :') }} {{ format_price($row->due_amount, 'MAD') }}</span>
                                         @endif
                                     </td>
                                     <td class="py-3 px-4 text-end font-bold {{ $isCancelled ? 'text-slate-400' : 'text-rose-600' }} whitespace-nowrap">
                                         {{ format_price($row->amount, 'MAD') }}
                                         @if($isCancelled)
-                                            <span class="block text-[9px] text-rose-500 font-bold uppercase no-underline">{{ __('Annulé') }}</span>
+                                            <span class="block text-2xs text-rose-500 font-bold uppercase no-underline">{{ __('Annulé') }}</span>
                                         @endif
                                     </td>
                                     <td class="py-3 px-4 text-center whitespace-nowrap">
                                         @if($row->type === 'expense')
                                             @if($row->has_receipt)
                                                 <a href="{{ route('super-admin.finance.expenses.receipt', $row->id) }}" target="_blank"
-                                                   class="inline-flex items-center gap-1 text-[11px] font-bold text-[#0DAD98] hover:underline">
+                                                   class="inline-flex items-center gap-1 text-xs font-bold text-[#0DAD98] hover:underline">
                                                     <span>{{ __('📎 Reçu') }}</span>
                                                 </a>
                                             @endif
                                             <a href="{{ route('super-admin.finance.expenses.receipt-pdf', $row->id) }}"
-                                               class="inline-flex items-center gap-1 text-[11px] font-bold text-slate-600 hover:underline">
+                                               class="inline-flex items-center gap-1 text-xs font-bold text-slate-600 hover:underline">
                                                 <span>{{ __('🧾 Reçu PDF') }}</span>
                                             </a>
                                             <a href="{{ route('super-admin.finance.expenses.receipt-pdf', ['expense' => $row->id, 'mode' => 'inline']) }}"
                                                target="_blank" rel="noopener"
-                                               class="inline-flex items-center gap-1 text-[11px] font-bold text-slate-600 hover:underline">
+                                               class="inline-flex items-center gap-1 text-xs font-bold text-slate-600 hover:underline">
                                                 <span>{{ __('🖨️ Imprimer') }}</span>
                                             </a>
                                         @else
-                                            <span class="text-slate-300 text-[11px]">—</span>
+                                            <span class="text-slate-300 text-xs">—</span>
                                         @endif
                                     </td>
                                     <td class="py-3 px-4 text-end whitespace-nowrap">
                                         <div class="flex items-center justify-end gap-1.5">
                                             @if($row->type === 'expense')
                                                 <button type="button" x-on:click="openDetail({{ Js::from($row->model) }})"
-                                                        class="rounded-md bg-slate-100 hover:bg-slate-200 px-2 py-1 text-[10px] font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                                                        class="rounded-md bg-slate-100 hover:bg-slate-200 px-2 py-1 text-2xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                                                     {{ __('Détails') }}
                                                 </button>
                                                 @if($row->can_cancel)
                                                     <form method="POST" action="{{ route('super-admin.finance.expenses.cancel', $row->id) }}" onsubmit="return confirm('{{ __('Confirmer l\'annulation de cette dépense ? Son montant sera réintégré au budget.') }}');">
                                                         @csrf
                                                         @method('PATCH')
-                                                        <button type="submit" class="rounded-md bg-amber-50 hover:bg-amber-100 px-2 py-1 text-[10px] font-semibold text-amber-700">
+                                                        <button type="submit" class="rounded-md bg-amber-50 hover:bg-amber-100 px-2 py-1 text-2xs font-semibold text-amber-700">
                                                             {{ __('Annuler') }}
                                                         </button>
                                                     </form>
                                                 @endif
                                             @else
-                                                <span class="text-[10px] text-slate-400">{{ __('Géré via Dépenses') }}</span>
+                                                <span class="text-2xs text-slate-400">{{ __('Géré via Dépenses') }}</span>
                                             @endif
                                         </div>
                                     </td>
@@ -335,7 +335,7 @@
                     </table>
 
                     {{-- Pied de tableau avec totaux par mode (Cad Syndic) --}}
-                    <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50/40 p-3.5 border-t border-slate-100 dark:border-slate-800 text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                    <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50/40 p-3.5 border-t border-slate-100 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">
                         <div class="flex items-center gap-4">
                             <span>{{ __('Espèces :') }} <strong class="text-slate-900 dark:text-white">{{ format_price($group->cash_total, 'MAD') }}</strong></span>
                             <span>{{ __('Chèques :') }} <strong class="text-slate-900 dark:text-white">{{ format_price($group->check_total, 'MAD') }}</strong></span>
@@ -367,7 +367,7 @@
                     </span>
                     <div>
                         <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ __('Enregistrer une dépense ou un achat') }}</h3>
-                        <p class="text-[11px] text-slate-500">{{ __('Ajout multi-articles, calcul automatique et déduction budgétaire') }}</p>
+                        <p class="text-xs text-slate-500">{{ __('Ajout multi-articles, calcul automatique et déduction budgétaire') }}</p>
                     </div>
                 </div>
                 <button type="button" x-on:click="expenseModalOpen = false" class="text-slate-400 hover:text-slate-600">✕</button>
@@ -458,7 +458,7 @@
                                 <span class="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">
                                     {{ __('Articles / Produits achetés') }}
                                 </span>
-                                <button type="button" x-on:click="addItem()" class="inline-flex items-center gap-1 rounded-md bg-[#ECFDF5] px-2.5 py-1 text-[11px] font-bold text-[#0DAD98] hover:bg-[#0DAD98]/20 transition-colors">
+                                <button type="button" x-on:click="addItem()" class="inline-flex items-center gap-1 rounded-md bg-[#ECFDF5] px-2.5 py-1 text-xs font-bold text-[#0DAD98] hover:bg-[#0DAD98]/20 transition-colors">
                                     <span>{{ __('+ Ajouter un article') }}</span>
                                 </button>
                             </div>
@@ -481,7 +481,7 @@
                                                 <input type="number" min="0" step="0.01" :name="'items['+index+'][unit_price]'" x-model.number="item.unit_price" required
                                                        placeholder="{{ __('Prix unit.') }}"
                                                        class="w-full rounded-lg border-slate-200 bg-white py-1.5 ps-2.5 pe-8 text-xs font-semibold text-slate-900">
-                                                <span class="absolute inset-y-0 end-2 flex items-center text-[10px] text-slate-400 font-bold">DH</span>
+                                                <span class="absolute inset-y-0 end-2 flex items-center text-2xs text-slate-400 font-bold">DH</span>
                                             </div>
                                         </div>
                                         <div class="w-28 text-end font-extrabold text-xs text-slate-900 dark:text-white">
@@ -502,7 +502,7 @@
                                 </div>
                             </div>
                             <div class="mt-2">
-                                <label class="block text-[11px] font-semibold text-slate-500 mb-1">{{ __('Ou montant global (sans articles)') }}</label>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">{{ __('Ou montant global (sans articles)') }}</label>
                                 <input type="number" min="0" step="0.01" name="amount" placeholder="{{ __('Ex: 1200') }}"
                                        class="w-full rounded-lg border-slate-200 bg-white py-1.5 px-2.5 text-xs text-slate-800">
                             </div>
@@ -538,7 +538,7 @@
                 {{-- ─────────── MODE SALAIRE PROFESSEUR (catégorie « Salaires des professeurs ») ─────────── --}}
                 <template x-if="isSalary">
                     <div class="space-y-4 rounded-xl border border-violet-200 bg-violet-50/40 p-4 dark:border-violet-900/50 dark:bg-violet-950/20">
-                        <p class="text-[11px] font-semibold text-violet-700 dark:text-violet-300">
+                        <p class="text-xs font-semibold text-violet-700 dark:text-violet-300">
                             {{ __('Vous enregistrez un salaire. Il sera géré dans la table de paie existante (aucune dépense dupliquée) et rattaché au centre du professeur.') }}
                         </p>
 
@@ -650,7 +650,7 @@
                     <div class="flex items-center justify-between pb-4 border-b border-slate-100">
                         <div>
                             <h3 class="text-sm font-bold text-slate-900 dark:text-white" x-text="activeExpense.title"></h3>
-                            <span class="text-[11px] text-slate-400" x-text="activeExpense.expense_date"></span>
+                            <span class="text-xs text-slate-400" x-text="activeExpense.expense_date"></span>
                         </div>
                         <button type="button" x-on:click="detailModalOpen = false" class="text-slate-400 hover:text-slate-600">✕</button>
                     </div>
@@ -672,10 +672,10 @@
                         </template>
                         <template x-if="activeExpense.items && activeExpense.items.length > 0">
                             <div class="pt-2">
-                                <span class="block text-[11px] font-bold text-slate-700 mb-1.5 uppercase">{{ __('Articles inclus :') }}</span>
+                                <span class="block text-xs font-bold text-slate-700 mb-1.5 uppercase">{{ __('Articles inclus :') }}</span>
                                 <div class="rounded-lg bg-slate-50 p-2.5 space-y-1">
                                     <template x-for="it in activeExpense.items" :key="it.id">
-                                        <div class="flex justify-between text-[11px]">
+                                        <div class="flex justify-between text-xs">
                                             <span x-text="it.quantity + 'x ' + it.name"></span>
                                             <strong x-text="it.total_price + ' MAD'"></strong>
                                         </div>

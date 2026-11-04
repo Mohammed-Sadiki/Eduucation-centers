@@ -48,7 +48,7 @@
         <div class="finance-card p-5">
             <div class="flex items-start justify-between">
                 <div>
-                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Total Déposé') }}</span>
+                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Total Déposé') }}</span>
                     <div class="mt-2 text-2xl lg:text-3xl font-extrabold text-[#0DAD98] whitespace-nowrap">
                         {{ format_price($totalDeposits, 'MAD') }}
                     </div>
@@ -57,7 +57,7 @@
                     <x-icon name="arrow-down-tray" class="h-5 w-5" />
                 </div>
             </div>
-            <div class="mt-3 text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 {{ __('Dépôts bancaires & encaissements') }}
             </div>
         </div>
@@ -66,7 +66,7 @@
         <div class="finance-card p-5">
             <div class="flex items-start justify-between">
                 <div>
-                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Total Retiré') }}</span>
+                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Total Retiré') }}</span>
                     <div class="mt-2 text-2xl lg:text-3xl font-extrabold text-rose-600 dark:text-rose-400 whitespace-nowrap">
                         {{ format_price($totalWithdrawals, 'MAD') }}
                     </div>
@@ -75,7 +75,7 @@
                     <x-icon name="arrow-up-tray" class="h-5 w-5" />
                 </div>
             </div>
-            <div class="mt-3 text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 {{ __('Décaissements, virements & retraits') }}
             </div>
         </div>
@@ -84,7 +84,7 @@
         <div class="finance-card p-5">
             <div class="flex items-start justify-between">
                 <div>
-                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Solde Banque') }}</span>
+                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Solde Banque') }}</span>
                     <div class="mt-2 text-2xl lg:text-3xl font-extrabold {{ $bankBalance >= 0 ? 'text-slate-900 dark:text-white' : 'text-rose-600' }} whitespace-nowrap">
                         {{ format_price($bankBalance, 'MAD') }}
                     </div>
@@ -93,7 +93,7 @@
                     <x-icon name="building" class="h-5 w-5" />
                 </div>
             </div>
-            <div class="mt-3 text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 {{ __('Position nette de trésorerie bancaire') }}
             </div>
         </div>
@@ -104,12 +104,12 @@
           class="rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] dark:border-slate-800 dark:bg-slate-900">
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 items-center">
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Recherche') }}</label>
+                <label class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Recherche') }}</label>
                 <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="{{ __('Libellé, référence...') }}"
                        class="w-full rounded-lg border-slate-200 bg-slate-50/50 py-1.5 px-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-[#0DAD98] focus:bg-white focus:ring-1 focus:ring-[#0DAD98]">
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Centre') }}</label>
+                <label class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Centre') }}</label>
                 <select name="center_id" onchange="this.form.submit()"
                         class="w-full rounded-lg border-slate-200 bg-slate-50/50 py-1.5 px-2.5 text-xs font-medium text-slate-800 focus:border-[#0DAD98] focus:bg-white focus:ring-1 focus:ring-[#0DAD98]">
                     <option value="" {{ empty($centerId) ? 'selected' : '' }}>{{ __('Tous centres') }}</option>
@@ -119,7 +119,7 @@
                 </select>
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Type d\'opération') }}</label>
+                <label class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Type d\'opération') }}</label>
                 <select name="type" onchange="this.form.submit()"
                         class="w-full rounded-lg border-slate-200 bg-slate-50/50 py-1.5 px-2.5 text-xs font-medium text-slate-800 focus:border-[#0DAD98] focus:bg-white focus:ring-1 focus:ring-[#0DAD98]">
                     <option value="all" {{ $type === 'all' ? 'selected' : '' }}>{{ __('Toutes écritures') }}</option>
@@ -139,7 +139,7 @@
 
         <div class="overflow-x-auto">
             <table class="w-full text-start text-xs">
-                <thead class="bg-slate-50/80 text-[10px] uppercase font-bold text-slate-400 border-b border-slate-100 dark:bg-slate-800/50 dark:border-slate-800">
+                <thead class="bg-slate-50/80 text-2xs uppercase font-bold text-slate-400 border-b border-slate-100 dark:bg-slate-800/50 dark:border-slate-800">
                     <tr>
                         <th class="py-3 px-4">{{ __('Date') }}</th>
                         <th class="py-3 px-4">{{ __('Libellé') }}</th>
@@ -159,7 +159,7 @@
                             <td class="py-3 px-4 font-semibold text-slate-900 dark:text-white whitespace-nowrap">
                                 {{ translate_label($t->label) }}
                                 @if($t->reference)
-                                    <span class="block text-[10px] text-slate-400 font-mono">{{ __('Réf:') }} {{ $t->reference }}</span>
+                                    <span class="block text-2xs text-slate-400 font-mono">{{ __('Réf:') }} {{ $t->reference }}</span>
                                 @endif
                             </td>
                             <td class="py-3 px-4 text-slate-600 whitespace-nowrap">

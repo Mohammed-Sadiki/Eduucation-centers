@@ -37,7 +37,7 @@
           class="rounded-xl border border-slate-200/90 bg-white p-3.5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] dark:border-slate-800 dark:bg-slate-900">
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 items-center">
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Formation') }}</label>
+                <label class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Formation') }}</label>
                 <select name="domain" onchange="this.form.submit()"
                         class="w-full rounded-lg border-slate-200 bg-slate-50/50 py-1.5 px-2.5 text-xs font-medium text-slate-800 focus:border-[#0DAD98] focus:bg-white focus:ring-1 focus:ring-[#0DAD98]">
                     <option value="all" {{ $domain === 'all' ? 'selected' : '' }}>{{ __('Toutes les formations') }}</option>
@@ -47,7 +47,7 @@
                 </select>
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Centre') }}</label>
+                <label class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Centre') }}</label>
                 <select name="center_id" onchange="this.form.submit()"
                         class="w-full rounded-lg border-slate-200 bg-slate-50/50 py-1.5 px-2.5 text-xs font-medium text-slate-800 focus:border-[#0DAD98] focus:bg-white focus:ring-1 focus:ring-[#0DAD98]">
                     <option value="" {{ empty($centerId) ? 'selected' : '' }}>{{ __('Tous les centres') }}</option>
@@ -57,7 +57,7 @@
                 </select>
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Année scolaire') }}</label>
+                <label class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Année scolaire') }}</label>
                 <select name="school_year" onchange="this.form.submit()"
                         class="w-full rounded-lg border-slate-200 bg-slate-50/50 py-1.5 px-2.5 text-xs font-medium text-slate-800 focus:border-[#0DAD98] focus:bg-white focus:ring-1 focus:ring-[#0DAD98]">
                     @foreach($schoolYears as $sy)
@@ -66,7 +66,7 @@
                 </select>
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Année civile') }}</label>
+                <label class="block text-2xs font-bold uppercase tracking-wider text-slate-400 mb-1">{{ __('Année civile') }}</label>
                 <select name="year" onchange="this.form.submit()"
                         class="w-full rounded-lg border-slate-200 bg-slate-50/50 py-1.5 px-2.5 text-xs font-medium text-slate-800 focus:border-[#0DAD98] focus:bg-white focus:ring-1 focus:ring-[#0DAD98]">
                     @foreach([2025, 2026, 2027, 2028] as $y)
@@ -80,31 +80,31 @@
     {{-- 3 KPI Épurés (Capture 3 Cad Syndic) --}}
     <div class="grid gap-4 sm:grid-cols-3">
         <div class="finance-card p-4.5">
-            <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Total attendu') }}</span>
+            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Total attendu') }}</span>
             <div class="mt-2 text-2xl lg:text-3xl font-extrabold text-slate-900 dark:text-white whitespace-nowrap">
                 {{ format_price($kpis['total_attendu'] ?? 0, 'MAD') }}
             </div>
-            <div class="mt-3 text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 {{ __('Base annuelle scolarités') }}
             </div>
         </div>
 
         <div class="finance-card p-4.5">
-            <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Reste impayé') }}</span>
+            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Reste impayé') }}</span>
             <div class="mt-2 text-2xl lg:text-3xl font-extrabold text-amber-600 dark:text-amber-400 whitespace-nowrap">
                 {{ format_price($kpis['total_restant_etudiants'] ?? 0, 'MAD') }}
             </div>
-            <div class="mt-3 text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 {{ __('Créances à percevoir') }}
             </div>
         </div>
 
         <div class="finance-card p-4.5">
-            <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">{{ __('Taux de recouvrement') }}</span>
+            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Taux de recouvrement') }}</span>
             <div class="mt-2 text-2xl lg:text-3xl font-extrabold text-[#0DAD98] whitespace-nowrap">
                 {{ $kpis['taux_recouvrement'] ?? 0 }}%
             </div>
-            <div class="mt-3 text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+            <div class="mt-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
                 {{ __('Encaissé :') }} {{ format_price($kpis['total_encaisse'] ?? 0, 'MAD') }}
             </div>
         </div>
@@ -137,9 +137,9 @@
             <div class="flex items-center justify-between mb-4">
                 <div>
                     <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ __('Encaissements par mois') }}</h3>
-                    <p class="text-[11px] text-slate-500">{{ __('Montants réels perçus sur l\'année') }}</p>
+                    <p class="text-xs text-slate-500">{{ __('Montants réels perçus sur l\'année') }}</p>
                 </div>
-                <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-[#0DAD98]">
+                <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-2xs font-bold text-[#0DAD98]">
                     {{ __('Recettes réelles') }}
                 </span>
             </div>
@@ -156,12 +156,12 @@
                         $hEnc = $maxVal > 0 ? round((($ev['collected'] ?? 0) / $maxVal) * 100) : 0;
                     @endphp
                     <div class="flex-1 flex flex-col items-center h-full justify-end group relative">
-                        <div class="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 bg-slate-900 text-white text-[10px] py-1 px-2 rounded whitespace-nowrap z-10 shadow">
+                        <div class="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 bg-slate-900 text-white text-2xs py-1 px-2 rounded whitespace-nowrap z-10 shadow">
                             {{ format_price($ev['collected'] ?? 0, 'MAD') }}
                         </div>
                         <div class="w-full bg-[#0DAD98] rounded-t-sm transition-all duration-300 group-hover:brightness-110"
                              style="height: {{ max(4, $hEnc) }}%"></div>
-                        <span class="mt-2 text-[10px] font-semibold text-slate-400 truncate w-full text-center">
+                        <span class="mt-2 text-2xs font-semibold text-slate-400 truncate w-full text-center">
                             {{ $ev['label'] ?? '' }}
                         </span>
                     </div>
@@ -174,9 +174,9 @@
             <div class="flex items-center justify-between mb-4">
                 <div>
                     <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ __('Salaires & Dépenses par mois') }}</h3>
-                    <p class="text-[11px] text-slate-500">{{ __('Décaissements d\'exploitation mensuels') }}</p>
+                    <p class="text-xs text-slate-500">{{ __('Décaissements d\'exploitation mensuels') }}</p>
                 </div>
-                <span class="rounded-full bg-rose-50 px-2.5 py-0.5 text-[10px] font-bold text-rose-600">
+                <span class="rounded-full bg-rose-50 px-2.5 py-0.5 text-2xs font-bold text-rose-600">
                     {{ __('Sorties financières') }}
                 </span>
             </div>
@@ -187,12 +187,12 @@
                         $hSal = $maxVal > 0 ? round((($ev['salaries'] ?? 0) / $maxVal) * 100) : 0;
                     @endphp
                     <div class="flex-1 flex flex-col items-center h-full justify-end group relative">
-                        <div class="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 bg-slate-900 text-white text-[10px] py-1 px-2 rounded whitespace-nowrap z-10 shadow">
+                        <div class="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 bg-slate-900 text-white text-2xs py-1 px-2 rounded whitespace-nowrap z-10 shadow">
                             {{ __('Salaires:') }} {{ format_price($ev['salaries'] ?? 0, 'MAD') }}
                         </div>
                         <div class="w-full bg-slate-400 dark:bg-slate-600 rounded-t-sm transition-all duration-300 group-hover:brightness-110"
                              style="height: {{ max(4, $hSal) }}%"></div>
-                        <span class="mt-2 text-[10px] font-semibold text-slate-400 truncate w-full text-center">
+                        <span class="mt-2 text-2xs font-semibold text-slate-400 truncate w-full text-center">
                             {{ $ev['label'] ?? '' }}
                         </span>
                     </div>
@@ -206,7 +206,7 @@
         <div class="flex items-center justify-between mb-4">
             <div>
                 <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ __('Encaissements vs Dépenses consolidées') }}</h3>
-                <p class="text-[11px] text-slate-500">{{ __('Bilan comparatif annuel des flux de trésorerie') }}</p>
+                <p class="text-xs text-slate-500">{{ __('Bilan comparatif annuel des flux de trésorerie') }}</p>
             </div>
             <div class="flex items-center gap-4 text-xs font-semibold">
                 <span class="inline-flex items-center gap-1.5 text-[#0DAD98]">

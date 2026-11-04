@@ -23,7 +23,7 @@
                 <x-icon name="academic" class="h-3.5 w-3.5" />
                 {{ __('Espace élève') }}
             </div>
-            <h1 class="text-[1.9rem] font-extrabold tracking-tight text-slate-900 sm:text-[2.15rem] dark:text-white">
+            <h1 class="ec-page-title text-slate-900 dark:text-white">
                 {{ __('Bonjour,') }} {{ $user->name }}
             </h1>
             <p class="mt-1.5 text-base text-slate-500 dark:text-slate-400">

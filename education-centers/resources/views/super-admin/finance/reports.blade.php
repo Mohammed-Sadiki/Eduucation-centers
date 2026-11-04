@@ -40,7 +40,7 @@
                     <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#ECFDF5] text-[#0DAD98] text-xl">
                         📑
                     </span>
-                    <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-2xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                         {{ __('Prévu v2') }}
                     </span>
                 </div>
@@ -61,7 +61,7 @@
                     <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/40 text-xl">
                         💼
                     </span>
-                    <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-2xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                         {{ __('Prévu v2') }}
                     </span>
                 </div>
@@ -82,7 +82,7 @@
                     <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 text-xl">
                         ⚖️
                     </span>
-                    <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-2xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                         {{ __('Prévu v2') }}
                     </span>
                 </div>
@@ -110,7 +110,7 @@
         <p class="mx-auto mt-1.5 max-w-xl text-xs text-slate-500 leading-relaxed">
             {{ __('Toutes les données sources (transactions, scolarités, affectations pédagogiques et émargements) sont déjà agrégées et exploitables. Les générateurs d\'exports CSV/PDF seront intégrés après validation formelle des gabarits comptables.') }}
         </p>
-        <div class="mt-4 inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+        <div class="mt-4 inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-slate-600 dark:bg-slate-800 dark:text-slate-300">
             <span class="h-2 w-2 rounded-full bg-[#0DAD98]"></span>
             {{ __('Données opérationnelles connectées') }}
         </div>

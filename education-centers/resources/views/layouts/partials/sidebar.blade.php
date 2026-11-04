@@ -291,13 +291,13 @@
                             📊
                         </span>
                         <div class="min-w-0">
-                            <span class="block text-[9px] uppercase font-bold tracking-wider text-slate-400 dark:text-slate-500">{{ __('Contexte actif') }}</span>
+                            <span class="block text-2xs uppercase font-bold tracking-wider text-slate-400 dark:text-slate-500">{{ __('Contexte actif') }}</span>
                             <span class="block truncate text-xs font-bold text-slate-900 dark:text-white">{{ __('Gestion financière') }}</span>
                         </div>
                     </div>
                     <a href="{{ route('admin.home') }}"
                        id="sidebar-changer-finance"
-                       class="w-full flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 py-1.5 text-[11px] font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors"
+                       class="w-full flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 py-1.5 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors"
                        title="{{ __('Retour à l\'accueil') }}">
                         <x-icon name="home" class="h-3 w-3 text-slate-400" />
                         <span>{{ __('Accueil') }}</span>
@@ -320,12 +320,12 @@
                             🧑‍💼
                         </span>
                         <div class="min-w-0">
-                            <span class="block text-[10px] uppercase font-bold tracking-wider text-purple-800 dark:text-purple-300">{{ __('Espace administratif') }}</span>
+                            <span class="block text-2xs uppercase font-bold tracking-wider text-purple-800 dark:text-purple-300">{{ __('Espace administratif') }}</span>
                             <span class="block truncate text-xs font-bold text-slate-900 dark:text-white">{{ __('Stagiaires') }}</span>
                         </div>
                     </div>
                     <a href="{{ route('admin.home') }}"
-                       class="inline-flex items-center gap-1 rounded-lg border border-purple-300/80 bg-white px-2 py-1 text-[11px] font-semibold text-purple-700 hover:bg-purple-100 hover:text-purple-800 dark:border-purple-700/80 dark:bg-slate-900 dark:text-purple-300 dark:hover:bg-purple-900/40 transition-colors shadow-2xs shrink-0"
+                       class="inline-flex items-center gap-1 rounded-lg border border-purple-300/80 bg-white px-2 py-1 text-xs font-semibold text-purple-700 hover:bg-purple-100 hover:text-purple-800 dark:border-purple-700/80 dark:bg-slate-900 dark:text-purple-300 dark:hover:bg-purple-900/40 transition-colors shadow-2xs shrink-0"
                        title="{{ __('Retour à l\'accueil') }}">
                         <x-icon name="home" class="h-3 w-3" />
                         <span>{{ __('Accueil') }}</span>
@@ -350,12 +350,12 @@
                             <x-icon name="{{ $domainIcon }}" class="h-4 w-4" />
                         </span>
                         <div class="min-w-0">
-                            <span class="block text-[10px] uppercase font-bold tracking-wider {{ $pal['label_text'] }}">{{ __('Domaine') }}</span>
+                            <span class="block text-2xs uppercase font-bold tracking-wider {{ $pal['label_text'] }}">{{ __('Domaine') }}</span>
                             <span class="block truncate text-xs font-bold text-slate-900 dark:text-white">{{ $domainLabel }}</span>
                         </div>
                     </div>
                     <a href="{{ route('admin.home') }}"
-                       class="inline-flex items-center gap-1 rounded-lg border {{ $pal['btn_border'] }} bg-white px-2 py-1 text-[11px] font-semibold {{ $pal['btn_text'] }} {{ $pal['btn_hover'] }} dark:bg-slate-900 transition-colors shadow-2xs shrink-0"
+                       class="inline-flex items-center gap-1 rounded-lg border {{ $pal['btn_border'] }} bg-white px-2 py-1 text-xs font-semibold {{ $pal['btn_text'] }} {{ $pal['btn_hover'] }} dark:bg-slate-900 transition-colors shadow-2xs shrink-0"
                        title="{{ __('Retour à l\'accueil') }}"
                        id="sidebar-changer-domaine">
                         <x-icon name="home" class="h-3 w-3" />
@@ -380,12 +380,12 @@
                         🧑‍💼
                     </span>
                     <div class="min-w-0">
-                        <span class="block text-[10px] uppercase font-bold tracking-wider text-purple-800 dark:text-purple-300">{{ __('Espace administratif') }}</span>
+                        <span class="block text-2xs uppercase font-bold tracking-wider text-purple-800 dark:text-purple-300">{{ __('Espace administratif') }}</span>
                         <span class="block truncate text-xs font-bold text-slate-900 dark:text-white">{{ __('Stagiaires') }}</span>
                     </div>
                 </div>
                 <a href="{{ route('admin.home') }}"
-                   class="inline-flex items-center gap-1 rounded-lg border border-purple-300/80 bg-white px-2 py-1 text-[11px] font-semibold text-purple-700 hover:bg-purple-100 hover:text-purple-800 dark:border-purple-700/80 dark:bg-slate-900 dark:text-purple-300 dark:hover:bg-purple-900/40 transition-colors shadow-2xs shrink-0"
+                   class="inline-flex items-center gap-1 rounded-lg border border-purple-300/80 bg-white px-2 py-1 text-xs font-semibold text-purple-700 hover:bg-purple-100 hover:text-purple-800 dark:border-purple-700/80 dark:bg-slate-900 dark:text-purple-300 dark:hover:bg-purple-900/40 transition-colors shadow-2xs shrink-0"
                    title="{{ __('Retour à l\'accueil') }}">
                     <x-icon name="home" class="h-3 w-3" />
                     <span>{{ __('Accueil') }}</span>
@@ -410,12 +410,12 @@
                         <x-icon name="{{ $domainIcon }}" class="h-4 w-4" />
                     </span>
                     <div class="min-w-0">
-                        <span class="block text-[10px] uppercase font-bold tracking-wider {{ $pal['label_text'] }}">{{ __('Domaine') }}</span>
+                        <span class="block text-2xs uppercase font-bold tracking-wider {{ $pal['label_text'] }}">{{ __('Domaine') }}</span>
                         <span class="block truncate text-xs font-bold text-slate-900 dark:text-white">{{ $domainLabel }}</span>
                     </div>
                 </div>
                 <a href="{{ route('admin.home') }}"
-                   class="inline-flex items-center gap-1 rounded-lg border {{ $pal['btn_border'] }} bg-white px-2 py-1 text-[11px] font-semibold {{ $pal['btn_text'] }} {{ $pal['btn_hover'] }} dark:bg-slate-900 transition-colors shadow-2xs shrink-0"
+                   class="inline-flex items-center gap-1 rounded-lg border {{ $pal['btn_border'] }} bg-white px-2 py-1 text-xs font-semibold {{ $pal['btn_text'] }} {{ $pal['btn_hover'] }} dark:bg-slate-900 transition-colors shadow-2xs shrink-0"
                    title="{{ __('Retour à l\'accueil') }}"
                    id="sidebar-changer-domaine-center">
                     <x-icon name="home" class="h-3 w-3" />
@@ -429,7 +429,7 @@
             </div>
             <div class="mt-2 flex items-center gap-2" x-show="!$store.ui.sidebarCollapsed">
                 <a href="{{ route('formations-generales.index') }}"
-                   class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border {{ $pal['btn_border'] }} bg-white/70 px-2 py-1 text-[11px] font-semibold {{ $pal['btn_text'] }} {{ $pal['btn_hover'] }} dark:bg-slate-900/60 transition-colors"
+                   class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border {{ $pal['btn_border'] }} bg-white/70 px-2 py-1 text-xs font-semibold {{ $pal['btn_text'] }} {{ $pal['btn_hover'] }} dark:bg-slate-900/60 transition-colors"
                    id="sidebar-tous-domaines-center">
                     <x-icon name="building" class="h-3 w-3" />
                     <span>{{ __('Toutes les formations') }}</span>
@@ -467,7 +467,7 @@
                                 x-on:click="toggle()"
                                 x-show="!$store.ui.sidebarCollapsed"
                                 x-transition.opacity.duration.200ms
-                                class="group flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-start text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:bg-slate-100 hover:text-slate-800 focus:outline-none dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200 transition-colors"
+                                class="group flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-start text-xs font-bold uppercase tracking-wider text-slate-500 hover:bg-slate-100 hover:text-slate-800 focus:outline-none dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-200 transition-colors"
                                 :aria-expanded="open">
                             <span class="flex items-center gap-1.5 font-bold tracking-wider">
                                 {{ $group['title'] }}
@@ -491,7 +491,7 @@
                                         $linkClass = 'ec-nav-link';
                                         if ($item['active']) {
                                             $linkClass = $isFinance
-                                                ? 'flex items-center gap-3 rounded-e-lg border-s-4 border-[#0DAD98] bg-[#ECFDF5] px-2.5 py-2 text-sm font-semibold text-[#0DAD98] dark:border-[#0DAD98] dark:bg-[#0DAD98]/15 dark:text-[#0DAD98]'
+                                                ? 'flex items-center gap-3 rounded-e-lg border-s-4 border-[#0DAD98] bg-[#ECFDF5] px-2.5 py-2 text-base font-semibold text-[#0DAD98] dark:border-[#0DAD98] dark:bg-[#0DAD98]/15 dark:text-[#0DAD98]'
                                                 : 'ec-nav-link ec-nav-link-active';
                                         }
                                     @endphp
@@ -514,7 +514,7 @@
                                                       "
                                                       x-show="count > 0 && !$store.ui.sidebarCollapsed"
                                                       x-text="count > 99 ? '99+' : count"
-                                                      class="ms-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-[#0DAD98] px-1 text-[10px] font-bold text-white">
+                                                      class="ms-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-[#0DAD98] px-1 text-2xs font-bold text-white">
                                                 </span>
                                             @endif
                                         </a>
@@ -532,7 +532,7 @@
                                     $linkClass = 'ec-nav-link';
                                     if ($item['active']) {
                                         $linkClass = $isFinance
-                                            ? 'flex items-center gap-3 rounded-e-lg border-s-4 border-[#0DAD98] bg-[#ECFDF5] px-2.5 py-2 text-sm font-semibold text-[#0DAD98] dark:border-[#0DAD98] dark:bg-[#0DAD98]/15 dark:text-[#0DAD98]'
+                                            ? 'flex items-center gap-3 rounded-e-lg border-s-4 border-[#0DAD98] bg-[#ECFDF5] px-2.5 py-2 text-base font-semibold text-[#0DAD98] dark:border-[#0DAD98] dark:bg-[#0DAD98]/15 dark:text-[#0DAD98]'
                                             : 'ec-nav-link ec-nav-link-active';
                                     }
                                 @endphp
@@ -555,7 +555,7 @@
                                                   "
                                                   x-show="count > 0 && !$store.ui.sidebarCollapsed"
                                                   x-text="count > 99 ? '99+' : count"
-                                                  class="ms-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-[#0DAD98] px-1 text-[10px] font-bold text-white">
+                                                  class="ms-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-[#0DAD98] px-1 text-2xs font-bold text-white">
                                             </span>
                                         @endif
                                     </a>

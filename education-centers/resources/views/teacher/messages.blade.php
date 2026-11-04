@@ -22,7 +22,7 @@
                     <p class="text-xs text-slate-400" x-text="totalUnread > 0 ? totalUnread + ' ' + @js(__('message(s) non lu(s)')) : @js(__('Tous vos messages sont lus'))"></p>
                 </div>
                 {{-- Indication : réponses autorisées vers l'administration --}}
-                <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-semibold text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
                     </svg>
@@ -43,7 +43,7 @@
                         <span x-text="f.label"></span>
                         <span x-show="f.count > 0"
                               x-text="f.count"
-                              class="inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold"
+                              class="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-2xs font-bold"
                               :class="f.key === 'unread' ? 'bg-red-500 text-white' : (activeFilter === f.key ? 'bg-brand-600 text-white' : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300')"></span>
                     </button>
                 </template>
@@ -104,7 +104,7 @@
                                     <p class="truncate text-sm text-slate-900 dark:text-white"
                                        :class="conv.unread_count > 0 ? 'font-bold' : 'font-semibold'"
                                        x-text="conv.other_user.name"></p>
-                                    <span class="shrink-0 text-[11px] text-slate-400"
+                                    <span class="shrink-0 text-xs text-slate-400"
                                           x-text="conv.last_message ? conv.last_message.time : ''"></span>
                                 </div>
                                 <p class="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400"
@@ -115,7 +115,7 @@
                                        x-text="conv.last_message ? conv.last_message.content : ''"></p>
                                     <span x-show="conv.unread_count > 0"
                                           x-text="conv.unread_count"
-                                          class="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white"></span>
+                                          class="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-red-500 px-1.5 text-2xs font-bold text-white"></span>
                                 </div>
                             </div>
                         </button>
@@ -167,7 +167,7 @@
                     <div class="min-w-0 flex-1">
                         <div class="flex flex-wrap items-center gap-2">
                             <p class="truncate text-sm font-bold text-slate-900 dark:text-white" x-text="currentOther ? currentOther.name : '…'"></p>
-                            <span class="rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-semibold text-brand-700 dark:bg-brand-900/40 dark:text-brand-300"
+                            <span class="rounded-full bg-brand-100 px-2 py-0.5 text-2xs font-semibold text-brand-700 dark:bg-brand-900/40 dark:text-brand-300"
                                   x-text="currentOther ? currentOther.role : ''"></span>
                         </div>
                         <p class="truncate text-xs text-slate-500 dark:text-slate-400" x-text="currentOther ? currentOther.center_name : ''"></p>
@@ -204,7 +204,7 @@
                             <template x-if="index === 0 || currentMessages[index-1].date !== msg.date">
                                 <div class="my-5 flex items-center">
                                     <div class="flex-1 border-t border-slate-200 dark:border-slate-700/60"></div>
-                                    <span class="mx-3 rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-slate-500 shadow-2xs dark:bg-slate-800 dark:text-slate-400" x-text="msg.date"></span>
+                                    <span class="mx-3 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500 shadow-2xs dark:bg-slate-800 dark:text-slate-400" x-text="msg.date"></span>
                                     <div class="flex-1 border-t border-slate-200 dark:border-slate-700/60"></div>
                                 </div>
                             </template>
@@ -215,7 +215,7 @@
                                     <template x-if="!msg.is_mine">
                                     <div class="mb-1 flex items-baseline gap-2 text-xs">
                                         <span class="font-bold text-slate-900 dark:text-white" x-text="msg.sender_name"></span>
-                                        <span class="text-[10px] text-slate-400" x-text="msg.sender_role + ' · ' + msg.sender_center"></span>
+                                        <span class="text-2xs text-slate-400" x-text="msg.sender_role + ' · ' + msg.sender_center"></span>
                                     </div>
                                     </template>
 
@@ -237,7 +237,7 @@
                                                         <a :href="att.url" target="_blank" rel="noopener"
                                                            class="block overflow-hidden rounded-xl border border-slate-200 shadow-2xs dark:border-slate-700">
                                                             <img :src="att.url" :alt="att.name" class="max-h-60 w-auto rounded-xl object-cover" />
-                                                            <p class="px-3 py-1 text-[10px] text-slate-400" x-text="att.name + ' (' + att.size + ')'"></p>
+                                                            <p class="px-3 py-1 text-2xs text-slate-400" x-text="att.name + ' (' + att.size + ')'"></p>
                                                         </a>
                                                     </template>
                                                     <template x-if="!att.is_image">
@@ -262,7 +262,7 @@
                                         </div>
                                     </template>
 
-                                    <p class="mt-1 px-1 text-[10px] text-slate-400"
+                                    <p class="mt-1 px-1 text-2xs text-slate-400"
                                        :class="msg.is_mine ? 'text-end' : 'text-start'"
                                        x-text="msg.time"></p>
                                 </div>

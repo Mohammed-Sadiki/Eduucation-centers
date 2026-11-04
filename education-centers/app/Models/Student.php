@@ -87,6 +87,24 @@ class Student extends Model
     }
 
     /**
+     * Inscription de référence du dossier : la plus récente non annulée, dans le
+     * centre de l'élève. C'est elle que le formulaire de modification préremplit
+     * (formation, classe, prix accordé, solde déjà encaissé).
+     */
+    public function currentEnrollment(): ?Enrollment
+    {
+        return $this->enrollments()
+            ->with(['formation', 'classRoom'])
+            ->where('center_id', $this->center_id)
+            ->where(function ($q): void {
+                $q->whereNull('status')
+                    ->orWhere('status', '!=', Enrollment::STATUS_CANCELLED);
+            })
+            ->latest('id')
+            ->first();
+    }
+
+    /**
      * Slugs des domaines suivis par l'étudiant (via ses inscriptions).
      *
      * @return \Illuminate\Support\Collection<int, string>

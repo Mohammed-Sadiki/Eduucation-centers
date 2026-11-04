@@ -45,7 +45,7 @@
         <div class="min-w-0">
             <span class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ __('Total stagiaires') }}</span>
             <p class="mt-1 text-3xl font-black leading-none text-purple-700 dark:text-purple-300">{{ $totalStagiaires }}</p>
-            <span class="mt-1 block text-[11px] text-slate-400 dark:text-slate-500">{{ __('Stagiaires enregistrés') }}</span>
+            <span class="mt-1 block text-xs text-slate-400 dark:text-slate-500">{{ __('Stagiaires enregistrés') }}</span>
         </div>
     </div>
 
@@ -136,7 +136,7 @@
                                         {{ $stagiaire->last_name }} {{ $stagiaire->first_name }}
                                     </a>
                                 </div>
-                                <div class="text-[11px] text-slate-500">
+                                <div class="text-xs text-slate-500">
                                     <bdi dir="ltr">{{ $stagiaire->email ?? $stagiaire->phone ?? __('Aucun contact') }}</bdi>
                                 </div>
                             </td>

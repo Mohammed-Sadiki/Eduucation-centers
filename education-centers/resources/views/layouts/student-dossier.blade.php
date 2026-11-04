@@ -21,7 +21,7 @@
     </script>
     @stack('styles')
 </head>
-<body id="student-dossier-layout" class="min-h-screen bg-slate-100 text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-100">
+<body id="student-dossier-layout" class="ec-type min-h-screen bg-slate-100 text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-100">
 
     {{-- BARRE SUPÉRIEURE ÉPURÉE --}}
     <div class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-200/80 bg-white/90 px-4 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/90 sm:px-8">

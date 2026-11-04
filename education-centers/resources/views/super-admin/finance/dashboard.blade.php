@@ -98,7 +98,7 @@
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5 items-center">
             {{-- Filtre Formation (métadonnée technique `domain` conservée en interne) --}}
             <div>
-                <label for="filter-domain" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
+                <label for="filter-domain" class="block text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
                     {{ __('Formation') }}
                 </label>
                 <select name="domain" id="filter-domain" onchange="this.form.submit()"
@@ -113,7 +113,7 @@
             {{-- Filtre Centre : sélecteur réservé au Super Admin. Un Admin Centre
                  est figé sur SON centre (imposé côté serveur). --}}
             <div>
-                <label for="filter-center" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
+                <label for="filter-center" class="block text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
                     {{ __('Centre') }}
                 </label>
                 @if(user_context()->canSwitchCenter())
@@ -133,7 +133,7 @@
 
             {{-- Filtre Année scolaire --}}
             <div>
-                <label for="filter-school-year" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
+                <label for="filter-school-year" class="block text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
                     {{ __('Année scolaire') }}
                 </label>
                 <select name="school_year" id="filter-school-year" onchange="this.form.submit()"
@@ -146,7 +146,7 @@
 
             {{-- Filtre Mois --}}
             <div>
-                <label for="filter-month" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
+                <label for="filter-month" class="block text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
                     {{ __('Mois salaires') }}
                 </label>
                 <select name="month" id="filter-month" onchange="this.form.submit()"
@@ -159,7 +159,7 @@
 
             {{-- Filtre Année --}}
             <div>
-                <label for="filter-year" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
+                <label for="filter-year" class="block text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
                     {{ __('Année civile') }}
                 </label>
                 <select name="year" id="filter-year" onchange="this.form.submit()"
@@ -181,7 +181,7 @@
         <div class="finance-card p-4.5">
             <div class="flex items-start justify-between">
                 <div>
-                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                         {{ __('Recettes · Total encaissé') }}
                     </span>
                     <div class="mt-2 text-2xl lg:text-3xl font-extrabold text-[#0DAD98] whitespace-nowrap">
@@ -192,7 +192,7 @@
                     <x-icon name="arrow-trending-up" class="h-5 w-5" />
                 </div>
             </div>
-            <div class="mt-3 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2.5">
+            <div class="mt-3 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2.5">
                 <span>{{ __('Taux de recouvrement') }}</span>
                 <span class="font-bold text-[#0DAD98]">{{ $kpis['taux_recouvrement'] ?? 0 }}%</span>
             </div>
@@ -207,7 +207,7 @@
         <div class="finance-card p-4.5">
             <div class="flex items-start justify-between">
                 <div>
-                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                         {{ __('Dépenses') }}
                     </span>
                     <div class="mt-2 text-2xl lg:text-3xl font-extrabold text-rose-600 dark:text-rose-400 whitespace-nowrap">
@@ -218,7 +218,7 @@
                     <x-icon name="banknotes" class="h-5 w-5" />
                 </div>
             </div>
-            <div class="mt-3 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2.5">
+            <div class="mt-3 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2.5">
                 <span>{{ __('Salaires payés') }}</span>
                 <span class="font-bold text-slate-700 dark:text-slate-300">{{ format_price($salairesVerses, 'MAD') }}</span>
             </div>
@@ -231,7 +231,7 @@
         <div class="finance-card p-4.5">
             <div class="flex items-start justify-between">
                 <div>
-                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                         {{ __('Trésorerie') }}
                     </span>
                     <div class="mt-2 text-2xl lg:text-3xl font-extrabold {{ $soldeTresorerie >= 0 ? 'text-[#0DAD98]' : 'text-rose-600' }} whitespace-nowrap">
@@ -242,7 +242,7 @@
                     <x-icon name="building" class="h-5 w-5" />
                 </div>
             </div>
-            <div class="mt-3 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2.5">
+            <div class="mt-3 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2.5">
                 <span>{{ __('Salaires restant à payer') }}</span>
                 <span class="font-bold text-amber-600">{{ format_price($kpis['salaires_restant'] ?? 0, 'MAD') }}</span>
             </div>
@@ -252,7 +252,7 @@
         <div class="finance-card p-4.5">
             <div class="flex items-start justify-between">
                 <div>
-                    <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                         {{ __('Impayés · Restant à encaisser') }}
                     </span>
                     <div class="mt-2 text-2xl lg:text-3xl font-extrabold text-amber-600 dark:text-amber-400 whitespace-nowrap">
@@ -263,7 +263,7 @@
                     <x-icon name="clock" class="h-5 w-5" />
                 </div>
             </div>
-            <div class="mt-3 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2.5">
+            <div class="mt-3 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2.5">
                 <span>{{ __('Non payés :') }} {{ $kpis['etudiants_impayes'] ?? 0 }}</span>
                 <span class="font-bold text-amber-600">{{ __('Partiels :') }} {{ $kpis['etudiants_partiels'] ?? 0 }}</span>
             </div>
@@ -276,7 +276,7 @@
     <div class="finance-card p-5 sm:p-6">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
             <div>
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ __('Recouvrement des scolarités') }}</span>
+                <span class="text-2xs font-bold uppercase tracking-wider text-slate-400">{{ __('Recouvrement des scolarités') }}</span>
                 <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
                     {{ __('Recouvrement des scolarités ·') }} {{ $schoolYear }}
                 </h2>
@@ -312,7 +312,7 @@
                 <div class="h-full rounded-full bg-[#0DAD98] transition-all duration-500 ease-out"
                      style="width: {{ min(100, max(0, $kpis['taux_recouvrement'] ?? 0)) }}%"></div>
             </div>
-            <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+            <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
                 <span>{{ format_price(0, 'MAD') }}</span>
                 <span>{{ __('Restant à percevoir :') }} {{ format_price($kpis['total_restant_etudiants'] ?? 0, 'MAD') }}</span>
                 <span>{{ format_price($kpis['total_attendu'] ?? 0, 'MAD') }}</span>
@@ -340,7 +340,7 @@
                     <h3 class="text-sm font-bold text-slate-900 dark:text-white">
                         {{ __('Alertes financières') }}
                     </h3>
-                    <p class="text-[11px] text-slate-500">{{ __('Points d\'attention nécessitant une action prioritaire') }}</p>
+                    <p class="text-xs text-slate-500">{{ __('Points d\'attention nécessitant une action prioritaire') }}</p>
                 </div>
             </div>
             <span class="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-700 dark:bg-amber-950/50 dark:text-amber-400">
@@ -357,9 +357,9 @@
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between">
                         <h4 class="text-xs font-bold text-slate-900 dark:text-white">{{ __('Scolarités en retard') }}</h4>
-                        <a href="{{ route('super-admin.finance.recovery') }}" class="text-[11px] font-semibold text-[#0DAD98] hover:underline">{{ __('Relancer') }} &rarr;</a>
+                        <a href="{{ route('super-admin.finance.recovery') }}" class="text-xs font-semibold text-[#0DAD98] hover:underline">{{ __('Relancer') }} &rarr;</a>
                     </div>
-                    <p class="mt-0.5 text-[11px] text-slate-500">
+                    <p class="mt-0.5 text-xs text-slate-500">
                         {{ $kpis['etudiants_impayes'] ?? 0 }} {{ __('étudiant(s) avec scolarité non réglée (créance :') }} {{ format_price($kpis['total_restant_etudiants'] ?? 0, 'MAD') }}).
                     </p>
                 </div>
@@ -373,9 +373,9 @@
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between">
                         <h4 class="text-xs font-bold text-slate-900 dark:text-white">{{ __('Salaires professeurs en attente') }}</h4>
-                        <a href="{{ route('super-admin.finance.teachers') }}" class="text-[11px] font-semibold text-[#0DAD98] hover:underline">{{ __('Régler') }} &rarr;</a>
+                        <a href="{{ route('super-admin.finance.teachers') }}" class="text-xs font-semibold text-[#0DAD98] hover:underline">{{ __('Régler') }} &rarr;</a>
                     </div>
-                    <p class="mt-0.5 text-[11px] text-slate-500">
+                    <p class="mt-0.5 text-xs text-slate-500">
                         {{ __('Reste à verser sur le mois :') }} <strong class="text-slate-800 dark:text-slate-200">{{ format_price($kpis['salaires_restant'] ?? 0, 'MAD') }}</strong>.
                     </p>
                 </div>
@@ -392,7 +392,7 @@
                 <h3 class="text-sm font-bold text-slate-900 dark:text-white">
                     {{ __('Périodes mensuelles · Année') }} {{ $year }}
                 </h3>
-                <p class="text-[11px] text-slate-500">{{ __('Solde net par mois (vert si positif, rouge si négatif)') }}</p>
+                <p class="text-xs text-slate-500">{{ __('Solde net par mois (vert si positif, rouge si négatif)') }}</p>
             </div>
             <span class="text-xs text-slate-400">{{ __('12 mois civils') }}</span>
         </div>
@@ -412,7 +412,7 @@
                     <div>
                         <div class="flex items-center justify-between mb-1.5">
                             <span class="text-xs font-bold text-slate-800 dark:text-slate-200">{{ $mName }}</span>
-                            <span class="rounded-md {{ $isPos ? 'bg-[#ECFDF5] text-[#0DAD98]' : 'bg-rose-50 text-rose-600' }} px-1.5 py-0.5 text-[10px] font-bold">
+                            <span class="rounded-md {{ $isPos ? 'bg-[#ECFDF5] text-[#0DAD98]' : 'bg-rose-50 text-rose-600' }} px-1.5 py-0.5 text-2xs font-bold">
                                 {{ $isPos ? '+' : '-' }}
                             </span>
                         </div>
@@ -420,7 +420,7 @@
                             {{ format_price($mNet, 'MAD') }}
                         </div>
                     </div>
-                    <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[10px] text-slate-400">
+                    <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-2xs text-slate-400">
                         <span>{{ __('Enc:') }} {{ format_number($mCollected, 0) }}</span>
                         <span>{{ __('Sal:') }} {{ format_number($mSalaries, 0) }}</span>
                     </div>
@@ -452,7 +452,7 @@
                     </span>
                     <div>
                         <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ __('Enregistrer un versement') }}</h3>
-                        <p class="text-[11px] text-slate-500">{{ __('Scolarité annuelle · Paiement partiel ou solde') }}</p>
+                        <p class="text-xs text-slate-500">{{ __('Scolarité annuelle · Paiement partiel ou solde') }}</p>
                     </div>
                 </div>
                 <button type="button" x-on:click="paymentModalOpen = false" class="text-slate-400 hover:text-slate-600">
@@ -568,7 +568,7 @@
                     </span>
                     <div>
                         <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ __('Règlement salaire professeur') }}</h3>
-                        <p class="text-[11px] text-slate-500">{{ __('Mois de') }} {{ $monthsNames[$month] ?? $month }} {{ $year }}</p>
+                        <p class="text-xs text-slate-500">{{ __('Mois de') }} {{ $monthsNames[$month] ?? $month }} {{ $year }}</p>
                     </div>
                 </div>
                 <button type="button" x-on:click="salaryModalOpen = false" class="text-slate-400 hover:text-slate-600">

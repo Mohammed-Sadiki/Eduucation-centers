@@ -39,7 +39,7 @@
                         <span x-text="f.label"></span>
                         <span x-show="f.count > 0"
                               x-text="f.count"
-                              class="inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold"
+                              class="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-2xs font-bold"
                               :class="f.key === 'unread' ? 'bg-red-500 text-white' : (activeFilter === f.key ? 'bg-brand-600 text-white' : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300')"></span>
                     </button>
                 </template>
@@ -150,7 +150,7 @@
                                     <p class="truncate text-sm text-slate-900 dark:text-white"
                                        :class="conv.unread_count > 0 ? 'font-bold' : 'font-semibold'"
                                        x-text="conv.other_user.name || @js(__('Utilisateur'))"></p>
-                                    <span class="shrink-0 text-[11px] text-slate-400"
+                                    <span class="shrink-0 text-xs text-slate-400"
                                           x-text="conv.last_message ? conv.last_message.time : ''"></span>
                                 </div>
                                 <p class="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400"
@@ -161,7 +161,7 @@
                                        x-text="conv.last_message ? (conv.last_message.is_mine ? @js(__('Vous: ')) : '') + conv.last_message.content : @js(__('Nouvelle conversation'))"></p>
                                     <span x-show="conv.unread_count > 0"
                                           x-text="conv.unread_count"
-                                          class="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white"></span>
+                                          class="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-red-500 px-1.5 text-2xs font-bold text-white"></span>
                                 </div>
                             </div>
                         </button>
@@ -213,7 +213,7 @@
                     <div class="min-w-0 flex-1">
                         <div class="flex flex-wrap items-center gap-2">
                             <p class="truncate text-sm font-bold text-slate-900 dark:text-white" x-text="currentOther ? currentOther.name : '…'"></p>
-                            <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                            <span class="rounded-full px-2 py-0.5 text-2xs font-semibold"
                                   :class="currentOther && currentOther.role_code === 'teacher'
                                       ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'
                                       : 'bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300'"
@@ -248,7 +248,7 @@
                             <template x-if="index === 0 || currentMessages[index-1].date !== msg.date">
                                 <div class="my-5 flex items-center">
                                     <div class="flex-1 border-t border-slate-200 dark:border-slate-700/60"></div>
-                                    <span class="mx-3 rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-slate-500 shadow-2xs dark:bg-slate-800 dark:text-slate-400" x-text="msg.date"></span>
+                                    <span class="mx-3 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500 shadow-2xs dark:bg-slate-800 dark:text-slate-400" x-text="msg.date"></span>
                                     <div class="flex-1 border-t border-slate-200 dark:border-slate-700/60"></div>
                                 </div>
                             </template>
@@ -258,7 +258,7 @@
                                 <div class="group max-w-[85%] sm:max-w-[70%]">
                                     {{-- Nom de l'expéditeur pour les messages reçus --}}
                                     <template x-if="!msg.is_mine">
-                                        <p class="mb-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                                        <p class="mb-1 text-xs font-medium text-slate-500 dark:text-slate-400">
                                             <span x-text="msg.sender_name"></span>
                                             <span class="opacity-75" x-text="' (' + msg.sender_role + ')'"></span>
                                         </p>
@@ -283,7 +283,7 @@
                                                         <a :href="att.url" target="_blank" rel="noopener"
                                                            class="block overflow-hidden rounded-xl border border-slate-200 shadow-2xs dark:border-slate-700">
                                                             <img :src="att.url" :alt="att.name" class="max-h-48 w-auto rounded-xl object-cover" />
-                                                            <p class="px-3 py-1 text-[10px] text-slate-400" x-text="att.size"></p>
+                                                            <p class="px-3 py-1 text-2xs text-slate-400" x-text="att.size"></p>
                                                         </a>
                                                     </template>
                                                     <template x-if="!att.is_image">
@@ -309,7 +309,7 @@
                                     </template>
 
                                     {{-- Horodatage --}}
-                                    <p class="mt-1 px-1 text-[10px] text-slate-400"
+                                    <p class="mt-1 px-1 text-2xs text-slate-400"
                                        :class="msg.is_mine ? 'text-end' : 'text-start'"
                                        x-text="msg.time"></p>
                                 </div>

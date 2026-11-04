@@ -226,7 +226,9 @@ class Formation extends Model
                 'price'     => \App\Services\FinanceService::getFormationAnnualPrice($formation),
                 'classes'   => $classes->map(fn (ClassRoom $c): array => [
                     'id'   => (int) $c->id,
-                    'name' => $c->translated('name') ?? $c->name,
+                    // ClassRoom ne porte pas les traductions (contrairement aux
+                    // formations et aux centres) : le nom enregistré fait foi.
+                    'name' => $c->name,
                     'code' => $c->code,
                 ])->values()->all(),
             ];

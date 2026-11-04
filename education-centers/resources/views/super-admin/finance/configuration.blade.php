@@ -52,7 +52,7 @@
                         <span class="h-2 w-2 rounded-full bg-[#0DAD98]"></span>
                         {{ __('Tarifs annuels des formations (MAD / DH)') }}
                     </h2>
-                    <p class="text-[11px] text-slate-500">
+                    <p class="text-xs text-slate-500">
                         {{ __('Montant de référence attendu par dossier de scolarité') }}
                     </p>
                 </div>
@@ -71,7 +71,7 @@
                             <span class="text-xs font-bold text-slate-900 dark:text-white truncate" title="{{ $fm->name }}">
                                 {{ $fm->name }}
                             </span>
-                            <span class="rounded-md bg-white border border-slate-200 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300">
+                            <span class="rounded-md bg-white border border-slate-200 px-1.5 py-0.5 text-2xs font-semibold text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300">
                                 {{ $fm->center->name ?? __('Tous') }}
                             </span>
                         </div>
@@ -99,7 +99,7 @@
                         <span class="h-2 w-2 rounded-full bg-[#0DAD98]"></span>
                         {{ __('Salaires mensuels contractuels des enseignants') }}
                     </h2>
-                    <p class="text-[11px] text-slate-500">
+                    <p class="text-xs text-slate-500">
                         {{ __('Base de calcul des décaissements mensuels par enseignant') }}
                     </p>
                 </div>
@@ -118,7 +118,7 @@
                             <span class="text-xs font-bold text-slate-900 dark:text-white truncate">
                                 {{ $tc->full_name }}
                             </span>
-                            <span class="rounded-md bg-white border border-slate-200 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300">
+                            <span class="rounded-md bg-white border border-slate-200 px-1.5 py-0.5 text-2xs font-semibold text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300">
                                 {{ $tc->center->name ?? __('Tous') }}
                             </span>
                         </div>

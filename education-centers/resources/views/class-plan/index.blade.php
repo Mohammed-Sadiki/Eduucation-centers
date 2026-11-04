@@ -175,7 +175,7 @@
                 <div class="relative">
                     {{-- Badge PROFESSEUR --}}
                     <div class="mb-1 text-center">
-                        <span class="inline-block rounded-full bg-brand-100 px-3 py-0.5 text-[11px] font-bold uppercase tracking-widest text-brand-700 dark:bg-brand-900/50 dark:text-brand-300">
+                        <span class="inline-block rounded-full bg-brand-100 px-3 py-0.5 text-xs font-bold uppercase tracking-widest text-brand-700 dark:bg-brand-900/50 dark:text-brand-300">
                             {{ __('PROFESSEUR') }}
                         </span>
                     </div>
@@ -228,7 +228,7 @@
                            :title="'{{ __('Consulter le dossier de') }} ' + student.full_name"
                         >
                             {{-- Numéro de siège --}}
-                            <span class="text-[10px] font-bold text-slate-300 dark:text-slate-600 mb-0.5 group-hover:text-brand-500" x-text="index + 1"></span>
+                            <span class="text-2xs font-bold text-slate-300 dark:text-slate-600 mb-0.5 group-hover:text-brand-500" x-text="index + 1"></span>
 
                             {{-- Cercle photo --}}
                             <div class="relative">
@@ -258,7 +258,7 @@
                             {{-- Nom --}}
                             <div class="text-center max-w-[90px]">
                                 <p class="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-tight truncate group-hover:text-brand-600 dark:group-hover:text-brand-400" x-text="student.first_name"></p>
-                                <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-tight truncate" x-text="student.last_name"></p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 leading-tight truncate" x-text="student.last_name"></p>
                             </div>
 
                             {{-- Tooltip : nom complet + action --}}
@@ -316,12 +316,17 @@
         'code' => $c->code,
         'formation' => $c->formation?->name,
     ])->values();
+    // Photo : la même URL que celle de « Détails de l'étudiant ». Le chemin est
+    // stocké sur le disque privé, donc asset('storage/…') (disque public) produit
+    // une image cassée. profilePhotoUrl() vérifie l'existence réelle du fichier et
+    // sert la photo par la route autorisée students.profile-photo ; il renvoie null
+    // sans photo ni fichier introuvable → avatar par défaut, jamais d'image cassée.
     $jsStudents = $students->map(fn($s) => [
         'id' => $s->id,
         'full_name' => trim($s->first_name . ' ' . $s->last_name),
         'first_name' => $s->first_name,
         'last_name' => $s->last_name,
-        'profile_photo_url' => $s->profile_photo_path ? asset('storage/' . $s->profile_photo_path) : null,
+        'profile_photo_url' => $s->profilePhotoUrl(),
     ])->values();
     $jsTeacherName = addslashes(($selectedTeacher?->last_name ?? '') . ' ' . ($selectedTeacher?->first_name ?? ''));
     $jsTeacherInitials = strtoupper(
