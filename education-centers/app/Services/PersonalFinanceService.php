@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Models\TeacherSalary;
+use App\Support\AcademicPerimeter;
 use Illuminate\Support\Collection;
 
 /**
@@ -96,15 +97,18 @@ class PersonalFinanceService
             // tranche rattachée à une inscription est comptée une seule fois ;
             // à défaut on retombe sur la formation, ce qui évite toute double
             // comptabilisation entre plusieurs formations d'un même élève.
+            // La retombée couvre aussi les anciennes sous-formations de cette
+            // formation générale : les montants hérités ne disparaissent pas.
+            $formationIds = AcademicPerimeter::equivalentIds($enrollment->formation_id);
             $payments = Payment::query()
                 ->where('center_id', $student->center_id)
                 ->where('student_id', $student->id)
                 ->where('status', 'paid')
-                ->where(function ($q) use ($enrollment): void {
+                ->where(function ($q) use ($enrollment, $formationIds): void {
                     $q->where('enrollment_id', $enrollment->id)
-                        ->orWhere(function ($q2) use ($enrollment): void {
+                        ->orWhere(function ($q2) use ($formationIds): void {
                             $q2->whereNull('enrollment_id')
-                                ->where('formation_id', $enrollment->formation_id);
+                                ->whereIn('formation_id', $formationIds);
                         });
                 })
                 ->orderByDesc('payment_date')
@@ -119,11 +123,11 @@ class PersonalFinanceService
                 ->with(['payments'])
                 ->where('center_id', $student->center_id)
                 ->where('student_id', $student->id)
-                ->where(function ($q) use ($enrollment): void {
+                ->where(function ($q) use ($enrollment, $formationIds): void {
                     $q->where('enrollment_id', $enrollment->id)
-                        ->orWhere(function ($q2) use ($enrollment): void {
+                        ->orWhere(function ($q2) use ($formationIds): void {
                             $q2->whereNull('enrollment_id')
-                                ->where('formation_id', $enrollment->formation_id);
+                                ->whereIn('formation_id', $formationIds);
                         });
                 })
                 ->whereNotIn('status', ['cancelled', 'draft'])
@@ -158,7 +162,7 @@ class PersonalFinanceService
             foreach ($echeances->where('state', 'upcoming')->sortBy('due_date') as $echeance) {
                 if ($nextEcheance === null || $echeance->due_date->lessThan($nextEcheance->due_date)) {
                     $nextEcheance = (object) [
-                        'formation' => $formation->name,
+                        'formation' => $formation->general_formation_name,
                         'invoice' => $echeance->invoice,
                         'amount' => $echeance->remaining,
                         'due_date' => $echeance->due_date,
@@ -170,7 +174,7 @@ class PersonalFinanceService
                 foreach ($overdueHere as $overdue) {
                     $allOverdueInvoices->push((object) [
                         'enrollment_id' => $enrollment->id,
-                        'formation' => $formation->name,
+                        'formation' => $formation->general_formation_name,
                         'invoice' => $overdue->invoice,
                         'amount' => $overdue->remaining,
                         'due_date' => $overdue->due_date,

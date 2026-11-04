@@ -26,7 +26,7 @@
     $backUrlSection = trim($__env->yieldContent('standalone_back_url'));
     $backLabelSection = trim($__env->yieldContent('standalone_back_label'));
     $backUrl = $backUrlSection !== '' ? $backUrlSection : $defaultBackUrl;
-    $backLabel = $backLabelSection !== '' ? $backLabelSection : __('Retour aux domaines');
+    $backLabel = $backLabelSection !== '' ? $backLabelSection : __('Retour aux formations générales');
 @endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ current_dir() }}" x-data x-init="$store.ui.init()">
 <head>
@@ -78,7 +78,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                 </svg>
                 <span class="hidden sm:inline">{{ $backLabel }}</span>
-                <span class="sm:hidden">{{ __('Domaines') }}</span>
+                <span class="sm:hidden">{{ __('Formations générales') }}</span>
             </a>
 
             {{-- Sélecteur de langue FR / AR --}}

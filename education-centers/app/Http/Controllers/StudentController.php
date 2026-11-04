@@ -12,7 +12,9 @@ use App\Models\Formation;
 use App\Models\Payment;
 use App\Models\Student;
 use App\Services\FinanceService;
-use App\Support\DomainRegistry;
+use App\Services\NotificationService;
+use App\Services\PersonalFinanceService;
+use App\Support\AcademicPerimeter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -212,17 +214,17 @@ class StudentController extends Controller
             $enrollment = null;
             if ($formationId) {
                 $enrollment = Enrollment::create([
-                    'center_id'           => $centerId,
-                    'student_id'          => $student->id,
-                    'formation_id'        => $formationId,
-                    'application_date'    => now()->toDateString(),
-                    'status'              => Enrollment::STATUS_PENDING,
+                    'center_id' => $centerId,
+                    'student_id' => $student->id,
+                    'formation_id' => $formationId,
+                    'application_date' => now()->toDateString(),
+                    'status' => Enrollment::STATUS_PENDING,
                     'registration_number' => Enrollment::generateRegistrationNumber($center),
                     // Prix final personnalisé propre à CETTE inscription (le
                     // catalogue n'est jamais modifié). Le tarif officiel est tracé
                     // comme référence de la réduction.
-                    'official_price'      => $officialPrice,
-                    'final_price'         => $finalPrice,
+                    'official_price' => $officialPrice,
+                    'final_price' => $finalPrice,
                 ]);
             }
 
@@ -239,19 +241,19 @@ class StudentController extends Controller
 
                 if ($amount > 0) {
                     Payment::create([
-                        'center_id'     => $centerId,
-                        'student_id'    => $student->id,
+                        'center_id' => $centerId,
+                        'student_id' => $student->id,
                         'enrollment_id' => $enrollment?->id,
-                        'formation_id'  => $formation->id,
-                        'school_year'   => $schoolYear,
-                        'domain'        => $formation->domain,
-                        'amount'        => $amount,
-                        'currency'      => default_currency(),
-                        'payment_date'  => now()->toDateString(),
-                        'method'        => 'cash',
-                        'reference'     => Payment::generateReference($center),
-                        'status'        => 'paid',
-                        'recorded_by'   => $authUser->id,
+                        'formation_id' => $formation->id,
+                        'school_year' => $schoolYear,
+                        'domain' => $formation->domain,
+                        'amount' => $amount,
+                        'currency' => default_currency(),
+                        'payment_date' => now()->toDateString(),
+                        'method' => 'cash',
+                        'reference' => Payment::generateReference($center),
+                        'status' => 'paid',
+                        'recorded_by' => $authUser->id,
                     ]);
                 }
             }
@@ -262,7 +264,7 @@ class StudentController extends Controller
         // ── Notifications internes (événement réel, après commit) ──────────
         // Ne notifie jamais l'auteur de l'action ; notifie les Admin Centre du
         // centre concerné. Le Super Admin n'est pas alerté pour un acte mineur.
-        $notifier = app(\App\Services\NotificationService::class);
+        $notifier = app(NotificationService::class);
         $formationName = $formation?->name ?? __('Formation inconnue');
 
         if ($formationId) {
@@ -306,7 +308,7 @@ class StudentController extends Controller
                     title: __('Nouveau paiement encaissé'),
                     message: __('Paiement de :amount encaissé pour :name.', [
                         'amount' => format_price($paidAmount, 'MAD'),
-                        'name'   => $student->full_name,
+                        'name' => $student->full_name,
                     ]),
                     link: route('students.show', $student),
                     exceptUserId: $authUser->id,
@@ -319,13 +321,13 @@ class StudentController extends Controller
 
         $message = __('Le dossier étudiant :student_number (:full_name) a été créé avec succès.', [
             'student_number' => $student->student_number,
-            'full_name'      => $student->full_name,
+            'full_name' => $student->full_name,
         ]);
 
         if ($paymentOption === 'paye') {
-            $message .= ' ' . __('Le paiement complet a été enregistré dans Gestion financière.');
+            $message .= ' '.__('Le paiement complet a été enregistré dans Gestion financière.');
         } elseif ($paymentOption === 'avance') {
-            $message .= ' ' . __('L\'avance a été enregistrée comme paiement partiel dans Gestion financière.');
+            $message .= ' '.__('L\'avance a été enregistrée comme paiement partiel dans Gestion financière.');
         }
 
         return redirect()
@@ -346,20 +348,20 @@ class StudentController extends Controller
         string $type,
         string $title,
     ): Document {
-        $safeName = Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $safeName = Str::uuid().'.'.$file->getClientOriginalExtension();
         $path = $file->storeAs("documents/{$centerId}/{$student->id}", $safeName, 'private');
 
         return Document::create([
-            'center_id'     => $centerId,
-            'student_id'    => $student->id,
-            'type'          => $type,
-            'title'         => $title,
-            'file_path'     => $path,
+            'center_id' => $centerId,
+            'student_id' => $student->id,
+            'type' => $type,
+            'title' => $title,
+            'file_path' => $path,
             'original_name' => $file->getClientOriginalName(),
-            'mime_type'     => $file->getMimeType(),
-            'size'          => $file->getSize(),
-            'uploaded_by'   => $uploadedBy,
-            'status'        => 'active',
+            'mime_type' => $file->getMimeType(),
+            'size' => $file->getSize(),
+            'uploaded_by' => $uploadedBy,
+            'status' => 'active',
         ]);
     }
 
@@ -379,7 +381,7 @@ class StudentController extends Controller
             'payments',
         ]);
 
-        $financeSituation = app(\App\Services\PersonalFinanceService::class)->studentSituation($student);
+        $financeSituation = app(PersonalFinanceService::class)->studentSituation($student);
 
         // Paramètres de retour contextuel (ex: depuis le plan de classe)
         $returnTeacherId = $request->input('return_teacher_id');
@@ -442,40 +444,50 @@ class StudentController extends Controller
         // Inscription de référence : formation, classe, prix accordé et solde.
         $enrollment = $student->currentEnrollment();
 
-        // Le catalogue est celui de la création. Une formation déjà inscrite au
-        // dossier mais sortie du catalogue (inactive / non officielle / héritée)
-        // est réajoutée : le champ reste fidèlement prérempli.
-        if ($enrollment?->formation_id) {
-            $formationIds = array_column($formationsData, 'id');
+        // Le catalogue est celui de la création. L'inscription de référence est
+        // toujours présentée par sa formation générale : une ancienne
+        // sous-formation n'est jamais proposée comme choix (elle n'existe plus
+        // dans le fonctionnement courant), seule ses données restent comptées.
+        $preselectedFormationId = $enrollment?->formation_id
+            ? AcademicPerimeter::generalFormationId((int) $enrollment->formation_id)
+            : null;
 
-            if (! in_array((int) $enrollment->formation_id, $formationIds, true)) {
-                $legacy = $enrollment->formation ?? Formation::find($enrollment->formation_id);
+        if ($preselectedFormationId !== null && ! in_array($preselectedFormationId, array_column($formationsData, 'id'), true)) {
+            // Formation générale hors catalogue (inactivée) : on la réajoute pour
+            // que le champ reste fidèlement prérempli, sans jamais proposer une
+            // sous-formation héritée.
+            $general = Formation::find($preselectedFormationId);
 
-                if ($legacy) {
-                    $formationsData[] = [
-                        'id'        => (int) $legacy->id,
-                        'center_id' => (int) $legacy->center_id,
-                        'name'      => $legacy->translated('name') ?? $legacy->name,
-                        'code'      => $legacy->code,
-                        'price'     => FinanceService::getFormationAnnualPrice($legacy),
-                        'classes'   => ClassRoom::query()
-                            ->where('formation_id', $legacy->id)
-                            ->orderBy('name')
-                            ->get(['id', 'formation_id', 'name', 'code'])
-                            ->map(fn (ClassRoom $c): array => [
-                                'id'   => (int) $c->id,
-                                'name' => $c->name,
-                                'code' => $c->code,
-                            ])
-                            ->all(),
-                    ];
-                }
+            if ($general) {
+                $formationsData[] = [
+                    'id' => (int) $general->id,
+                    'center_id' => (int) $general->center_id,
+                    'name' => $general->translated('name') ?? $general->name,
+                    'code' => $general->code,
+                    'price' => FinanceService::getFormationAnnualPrice($general),
+                    'classes' => collect(ClassRoom::query()
+                        ->with('formation')
+                        ->whereIn('formation_id', AcademicPerimeter::equivalentIds($general))
+                        ->orderBy('name')
+                        ->get(['id', 'formation_id', 'name', 'code']))
+                        ->map(fn (ClassRoom $c): array => [
+                            'id' => (int) $c->id,
+                            'name' => $c->group_label,
+                            'code' => $c->code,
+                        ])
+                        ->values()
+                        ->all(),
+                ];
             }
         }
 
-        // Versements déjà encaissés, par formation : sert uniquement à l'affichage
-        // du reste à payer. Aucune écriture financière existante n'est modifiée.
-        $paidByFormation = Payment::query()
+        // Versements déjà encaissés, par formation générale : sert uniquement à
+        // l'affichage du reste à payer. Les versements enregistrés sur une
+        // ancienne sous-formation sont rattachés à sa formation générale, sinon
+        // le formulaire afficherait un solde erroné pour les dossiers hérités.
+        // Aucune écriture financière existante n'est modifiée.
+        $paidByFormation = [];
+        foreach (Payment::query()
             ->where('center_id', $student->center_id)
             ->where('student_id', $student->id)
             ->where('status', 'paid')
@@ -483,12 +495,16 @@ class StudentController extends Controller
             ->whereNotNull('formation_id')
             ->groupBy('formation_id')
             ->pluck('total', 'formation_id')
-            ->map(fn ($total) => (float) $total)
-            ->all();
+            ->all() as $formationId => $total
+        ) {
+            $generalId = AcademicPerimeter::generalFormationId((int) $formationId) ?? (int) $formationId;
+            $paidByFormation[$generalId] = ($paidByFormation[$generalId] ?? 0.0) + (float) $total;
+        }
 
         return view('students.edit', [
             'student' => $student,
             'formationsData' => $formationsData,
+            'preselectedFormationId' => $preselectedFormationId,
             'enrollment' => $enrollment,
             'paidByFormation' => $paidByFormation,
             'paidAmount' => $enrollment ? $enrollment->paidAmount() : 0.0,
@@ -581,7 +597,12 @@ class StudentController extends Controller
                 // Le prix final enregistré est conservé tant que la formation ne
                 // change pas et qu'aucun nouveau montant n'est transmis
                 // ($finalPriceInput, résolue hors de la fermeture).
-                $sameFormation = $enrollment && (int) $enrollment->formation_id === (int) $formationId;
+                // Comparaison par formation générale : un dossier inscrit sur une
+                // ancienne sous-formation n'est PAS réaffecté dès qu'on ouvre la
+                // fiche — la sous-formation et la formation générale décrivent la
+                // même réalité, classe et prix sont donc conservés.
+                $sameFormation = $enrollment
+                    && AcademicPerimeter::sameGeneralFormation($enrollment->formation_id, $formationId);
 
                 $finalPrice = $finalPriceInput !== null && $finalPriceInput !== ''
                     ? min((float) $finalPriceInput, $officialPrice)
@@ -606,14 +627,14 @@ class StudentController extends Controller
                     // Dossier sans inscription : création à la demande, avec la
                     // même logique que la création d'un élève.
                     $enrollment = Enrollment::create([
-                        'center_id'           => $student->center_id,
-                        'student_id'          => $student->id,
-                        'formation_id'        => $formationId,
-                        'application_date'    => now()->toDateString(),
-                        'status'              => Enrollment::STATUS_PENDING,
+                        'center_id' => $student->center_id,
+                        'student_id' => $student->id,
+                        'formation_id' => $formationId,
+                        'application_date' => now()->toDateString(),
+                        'status' => Enrollment::STATUS_PENDING,
                         'registration_number' => Enrollment::generateRegistrationNumber($student->center),
-                        'official_price'      => $officialPrice,
-                        'final_price'         => $finalPrice,
+                        'official_price' => $officialPrice,
+                        'final_price' => $finalPrice,
                     ]);
                 }
             }
@@ -628,19 +649,19 @@ class StudentController extends Controller
 
                 if ($amount > 0.01) {
                     $recordedPayment = Payment::create([
-                        'center_id'     => $student->center_id,
-                        'student_id'    => $student->id,
+                        'center_id' => $student->center_id,
+                        'student_id' => $student->id,
                         'enrollment_id' => $enrollment->id,
-                        'formation_id'  => $enrollment->formation_id,
-                        'school_year'   => config('app.school_year', '2026/2027'),
-                        'domain'        => $enrollment->formation?->domain,
-                        'amount'        => $amount,
-                        'currency'      => default_currency(),
-                        'payment_date'  => now()->toDateString(),
-                        'method'        => 'cash',
-                        'reference'     => Payment::generateReference($student->center),
-                        'status'        => 'paid',
-                        'recorded_by'   => $authUser->id,
+                        'formation_id' => $enrollment->formation_id,
+                        'school_year' => config('app.school_year', '2026/2027'),
+                        'domain' => $enrollment->formation?->domain,
+                        'amount' => $amount,
+                        'currency' => default_currency(),
+                        'payment_date' => now()->toDateString(),
+                        'method' => 'cash',
+                        'reference' => Payment::generateReference($student->center),
+                        'status' => 'paid',
+                        'recorded_by' => $authUser->id,
                     ]);
                 }
             }
@@ -649,7 +670,7 @@ class StudentController extends Controller
         $message = __('Le dossier étudiant :student_number a été mis à jour avec succès.', ['student_number' => $student->student_number]);
 
         if ($recordedPayment) {
-            $message .= ' ' . __('Le nouveau versement a été enregistré dans Gestion financière.');
+            $message .= ' '.__('Le nouveau versement a été enregistré dans Gestion financière.');
         }
 
         return redirect()

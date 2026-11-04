@@ -2,7 +2,7 @@
 @section('title', $evaluation->title)
 
 @section('content')
-<x-ui.page-header title="{{ $evaluation->title }}" :description="$evaluation->classRoom?->name.' · '.$evaluation->type_label">
+<x-ui.page-header title="{{ $evaluation->title }}" :description="$evaluation->classRoom?->perimeter_label.' · '.$evaluation->type_label">
     @can('update', $evaluation)
         <a href="{{ route('evaluations.edit', $evaluation) }}" class="ec-btn-secondary">{{ __('Modifier') }}</a>
     @endcan

@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\ClassRoom;
 use App\Models\Schedule;
+use App\Services\PersonalFinanceService;
 use App\Services\TeacherPortalService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -132,7 +134,7 @@ class TeacherPortalController extends Controller
      * dérivé de l'utilisateur authentifié ; aucun teacher_id du navigateur
      * n'est utilisé. Un professeur ne voit jamais la paie d'un confrère.
      */
-    public function salaries(Request $request, \App\Services\PersonalFinanceService $finance): View
+    public function salaries(Request $request, PersonalFinanceService $finance): View
     {
         $teacher = $this->portal->teacherFor($request->user());
 
@@ -167,7 +169,7 @@ class TeacherPortalController extends Controller
 
         return [
             'id' => (string) $schedule->id,
-            'title' => $schedule->title ?: ($schedule->classRoom?->name ?: __('Séance')),
+            'title' => $schedule->title ?: ($schedule->classRoom?->perimeter_label ?: __('Séance')),
             'start' => $schedule->date?->format('Y-m-d').'T'.substr((string) $schedule->start_time, 0, 5),
             'end' => $schedule->date?->format('Y-m-d').'T'.substr((string) $schedule->end_time, 0, 5),
             'allDay' => false,
@@ -185,9 +187,9 @@ class TeacherPortalController extends Controller
                 },
                 'date' => format_date($schedule->date, 'D d M Y'),
                 'time' => $schedule->formatted_time,
-                'className' => $schedule->classRoom?->name,
+                'className' => $schedule->classRoom?->perimeter_label,
                 'classCode' => $schedule->classRoom?->code,
-                'formationName' => $schedule->classRoom?->formation?->name,
+                'formationName' => $schedule->classRoom?->general_formation_name,
                 'roomName' => $schedule->room?->name,
                 'roomCode' => $schedule->room?->code,
                 'centerName' => $schedule->center?->name,
@@ -199,9 +201,9 @@ class TeacherPortalController extends Controller
     /**
      * Positionne le calendrier sur la prochaine séance, sinon la plus récente.
      *
-     * @param  \Illuminate\Support\Collection<int, Schedule>  $schedules
+     * @param  Collection<int, Schedule>  $schedules
      */
-    private function initialScheduleDate(\Illuminate\Support\Collection $schedules): string
+    private function initialScheduleDate(Collection $schedules): string
     {
         $today = now()->toDateString();
 

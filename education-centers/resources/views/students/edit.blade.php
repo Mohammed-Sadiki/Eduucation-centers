@@ -22,7 +22,7 @@
         'forcedCenterId' => (int) $student->center_id,
         'centers' => collect(),
         'formations' => $formationsData,
-        'preselectedFormationId' => $enrollment?->formation_id,
+        'preselectedFormationId' => $preselectedFormationId ?? $enrollment?->formation_id,
         'defaultFinalPrice' => $enrollment?->final_price ?? '',
         'currencySymbol' => $currencySymbol,
         'paidByFormation' => $paidByFormation,

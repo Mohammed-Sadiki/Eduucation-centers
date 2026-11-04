@@ -110,7 +110,7 @@
                                 </li>
                                 @if($user->isTeacher() && $user->domains()->isNotEmpty())
                                     <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
-                                        <span class="text-muted fw-semibold">{{ __('Domaines d\'enseignement') }}</span>
+                                        <span class="text-muted fw-semibold">{{ __('Formations générales enseignées') }}</span>
                                         <div class="d-flex flex-wrap gap-1 justify-content-end">
                                             @foreach($user->domains() as $dom)
                                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">

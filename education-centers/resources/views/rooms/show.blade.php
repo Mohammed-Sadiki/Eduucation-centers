@@ -219,7 +219,7 @@
                                     <tr>
                                         <td class="ps-3">{{ $rs->formatted_date }}</td>
                                         <td>{{ $rs->formatted_time }}</td>
-                                        <td>{{ $rs->classRoom->name }}</td>
+                                        <td>{{ $rs->classRoom->perimeter_label }}</td>
                                         <td>
                                             @if($rs->status === 'scheduled')
                                                 <span class="badge bg-primary-subtle text-primary">{{ __('Prévue') }}</span>

@@ -20,7 +20,7 @@
         <select id="class_id" name="class_id" class="ec-select @error('class_id') is-invalid @enderror" required>
             <option value="">{{ __('Sélectionner') }}</option>
             @foreach($classes as $class)
-                <option value="{{ $class->id }}" @selected(old('class_id')==$class->id)>{{ $class->name }}</option>
+                <option value="{{ $class->id }}" @selected(old('class_id')==$class->id)>{{ $class->perimeter_label }}</option>
             @endforeach
         </select>
         @error('class_id')<p class="ec-error">{{ $message }}</p>@enderror

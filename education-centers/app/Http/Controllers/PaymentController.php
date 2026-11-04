@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Center;
-use App\Models\Formation;
 use App\Models\Payment;
 use App\Models\Student;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -48,7 +48,7 @@ class PaymentController extends Controller
         $user = $request->user();
         $centerId = $user->isSuperAdmin() ? $request->input('center_id') : $user->center_id;
         $students = Student::when($centerId, fn ($q) => $q->where('center_id', $centerId))->where('status', 'active')->orderBy('last_name')->get();
-        $formations = Formation::when($centerId, fn ($q) => $q->where('center_id', $centerId))->where('status', 'active')->orderBy('name')->get();
+        $formations = $this->perimeter($user, $centerId ? (int) $centerId : null)->withoutActiveDomain()->formationsQuery()->get();
         $centers = $user->isSuperAdmin() ? Center::orderBy('name')->get() : collect();
         $preselectedStudentId = $request->input('student_id');
         $preselectedEnrollmentId = $request->input('enrollment_id');
@@ -84,13 +84,13 @@ class PaymentController extends Controller
         $payment = Payment::create($data);
 
         // Notification interne : paiement réellement encaissé (jamais annulé/échoué).
-        app(\App\Services\NotificationService::class)->notifyCenterAdmins(
+        app(NotificationService::class)->notifyCenterAdmins(
             centerId: $centerId,
             type: 'payment',
             title: __('Nouveau paiement encaissé'),
             message: __('Paiement de :amount encaissé pour :name.', [
                 'amount' => format_price($payment->amount, $payment->currency),
-                'name'   => $student->full_name,
+                'name' => $student->full_name,
             ]),
             link: route('payments.show', $payment),
             exceptUserId: $user->id,

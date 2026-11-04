@@ -32,7 +32,7 @@
                         <option value="">{{ __('Toutes mes classes') }}</option>
                         @foreach($classes as $class)
                             <option value="{{ $class->id }}" @selected((int) $classId === (int) $class->id)>
-                                {{ $class->name }}{{ $class->code ? ' ('.$class->code.')' : '' }}
+                                {{ $class->perimeter_label }}{{ $class->code ? ' ('.$class->code.')' : '' }}
                             </option>
                         @endforeach
                     </select>
@@ -80,12 +80,12 @@
                         <div class="flex flex-col gap-1.5 px-5 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
                             <div class="min-w-0">
                                 <p class="truncate font-semibold text-slate-800 dark:text-slate-100">
-                                    {{ $schedule->title ?: $schedule->classRoom?->name }}
+                                    {{ $schedule->title ?: $schedule->classRoom?->perimeter_label }}
                                 </p>
                                 <p class="truncate text-xs text-slate-500">
                                     {{ format_date($schedule->date, 'D d M Y') }} · {{ $schedule->formatted_time }}
                                     @if($schedule->classRoom?->name)
-                                        · {{ $schedule->classRoom->name }}
+                                        · {{ $schedule->classRoom->perimeter_label }}
                                     @endif
                                     @if($schedule->room?->name)
                                         · {{ $schedule->room->name }}

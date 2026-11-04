@@ -6,6 +6,7 @@ use App\Models\ClassRoom;
 use App\Models\Room;
 use App\Models\Teacher;
 use App\Services\ScheduleConflictService;
+use App\Support\AcademicPerimeter;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
@@ -97,11 +98,20 @@ class StoreScheduleRequest extends FormRequest
                 $validator->errors()->add('room_id', __('La salle sélectionnée est inactive.'));
             }
 
+            // 2 bis. Architecture obligatoire : la classe doit relever d'une
+            // formation générale active du périmètre autorisé.
+            if ($class && ! $validator->errors()->has('class_id')) {
+                $perimeter = AcademicPerimeter::for($user, $targetCenterId);
+                if (! $perimeter->allowsClass((int) $class->id)) {
+                    $validator->errors()->add('class_id', __('La classe doit appartenir à une formation générale active de votre périmètre.'));
+                }
+            }
+
             // 3. Professeur affecté à la classe
             if ($class && $teacher && ! $class->hasTeacher($teacher)) {
                 $validator->errors()->add(
                     'teacher_id',
-                    __('Le professeur :full_name n\'est pas affecté à la classe :name.', ['full_name' => $teacher->full_name, 'name' => $class->name])
+                    __('Le professeur :full_name n\'est pas affecté à la classe :name.', ['full_name' => $teacher->full_name, 'name' => $class->perimeter_label])
                 );
             }
 

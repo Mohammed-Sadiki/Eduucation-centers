@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Center;
-use App\Models\Formation;
 use App\Models\Invoice;
 use App\Models\Student;
 use App\Services\PdfService;
@@ -38,7 +37,7 @@ class InvoiceController extends Controller
         $user = $request->user();
         $centerId = $user->isSuperAdmin() ? $request->input('center_id') : $user->center_id;
         $students = Student::when($centerId, fn ($q) => $q->where('center_id', $centerId))->where('status', 'active')->orderBy('last_name')->get();
-        $formations = Formation::when($centerId, fn ($q) => $q->where('center_id', $centerId))->where('status', 'active')->orderBy('name')->get();
+        $formations = $this->perimeter($user, $centerId ? (int) $centerId : null)->withoutActiveDomain()->formationsQuery()->get();
         $centers = $user->isSuperAdmin() ? Center::orderBy('name')->get() : collect();
 
         return view('invoices.create', compact('students', 'formations', 'centers', 'centerId'));

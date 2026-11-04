@@ -350,7 +350,7 @@
                             <x-icon name="{{ $domainIcon }}" class="h-4 w-4" />
                         </span>
                         <div class="min-w-0">
-                            <span class="block text-2xs uppercase font-bold tracking-wider {{ $pal['label_text'] }}">{{ __('Domaine') }}</span>
+                            <span class="block text-2xs uppercase font-bold tracking-wider {{ $pal['label_text'] }}">{{ __('Formation générale') }}</span>
                             <span class="block truncate text-xs font-bold text-slate-900 dark:text-white">{{ $domainLabel }}</span>
                         </div>
                     </div>
@@ -410,7 +410,7 @@
                         <x-icon name="{{ $domainIcon }}" class="h-4 w-4" />
                     </span>
                     <div class="min-w-0">
-                        <span class="block text-2xs uppercase font-bold tracking-wider {{ $pal['label_text'] }}">{{ __('Domaine') }}</span>
+                        <span class="block text-2xs uppercase font-bold tracking-wider {{ $pal['label_text'] }}">{{ __('Formation générale') }}</span>
                         <span class="block truncate text-xs font-bold text-slate-900 dark:text-white">{{ $domainLabel }}</span>
                     </div>
                 </div>

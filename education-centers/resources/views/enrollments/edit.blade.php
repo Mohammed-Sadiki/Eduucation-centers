@@ -90,7 +90,7 @@
                                 <label for="formation_id" class="form-label fw-semibold">{{ __('Formation') }} <span class="text-danger">*</span></label>
                                 <select name="formation_id" id="formation_id" class="form-select @error('formation_id') is-invalid @enderror" required>
                                     @foreach($formations as $f)
-                                        <option value="{{ $f->id }}" {{ old('formation_id', $enrollment->formation_id) == $f->id ? 'selected' : '' }}>
+                                        <option value="{{ $f->id }}" {{ old('formation_id', $selectedFormationId) == $f->id ? 'selected' : '' }}>
                                             {{ $f->translated('name') }} ({{ $f->code }})
                                         </option>
                                     @endforeach
@@ -107,7 +107,7 @@
                                     <option value="">{{ __('-- Aucune affectation --') }}</option>
                                     @foreach($classes as $cl)
                                         <option value="{{ $cl->id }}" {{ old('class_id', $enrollment->class_id) == $cl->id ? 'selected' : '' }}>
-                                            {{ $cl->name }} {{ __('(Capacité:') }} {{ $cl->capacity ?? __('Illimitée') }})
+                                            {{ $cl->perimeter_label }} {{ __('(Capacité:') }} {{ $cl->capacity ?? __('Illimitée') }})
                                         </option>
                                     @endforeach
                                 </select>

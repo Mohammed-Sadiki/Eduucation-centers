@@ -8,6 +8,7 @@ use App\Models\Center;
 use App\Models\ClassRoom;
 use App\Models\Formation;
 use App\Models\Teacher;
+use App\Support\AcademicPerimeter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -29,6 +30,7 @@ class ClassController extends Controller
         Gate::authorize('viewAny', ClassRoom::class);
 
         $authUser = $request->user();
+        $perimeter = $this->perimeter($authUser);
         $query = ClassRoom::with(['center', 'formation']);
 
         // Isolation multi-centres stricte
@@ -36,8 +38,10 @@ class ClassController extends Controller
             $query->where('center_id', $authUser->center_id);
         }
 
-        // Filtrage par domaine actif
-        $query = $this->applyDomainScope($query);
+        // Espace de formation actif + formations générales uniquement : la même
+        // autorité que les menus déroulants ci-dessous, pour que le tableau et
+        // les filtres décrivent toujours le même périmètre.
+        $query = $perimeter->applyTo($query);
 
         // Filtre : recherche par nom
         if ($search = $request->input('search')) {
@@ -49,9 +53,10 @@ class ClassController extends Controller
             $query->where('code', 'like', "%{$code}%");
         }
 
-        // Filtre : formation
+        // Filtre : formation générale (les classes rattachées à ses alias
+        // historiques font partie de la même formation).
         if ($formationId = $request->input('formation_id')) {
-            $query->where('formation_id', $formationId);
+            $query->whereIn('formation_id', $perimeter->formationIds((int) $formationId));
         }
 
         // Filtre : statut
@@ -66,11 +71,8 @@ class ClassController extends Controller
 
         $classes = $query->latest('id')->paginate(15)->withQueryString();
 
-        // Sélecteur de filtre : uniquement les formations officielles actives.
-        $centerIds = $authUser->isCenterAdmin() ? [(int) $authUser->center_id] : null;
-        $formations = collect(\App\Models\Formation::selectionForCenters($centerIds))
-            ->map(fn (array $f): object => (object) ['id' => $f['id'], 'name' => $f['name']])
-            ->values();
+        // Sélecteur de filtre : uniquement les formations générales actives.
+        $formations = $perimeter->formationsQuery()->get();
         $centers = $authUser->isSuperAdmin() ? Center::orderBy('name')->get() : collect();
 
         return view('classes.index', compact('classes', 'centers', 'formations'));
@@ -78,8 +80,8 @@ class ClassController extends Controller
 
     /**
      * Formulaire de création d'une classe.
-     * Seules les six formations générales officielles actives peuvent accueillir
-     * une nouvelle classe (règle métier §4 : max. 2 classes par formation).
+     * Seules les formations générales actives peuvent accueillir une nouvelle
+     * classe (règle métier : maximum 2 classes par formation).
      */
     public function create(Request $request): View
     {
@@ -87,14 +89,11 @@ class ClassController extends Controller
 
         $authUser = $request->user();
 
-        // Catalogue réduit aux six formations officielles actives du périmètre.
-        $formationQuery = Formation::query()
-            ->where('is_official', true)
-            ->where('status', 'active')
-            ->orderBy('name');
-        if ($authUser->isCenterAdmin()) {
-            $formationQuery->where('center_id', $authUser->center_id);
-        } else {
+        // Catalogue des formations générales du centre autorisé. Toute la liste
+        // est proposée, l'espace de formation actif ne bornant pas un formulaire
+        // de création (comportement conservé).
+        $formationQuery = $this->perimeter($authUser)->withoutActiveDomain()->formationsQuery();
+        if ($authUser->isSuperAdmin()) {
             $formationQuery->with('center');
         }
         $formations = $formationQuery->get();
@@ -145,9 +144,11 @@ class ClassController extends Controller
 
     /**
      * Formulaire d'édition d'une classe.
-     * Filtre : uniquement les formations officielles actives du centre, plus
-     * la formation courante si elle est historique (legacy) pour ne pas la
-     * perdre silencieusement lors d'une modification d'une classe existante.
+     * Catalogue : les formations générales actives du centre de la classe. Une
+     * classe encore rattachée à une ancienne sous-formation est présentée par sa
+     * formation générale équivalente (même réalité métier) ; si aucune formation
+     * générale n'existe pour elle, sa formation courante est conservée dans la
+     * liste pour ne pas la perdre silencieusement.
      */
     public function edit(ClassRoom $class): View
     {
@@ -158,17 +159,21 @@ class ClassController extends Controller
 
         $centerId = $authUser->isSuperAdmin() ? $class->center_id : $authUser->center_id;
 
-        $formations = Formation::query()
-            ->where('center_id', $centerId)
-            ->where(function ($q) use ($class) {
-                $q->where('is_official', true)
-                    ->orWhere('id', $class->formation_id);
-            })
-            ->orderByDesc('is_official')
-            ->orderBy('name')
-            ->get();
+        $perimeter = $this->perimeter($authUser, (int) $centerId)->withoutActiveDomain();
+        $formations = $perimeter->formationsQuery()->get();
 
-        return view('classes.edit', compact('class', 'formations'));
+        $currentFormationId = AcademicPerimeter::generalFormationId($class->formation_id) ?? $class->formation_id;
+
+        if (! $formations->contains('id', $currentFormationId)) {
+            $current = Formation::query()->find($currentFormationId)
+                ?? Formation::query()->find($class->formation_id);
+
+            if ($current) {
+                $formations = $formations->push($current);
+            }
+        }
+
+        return view('classes.edit', compact('class', 'formations', 'currentFormationId'));
     }
 
     /**

@@ -34,7 +34,7 @@
                 <option value="">{{ __('Choisir une séance') }}</option>
                 @foreach($schedules as $s)
                     <option value="{{ $s->id }}" @selected(($schedule?->id) == $s->id)>
-                        {{ format_date($s->date, 'd/m/Y') }} · {{ substr($s->start_time,0,5) }} — {{ substr($s->end_time,0,5) }} · {{ $s->classRoom?->name ?? $s->title }}
+                        {{ format_date($s->date, 'd/m/Y') }} · {{ substr($s->start_time,0,5) }} — {{ substr($s->end_time,0,5) }} · {{ $s->classRoom?->perimeter_label ?? $s->title }}
                     </option>
                 @endforeach
             </select>

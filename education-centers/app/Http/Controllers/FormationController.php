@@ -30,8 +30,11 @@ class FormationController extends Controller
             $query->where('center_id', $authUser->center_id);
         }
 
-        // Filtrage par domaine actif
-        $query = $this->applyDomainScope($query);
+        // Filtrage par espace de formation actif + architecture obligatoire :
+        // la liste ne présente que les formations du fonctionnement courant
+        // (formations générales actives), jamais les anciennes sous-formations
+        // devenues alias techniques d'une formation générale. Autorité unique.
+        $query = $this->perimeter($authUser)->applyTo($query);
 
         // Filtre : recherche par nom
         if ($search = $request->input('search')) {

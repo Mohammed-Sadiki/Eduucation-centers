@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
 @section('title', __('Dashboard Santé') . ' — ' . config('app.name'))
-@section('description', __('Tableau de bord du domaine Santé — vue d\'ensemble des données.'))
+@section('description', __('Tableau de bord de la formation générale Santé — vue d\'ensemble des données.'))
 
 @section('breadcrumb')
     <li class="flex items-center gap-2">
         <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
         </svg>
-        <a href="{{ route('super-admin.domaines') }}" class="hover:text-brand-700 dark:hover:text-brand-400 transition-colors">{{ __('Domaines') }}</a>
+        <a href="{{ route('super-admin.domaines') }}" class="hover:text-brand-700 dark:hover:text-brand-400 transition-colors">{{ __('Formations générales') }}</a>
     </li>
     <li class="flex items-center gap-2">
         <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -42,7 +42,7 @@
                     {{-- Label domaine --}}
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 mb-1">
                         <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                        {{ __('Domaine actif') }}
+                        {{ __('Formation générale active') }}
                     </span>
                     <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                         {{ __('Espace Santé') }}
@@ -60,9 +60,9 @@
                       hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900 hover:-translate-y-px
                       dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700
                       transition-all duration-200 shrink-0"
-               title="{{ __('Retourner au portail de sélection des domaines') }}">
+               title="{{ __('Retourner au portail de sélection des formations générales') }}">
                 <x-icon name="arrow-uturn-left" class="h-4 w-4 text-slate-500 dark:text-slate-400" />
-                <span>{{ __('Changer de domaine') }}</span>
+                <span>{{ __('Changer de formation générale') }}</span>
             </a>
         </div>
     </div>
@@ -76,9 +76,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/>
             </svg>
             <div>
-                <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">{{ __('Données globales — filtrage par domaine à venir') }}</p>
+                <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">{{ __('Données globales — filtrage par formation générale à venir') }}</p>
                 <p class="mt-0.5 text-xs text-amber-700 dark:text-amber-400">
-                    {{ __('Les statistiques ci-dessous reflètent') }} <strong>{{ __('l\'ensemble des données') }}</strong> {{ __('de la plateforme (tous domaines confondus). Pour afficher uniquement les données du domaine Santé, il faudra ajouter un champ') }} <code class="rounded bg-amber-200/70 px-1 py-0.5 font-mono dark:bg-amber-800/40">{{ __('domain') }}</code>
+                    {{ __('Les statistiques ci-dessous reflètent') }} <strong>{{ __('l\'ensemble des données') }}</strong> {{ __('de la plateforme (toutes formations générales confondues). Pour afficher uniquement les données de la formation générale Santé, il faudra ajouter un champ') }} <code class="rounded bg-amber-200/70 px-1 py-0.5 font-mono dark:bg-amber-800/40">{{ __('domain') }}</code>
                     {{ __('sur les modèles (formations, centres, étudiants…) et appliquer le filtre correspondant.') }}
                 </p>
             </div>
@@ -129,7 +129,7 @@
                         @forelse($recentEnrollments as $e)
                             <tr>
                                 <td>{{ $e->student?->full_name ?? '—' }}</td>
-                                <td>{{ $e->formation?->name ?? '—' }}</td>
+                                <td>{{ $e->formation?->general_formation_name ?? '—' }}</td>
                                 <td>{{ $e->center?->name ?? '—' }}</td>
                                 <td><x-status-badge type="enrollment" :status="$e->status" /></td>
                             </tr>
@@ -154,7 +154,7 @@
                     <div class="flex items-center justify-between px-5 py-3.5 text-sm">
                         <div class="min-w-0">
                             <p class="truncate font-medium text-slate-800 dark:text-white">
-                                {{ $schedule->classRoom?->name ?? '—' }}
+                                {{ $schedule->classRoom?->perimeter_label ?? '—' }}
                             </p>
                             <p class="text-xs text-slate-500 dark:text-slate-400">
                                 {{ $schedule->teacher?->user?->name ?? '—' }}

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', "Classe {$class->code} — " . config('app.name'))
-@section('description', "Fiche descriptive de la classe {$class->name}")
+@section('description', "Fiche descriptive de la classe {$class->perimeter_label}")
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('classes.index') }}">{{ __('Classes') }}</a></li>
@@ -19,7 +19,7 @@
             </div>
             <div>
                 <div class="d-flex align-items-center gap-2">
-                    <h1 class="h3 fw-bold mb-0">{{ $class->name }}</h1>
+                    <h1 class="h3 fw-bold mb-0">{{ $class->perimeter_label }}</h1>
                     @if($class->isActive())
                         <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
                             <i class="bi bi-check-circle-fill me-1"></i>{{ __('Actif') }}
@@ -33,7 +33,7 @@
                 <div class="text-muted small mt-1 font-monospace">
                     {{ __('Code :') }} <strong class="text-primary">{{ $class->code }}</strong>
                     @if($class->formation)
-                        &bull; Formation : <strong>{{ $class->formation->name }} ({{ $class->formation->code }})</strong>
+                        &bull; Formation : <strong>{{ $class->formation->general_formation_name }} ({{ $class->formation->code }})</strong>
                     @endif
                     @if($class->center)
                         &bull; Centre : <strong>{{ $class->center->name }} ({{ $class->center->code }})</strong>
@@ -98,14 +98,14 @@
                             </tr>
                             <tr>
                                 <th class="ps-4 text-secondary small">{{ __('Intitulé') }}</th>
-                                <td class="fw-semibold">{{ $class->name }}</td>
+                                <td class="fw-semibold">{{ $class->perimeter_label }}</td>
                             </tr>
                             <tr>
                                 <th class="ps-4 text-secondary small">{{ __('Formation rattachée') }}</th>
                                 <td>
                                     @if($class->formation)
                                         <a href="{{ route('formations.show', $class->formation) }}" class="fw-semibold text-decoration-none">
-                                            {{ $class->formation->name }}
+                                            {{ $class->formation->general_formation_name }}
                                         </a>
                                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1">
                                             {{ $class->formation->code }}
@@ -437,7 +437,7 @@
                         </div>
                         <div class="modal-body">
                             <p class="small text-muted mb-3">
-                                {{ __('Sélectionnez un professeur actif du centre') }} <strong>{{ $class->center?->name }}</strong> {{ __('à associer à la classe') }} <strong>{{ $class->code }} ({{ $class->name }})</strong>.
+                                {{ __('Sélectionnez un professeur actif du centre') }} <strong>{{ $class->center?->name }}</strong> {{ __('à associer à la classe') }} <strong>{{ $class->code }} ({{ $class->perimeter_label }})</strong>.
                             </p>
 
                             <div class="mb-3">

@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Attendance;
-use App\Models\Certificate;
 use App\Models\Center;
+use App\Models\Certificate;
 use App\Models\ClassRoom;
 use App\Models\Enrollment;
 use App\Models\Formation;
@@ -51,11 +51,17 @@ class CenterAdminDomainDashboardSimplificationTest extends TestCase
     private const REMOVED_CARDS_FR = ['Professeurs', 'Formations', 'Classes', 'Inscriptions'];
 
     protected Center $tanger;
+
     protected Center $essaouira;
+
     protected User $adminTanger;
+
     protected User $adminEssaouira;
+
     protected User $superAdmin;
+
     protected Formation $formaSante;
+
     protected Formation $formaInfo;
 
     protected function setUp(): void
@@ -279,7 +285,7 @@ class CenterAdminDomainDashboardSimplificationTest extends TestCase
         // (« Voir tout » existe aussi ailleurs : le dropdown de notifications.)
         $this->assertSame(
             0,
-            preg_match('/<a href="' . preg_quote(route('enrollments.index'), '/') . '[^>]*>\s*Voir tout/', $html),
+            preg_match('/<a href="'.preg_quote(route('enrollments.index'), '/').'[^>]*>\s*Voir tout/', $html),
             'Le bouton « Voir tout » du tableau des inscriptions doit avoir disparu.'
         );
         $this->assertStringNotContainsString('ec-table', $html);
@@ -325,7 +331,7 @@ class CenterAdminDomainDashboardSimplificationTest extends TestCase
         $html = $this->dashboard($this->adminTanger);
 
         $this->assertStringContainsString('Espace Santé', $html);
-        $this->assertStringContainsString('Domaine actif', $html);
+        $this->assertStringContainsString('Formation générale active', $html);
         $this->assertStringContainsString('Bonjour', $html);
         $this->assertStringContainsString($this->adminTanger->name, $html);
         $this->assertStringContainsString('Centre Tanger', $html);
@@ -499,7 +505,7 @@ class CenterAdminDomainDashboardSimplificationTest extends TestCase
         $this->assertStringContainsString('Dernières inscriptions', $html);
         $this->assertSame(
             1,
-            preg_match('/<a href="' . preg_quote(route('enrollments.index'), '/') . '[^>]*>\s*Voir tout/', $html),
+            preg_match('/<a href="'.preg_quote(route('enrollments.index'), '/').'[^>]*>\s*Voir tout/', $html),
             'Le lien « Voir tout » du tableau des inscriptions est conservé chez le Super Admin.'
         );
         $this->assertStringContainsString('ec-table', $html);
@@ -521,7 +527,7 @@ class CenterAdminDomainDashboardSimplificationTest extends TestCase
         $this->assertStringContainsString('Espace professeur', $html);
 
         // La vue du professeur n'est pas la vue de domaine simplifiée.
-        $this->assertStringNotContainsString('Domaine actif', $html);
+        $this->assertStringNotContainsString('Formation générale active', $html);
     }
 
     // ──────────────────────────────────────────────────────────────────────────

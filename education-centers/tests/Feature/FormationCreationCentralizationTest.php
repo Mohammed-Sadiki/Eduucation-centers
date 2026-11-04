@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Center;
 use App\Models\Formation;
+use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -22,9 +23,13 @@ class FormationCreationCentralizationTest extends TestCase
     use RefreshDatabase;
 
     protected Center $centerBerlin;
+
     protected Center $centerMunich;
+
     protected User $superAdmin;
+
     protected User $adminBerlin;
+
     protected User $adminMunich;
 
     protected function setUp(): void
@@ -130,7 +135,7 @@ class FormationCreationCentralizationTest extends TestCase
             ->get(route('formations.create'))
             ->assertOk()
             ->assertSee('Ajouter une formation')
-            ->assertSee('Retour aux domaines')
+            ->assertSee('Retour aux formations générales')
             ->assertSee(route('super-admin.domaines'), false);
 
         $this->actingAs($this->adminBerlin)
@@ -403,7 +408,7 @@ class FormationCreationCentralizationTest extends TestCase
     public function test_formation_creation_does_not_affect_other_modules(): void
     {
         $usersBefore = User::count();
-        $studentsBefore = \App\Models\Student::count();
+        $studentsBefore = Student::count();
 
         $this->actingAs($this->adminBerlin)->post(route('formations.store'), [
             'domain' => 'informatique',
@@ -414,7 +419,7 @@ class FormationCreationCentralizationTest extends TestCase
 
         // Créer une formation ne crée aucun compte utilisateur ni dossier élève.
         $this->assertSame($usersBefore, User::count());
-        $this->assertSame($studentsBefore, \App\Models\Student::count());
+        $this->assertSame($studentsBefore, Student::count());
 
         // La page « Ajouter un élève » reste fonctionnelle (non régressée).
         $this->actingAs($this->adminBerlin)

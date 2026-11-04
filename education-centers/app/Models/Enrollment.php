@@ -2,15 +2,21 @@
 
 namespace App\Models;
 
+use App\Concerns\HasDomainScope;
+use App\Models\Concerns\HasContextScope;
+use App\Services\FinanceService;
+use App\Support\AcademicPerimeter;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Enrollment extends Model
 {
+    use HasContextScope;
+    use HasDomainScope;
     use HasFactory;
-    use \App\Concerns\HasDomainScope;
-    use \App\Models\Concerns\HasContextScope;
 
     /**
      * Le domaine d'une inscription est hérité de sa formation.
@@ -81,7 +87,7 @@ class Enrollment extends Model
         // sinon Eloquent la charge à la demande.
         $formation = $this->formation;
 
-        return $formation ? \App\Services\FinanceService::getFormationAnnualPrice($formation) : 0.0;
+        return $formation ? FinanceService::getFormationAnnualPrice($formation) : 0.0;
     }
 
     /**
@@ -126,17 +132,21 @@ class Enrollment extends Model
      * identifiant d'inscription (écritures antérieures). En lecture seule : la
      * mise à jour d'un dossier étudiant ne modifie jamais ces versements.
      */
-    public function paidPayments(): \Illuminate\Database\Eloquent\Collection
+    public function paidPayments(): Collection
     {
+        // La retombée « formation » couvre aussi les anciennes sous-formations de
+        // la même formation générale : un solde hérité ne disparaît jamais.
+        $formationIds = AcademicPerimeter::equivalentIds($this->formation_id);
+
         return Payment::query()
             ->where('center_id', $this->center_id)
             ->where('student_id', $this->student_id)
             ->where('status', 'paid')
-            ->where(function ($q): void {
+            ->where(function ($q) use ($formationIds): void {
                 $q->where('enrollment_id', $this->id)
-                    ->orWhere(function ($q2): void {
+                    ->orWhere(function ($q2) use ($formationIds): void {
                         $q2->whereNull('enrollment_id')
-                            ->where('formation_id', $this->formation_id);
+                            ->whereIn('formation_id', $formationIds);
                     });
             })
             ->orderByDesc('payment_date')
@@ -194,7 +204,7 @@ class Enrollment extends Model
     /**
      * Versements rattachés à cette inscription (module Finance).
      */
-    public function payments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
     }
@@ -202,7 +212,7 @@ class Enrollment extends Model
     /**
      * Factures / échéances rattachées à cette inscription (module Finance).
      */
-    public function invoices(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
     }

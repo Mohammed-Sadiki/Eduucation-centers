@@ -1,7 +1,7 @@
 @extends('layouts.portal')
 
-@section('title', __('Sélection du domaine') . ' — ' . config('app.name'))
-@section('description', __('Choisissez le domaine d\'activité à administrer pour votre centre.'))
+@section('title', __('Sélection de la formation générale') . ' — ' . config('app.name'))
+@section('description', __('Choisissez la formation générale à administrer pour votre centre.'))
 
 @php
     $user = auth()->user();
@@ -21,13 +21,13 @@
             </span>
             <div>
                 <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
-                    {{ __('Domaines de formation') }}
+                    {{ __('Formations générales') }}
                     @if($centerName)
                         <span class="ms-2 text-base font-normal text-slate-500 dark:text-slate-400">· {{ $centerName }}</span>
                     @endif
                 </h1>
                 <p class="text-sm text-slate-500 dark:text-slate-400">
-                    {{ __('Les six domaines de formation sont disponibles pour votre centre.') }}
+                    {{ __('Les six formations générales sont disponibles pour votre centre.') }}
                 </p>
             </div>
         </div>
@@ -56,7 +56,7 @@
             <div class="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white/60 p-10 text-center dark:border-slate-700 dark:bg-slate-900/40">
                 <x-icon name="book" class="mx-auto h-10 w-10 text-slate-300 dark:text-slate-600" />
                 <p class="mt-3 text-sm font-medium text-slate-500 dark:text-slate-400">
-                    {{ __('Aucun domaine disponible pour votre centre pour le moment.') }}
+                    {{ __('Aucune formation générale disponible pour votre centre pour le moment.') }}
                 </p>
                 <a href="{{ route('admin.home') }}" class="mt-4 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700">
                     <x-icon name="home" class="h-4 w-4" />

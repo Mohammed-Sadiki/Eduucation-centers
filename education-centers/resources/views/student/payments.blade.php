@@ -91,7 +91,7 @@
                     <div class="flex flex-col gap-3 border-b border-slate-100 p-5 dark:border-slate-800 sm:flex-row sm:items-start sm:justify-between">
                         <div class="min-w-0">
                             <p class="text-xs font-bold uppercase tracking-wide text-brand-600 dark:text-brand-300">{{ __('Formation') }}</p>
-                            <h2 class="mt-0.5 truncate text-lg font-bold text-slate-900 dark:text-white">{{ $row->formation->name }}</h2>
+                            <h2 class="mt-0.5 truncate text-lg font-bold text-slate-900 dark:text-white">{{ $row->formation->general_formation_name }}</h2>
                             <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
                                 {{ $row->enrollment->registration_number }}
                                 @if($row->center?->name)

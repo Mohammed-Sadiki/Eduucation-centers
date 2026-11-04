@@ -2,24 +2,43 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Support\AcademicPerimeter;
 use App\Support\UserContext;
 use Illuminate\Database\Eloquent\Builder;
 
 abstract class Controller
 {
     /**
-     * Restreindre une requête au domaine actif du contexte (aucun effet si
-     * aucun domaine n'est sélectionné). Le modèle doit exposer `scopeForDomain`.
+     * Autorité unique du périmètre pédagogique « Centre → Formation générale →
+     * Classe → Élève » pour un utilisateur donné. Le centre d'un Admin Centre
+     * (ou d'un professeur) est toujours forcé côté serveur.
+     */
+    protected function perimeter(?User $user, ?int $centerId = null): AcademicPerimeter
+    {
+        return AcademicPerimeter::for($user, $centerId);
+    }
+
+    /**
+     * Restreindre une requête à l'espace pédagogique actif (aucun effet si
+     * aucun domaine n'est sélectionné).
+     *
+     * Le « domaine actif » du contexte est aujourd'hui le code d'une formation
+     * générale : ce filtre passe donc par l'autorité unique du périmètre
+     * ({@see AcademicPerimeter}) et résout les alias historiques, au lieu
+     * d'une comparaison directe sur une colonne `domain`. Un seul mécanisme de
+     * filtrage pour toute l'application : les tableaux suivent exactement les
+     * mêmes règles que les menus déroulants des formations et des classes.
      */
     protected function applyDomainScope(Builder $query, ?UserContext $context = null): Builder
     {
         $context ??= user_context();
 
-        if ($context->hasDomain() && method_exists($query->getModel(), 'scopeForDomain')) {
-            $query->forDomain($context->domainSlug());
+        if (! $context->hasDomain()) {
+            return $query;
         }
 
-        return $query;
+        return $this->perimeter($context->user(), $context->centerId())->applyTo($query);
     }
 
     /**

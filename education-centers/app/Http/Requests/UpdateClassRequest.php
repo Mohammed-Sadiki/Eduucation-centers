@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\ClassRoom;
 use App\Models\Formation;
+use App\Support\AcademicPerimeter;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -45,6 +46,14 @@ class UpdateClassRequest extends FormRequest
 
                     if ($formation->center_id != $centerId) {
                         $fail(__('La formation sélectionnée n\'appartient pas au même centre que la classe.'));
+
+                        return;
+                    }
+
+                    // Architecture obligatoire : une classe est rattachée à une
+                    // formation générale, jamais à une ancienne sous-formation.
+                    if (! AcademicPerimeter::isCurrentFormation($formation)) {
+                        $fail(__('La formation sélectionnée n\'est plus proposée. Choisissez la formation générale équivalente.'));
                     }
                 },
             ],

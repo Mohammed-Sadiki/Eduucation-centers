@@ -122,7 +122,7 @@
                     <source srcset="{{ asset($imageWebp) }}" type="image/webp">
                 @endif
                 <img src="{{ asset($imageJpg) }}"
-                     alt="{{ __('Photographie du domaine :domain', ['domain' => __($domain->name)]) }}"
+                     alt="{{ __('Photographie de la formation générale :domain', ['domain' => __($domain->name)]) }}"
                      loading="lazy"
                      class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                      onerror="this.onerror=null; this.parentElement.style.display='none'; this.closest('.relative').querySelector('.fallback-banner').classList.remove('hidden');"

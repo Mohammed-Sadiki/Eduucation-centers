@@ -8,7 +8,7 @@ use App\Models\ContactMessage;
 use App\Models\Enrollment;
 use App\Models\Formation;
 use App\Models\Student;
-use App\Models\User;
+use App\Support\AcademicPerimeter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,12 +17,12 @@ class PublicController extends Controller
 {
     public function home(): View
     {
-        $centers = Center::where('status', 'active')->withCount(['formations', 'classes', 'students'])->get();
-        $formations = Formation::where('status', 'active')->with('center')->take(6)->get();
+        $centers = Center::where('status', 'active')->withCount(['generalFormations as formations_count', 'classes', 'students'])->get();
+        $formations = AcademicPerimeter::currentFormationsQuery()->with('center')->take(6)->get();
         $stats = [
             'centers' => Center::where('status', 'active')->count(),
             'students' => Student::where('status', 'active')->count(),
-            'formations' => Formation::where('status', 'active')->count(),
+            'formations' => AcademicPerimeter::currentFormationsQuery()->count(),
         ];
         $announcements = Announcement::where('status', 'published')->where('is_public', true)->latest('published_at')->take(3)->get();
         $viewName = view()->exists('public.home') ? 'public.home' : 'home';
@@ -32,7 +32,7 @@ class PublicController extends Controller
 
     public function centers(): View
     {
-        $centers = Center::where('status', 'active')->withCount(['formations', 'teachers', 'students'])->get();
+        $centers = Center::where('status', 'active')->withCount(['generalFormations as formations_count', 'teachers', 'students'])->get();
 
         return view('public.centers', compact('centers'));
     }
@@ -40,18 +40,18 @@ class PublicController extends Controller
     public function centerShow(Center $center): View
     {
         abort_if($center->status !== 'active', 404);
-        $formations = Formation::where('center_id', $center->id)->where('status', 'active')->get();
+        $formations = AcademicPerimeter::currentFormationsQuery($center->id)->get();
 
         return view('public.center-show', compact('center', 'formations'));
     }
 
     public function formations(Request $request): View
     {
-        $query = Formation::where('status', 'active')->with('center');
+        $query = AcademicPerimeter::currentFormationsQuery()->with('center');
         if ($centerId = $request->input('center_id')) {
             $query->where('center_id', $centerId);
         }
-        $formations = $query->orderBy('name')->paginate(12)->withQueryString();
+        $formations = $query->paginate(12)->withQueryString();
         $centers = Center::where('status', 'active')->orderBy('name')->get();
 
         return view('public.formations', compact('formations', 'centers'));
@@ -60,7 +60,14 @@ class PublicController extends Controller
     public function formationShow(Formation $formation): View
     {
         abort_if($formation->status !== 'active', 404);
-        $formation->load(['center', 'classes']);
+        // Une ancienne sous-formation n'est plus une page publique : elle est
+        // remplacée par sa formation générale équivalente.
+        abort_unless(AcademicPerimeter::isCurrentFormation($formation), 404);
+        $formation->load('center');
+        // Les classes affichées sont celles du périmètre de la formation générale
+        // (alias historiques inclus) : autorité unique AcademicPerimeter, jamais
+        // un filtrage fait à la main dans la vue.
+        $formation->setRelation('classes', $formation->perimeterClasses()->get());
 
         return view('public.formation-show', compact('formation'));
     }
@@ -108,7 +115,7 @@ class PublicController extends Controller
         $centers = Center::where('status', 'active')->orderBy('name')->get();
         $preselectedFormationId = $request->input('formation_id');
         $preselectedCenterId = $request->input('center_id');
-        $formations = Formation::where('status', 'active')->with('center')->orderBy('name')->get();
+        $formations = AcademicPerimeter::currentFormationsQuery()->with('center')->get();
 
         return view('public.apply', compact('centers', 'formations', 'preselectedFormationId', 'preselectedCenterId'));
     }
@@ -130,6 +137,11 @@ class PublicController extends Controller
         $formation = Formation::findOrFail($data['formation_id']);
         if ($formation->center_id !== (int) $data['center_id']) {
             return back()->withErrors(['formation_id' => __('Cette formation n\'appartient pas à ce centre.')])->withInput();
+        }
+        // Architecture obligatoire : une candidature ne peut viser qu'une
+        // formation générale active, jamais une ancienne sous-formation.
+        if ($formation->status !== 'active' || ! AcademicPerimeter::isCurrentFormation($formation)) {
+            return back()->withErrors(['formation_id' => __('La formation sélectionnée n\'est plus proposée. Choisissez la formation générale équivalente.')])->withInput();
         }
         // Création directe du dossier étudiant sans compte utilisateur
         $student = Student::create([

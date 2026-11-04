@@ -98,7 +98,7 @@
                             <span class="text-2xs text-slate-400">{{ substr($s->end_time, 0, 5) }}</span>
                         </div>
                         <div class="min-w-0 flex-1">
-                            <p class="truncate text-sm font-semibold text-slate-800 dark:text-white">{{ $s->classRoom?->name ?? '—' }}</p>
+                            <p class="truncate text-sm font-semibold text-slate-800 dark:text-white">{{ $s->classRoom?->perimeter_label ?? '—' }}</p>
                             <p class="truncate text-xs text-slate-500">{{ $s->teacher?->user?->name ?? $s->teacher?->full_name ?? '—' }} · {{ $s->room?->code ?? '—' }}</p>
                         </div>
                         <span class="shrink-0 text-xs text-slate-400">{{ format_date($s->date, 'd/m') }}</span>
@@ -124,7 +124,7 @@
                     <div class="flex items-center justify-between gap-3 px-5 py-3">
                         <div class="min-w-0">
                             <p class="truncate text-sm font-semibold text-slate-800 dark:text-white">{{ $e->student?->full_name ?? '—' }}</p>
-                            <p class="truncate text-xs text-slate-500">{{ $e->formation?->name ?? '—' }}</p>
+                            <p class="truncate text-xs text-slate-500">{{ $e->formation?->general_formation_name ?? '—' }}</p>
                         </div>
                         <x-status-badge type="enrollment" :status="$e->status" />
                     </div>

@@ -103,7 +103,7 @@
                 @forelse ($classes as $class)
                     <li class="flex items-center justify-between py-2.5">
                         <div>
-                            <p class="font-semibold text-slate-800 dark:text-slate-100">{{ $class->name }}</p>
+                            <p class="font-semibold text-slate-800 dark:text-slate-100">{{ $class->perimeter_label }}</p>
                             <p class="text-xs text-slate-500 dark:text-slate-400">{{ $class->code }} · {{ $class->formatted_period }}</p>
                         </div>
                         <span class="text-xs text-slate-400">{{ $class->enrollments_count ?? $class->enrollments()->count() }} {{ __('inscrit(s)') }}</span>
@@ -159,7 +159,7 @@
                 @endforeach
             </ul>
             <a href="{{ $domainDashboardRoute }}" class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand-700 hover:text-brand-800 dark:text-brand-400">
-                {{ __('Accéder à l\'espace historique du domaine') }}
+                {{ __('Accéder à l\'espace historique de la formation générale') }}
                 <x-icon name="arrow-right" class="h-4 w-4 rtl:rotate-180" stroke-width="2" />
             </a>
         </div>

@@ -29,7 +29,7 @@
         <x-ui.stat :label="__('Formations')" :value="format_number($enrollments->count())" icon="book" tone="primary" :hint="$centerName" />
         <x-ui.stat :label="__('Inscriptions acceptées')" :value="format_number($acceptedCount)" icon="check" tone="success" :hint="__('accès aux cours et notes')" />
         <x-ui.stat :label="__('En attente')" :value="format_number($pendingCount)" icon="clock" tone="warning" :hint="__('traitement administratif')" />
-        <x-ui.stat :label="__('Domaines suivis')" :value="format_number($domainCount)" icon="academic" tone="info" :hint="__('parcours personnels')" />
+        <x-ui.stat :label="__('Formations générales suivies')" :value="format_number($domainCount)" icon="academic" tone="info" :hint="__('parcours personnels')" />
     </div>
 
     @if($enrollments->isEmpty())
@@ -59,7 +59,7 @@
                                     {{ $domainLabel }}
                                 </p>
                                 <h2 class="mt-1 text-lg font-bold text-slate-900 dark:text-white">
-                                    {{ $formation?->name ?? __('Formation') }}
+                                    {{ $formation?->general_formation_name ?? __('Formation') }}
                                 </h2>
                                 <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                                     {{ $enrollment->center?->name ?? $centerName }}
@@ -77,7 +77,7 @@
                         <div>
                             <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('Classe') }}</dt>
                             <dd class="mt-0.5 text-sm font-medium text-slate-800 dark:text-slate-100">
-                                {{ $classRoom?->name ?? __('Non affectée') }}
+                                {{ $classRoom?->perimeter_label ?? __('Non affectée') }}
                                 @if($classRoom?->code)
                                     <span class="block text-xs font-normal text-slate-500">{{ $classRoom->code }}</span>
                                 @endif

@@ -156,7 +156,7 @@
                                 {{ $debtor->center->name ?? __('Centre') }}
                             </td>
                             <td class="py-3 px-4 text-slate-700 whitespace-nowrap">
-                                {{ $debtor->formation->name }}
+                                {{ $debtor->formation->general_formation_name }}
                             </td>
                             <td class="py-3 px-4 text-end text-slate-600 whitespace-nowrap">
                                 {{ format_price($debtor->annual_price, 'MAD') }}
@@ -169,7 +169,7 @@
                             </td>
                             <td class="py-3 px-4 text-center whitespace-nowrap">
                                 <button type="button"
-                                        x-on:click="openWhatsApp('{{ $phone }}', '{{ addslashes($debtor->student->full_name) }}', '{{ number_format($debtor->remaining_amount, 2) }}', '{{ addslashes($debtor->formation->name) }}')"
+                                        x-on:click="openWhatsApp('{{ $phone }}', '{{ addslashes($debtor->student->full_name) }}', '{{ number_format($debtor->remaining_amount, 2) }}', '{{ addslashes($debtor->formation->general_formation_name) }}')"
                                         class="inline-flex items-center gap-1.5 rounded-lg bg-[#25D366]/10 hover:bg-[#25D366]/20 px-2.5 py-1 text-xs font-bold text-[#128C7E] transition-colors"
                                         title="{{ $phone ? __('Relancer sur WhatsApp') . ' (' . $phone . ')' : __('Aucun numéro disponible') }}">
                                     <span>💬</span>

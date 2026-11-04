@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', "Modifier la classe {$class->name} ({$class->code}) — " . config('app.name'))
-@section('description', "Modification de la classe {$class->name}")
+@section('title', "Modifier la classe {$class->perimeter_label} ({$class->code}) — " . config('app.name'))
+@section('description', "Modification de la classe {$class->perimeter_label}")
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('classes.index') }}">{{ __('Classes') }}</a></li>
@@ -54,7 +54,7 @@
                                 <select id="formation_id" name="formation_id" class="form-select @error('formation_id') is-invalid @enderror" required>
                                     <option value="">{{ __('-- Sélectionner une formation --') }}</option>
                                     @foreach($formations as $formation)
-                                        <option value="{{ $formation->id }}" {{ old('formation_id', $class->formation_id) == $formation->id ? 'selected' : '' }}>
+                                        <option value="{{ $formation->id }}" {{ old('formation_id', $currentFormationId ?? $class->formation_id) == $formation->id ? 'selected' : '' }}>
                                             {{ $formation->code }} — {{ $formation->translated('name') }}
                                         </option>
                                     @endforeach

@@ -139,7 +139,7 @@
                                 </a>
                             </td>
                             <td>
-                                <div class="fw-semibold text-dark">{{ $class->name }}</div>
+                                <div class="fw-semibold text-dark">{{ $class->perimeter_label }}</div>
                                 @if($class->description)
                                     <small class="text-muted text-truncate d-inline-block" style="max-width: 250px;">
                                         {{ Str::limit($class->description, 50) }}
@@ -149,7 +149,7 @@
                             <td>
                                 @if($class->formation)
                                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
-                                        {{ $class->formation->code }} — {{ $class->formation->name }}
+                                        {{ $class->formation->code }} — {{ $class->formation->general_formation_name }}
                                     </span>
                                 @else
                                     <span class="text-muted">—</span>

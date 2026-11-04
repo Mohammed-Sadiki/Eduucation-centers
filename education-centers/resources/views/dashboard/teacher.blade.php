@@ -131,9 +131,9 @@
                             <span class="text-2xs text-slate-400" dir="ltr">{{ substr((string) $s->end_time, 0, 5) }}</span>
                         </div>
                         <div class="min-w-0 flex-1">
-                            <p class="truncate text-sm font-semibold text-slate-800 dark:text-white">{{ $s->title ?: $s->classRoom?->name }}</p>
+                            <p class="truncate text-sm font-semibold text-slate-800 dark:text-white">{{ $s->title ?: $s->classRoom?->perimeter_label }}</p>
                             <p class="truncate text-xs text-slate-500">
-                                {{ $s->classRoom?->name ?? '—' }}
+                                {{ $s->classRoom?->perimeter_label ?? '—' }}
                                 @if($s->room) · {{ $s->room->name }} @endif
                             </p>
                         </div>
@@ -164,8 +164,8 @@
                             <span class="text-2xs text-slate-400">{{ format_date($s->date, 'd/m') }}</span>
                         </div>
                         <div class="min-w-0 flex-1">
-                            <p class="truncate text-sm font-semibold text-slate-800 dark:text-white">{{ $s->classRoom?->name ?? '—' }}</p>
-                            <p class="truncate text-xs text-slate-500">{{ $s->classRoom?->formation?->name ?? '—' }}</p>
+                            <p class="truncate text-sm font-semibold text-slate-800 dark:text-white">{{ $s->classRoom?->perimeter_label ?? '—' }}</p>
+                            <p class="truncate text-xs text-slate-500">{{ $s->classRoom?->formation?->general_formation_name ?? '—' }}</p>
                         </div>
                         <span class="shrink-0 text-xs font-medium text-slate-400">{{ format_date($s->date, 'd/m/Y') }}</span>
                     </div>
@@ -192,7 +192,7 @@
                         <div class="min-w-0 flex-1">
                             <p class="truncate text-sm font-semibold text-slate-800 dark:text-white">{{ $evaluation->title }}</p>
                             <p class="truncate text-xs text-slate-500">
-                                {{ $evaluation->classRoom?->name ?? '—' }} · {{ format_date($evaluation->evaluation_date, 'd/m/Y') }}
+                                {{ $evaluation->classRoom?->perimeter_label ?? '—' }} · {{ format_date($evaluation->evaluation_date, 'd/m/Y') }}
                             </p>
                         </div>
                         <span class="shrink-0 text-xs font-semibold text-amber-600 dark:text-amber-400">
@@ -224,8 +224,8 @@
                             <x-icon name="book" class="h-4 w-4" />
                         </span>
                         <div class="min-w-0 flex-1">
-                            <p class="truncate text-sm font-semibold text-slate-800 dark:text-white">{{ $class->name }}</p>
-                            <p class="truncate text-xs text-slate-500">{{ $class->formation?->name ?? '—' }}</p>
+                            <p class="truncate text-sm font-semibold text-slate-800 dark:text-white">{{ $class->perimeter_label }}</p>
+                            <p class="truncate text-xs text-slate-500">{{ $class->formation?->general_formation_name ?? '—' }}</p>
                         </div>
                         <span class="shrink-0 text-xs font-medium text-slate-500">
                             {{ format_number($class->accepted_enrollments_count ?? 0) }} {{ __('étudiants') }}

@@ -34,7 +34,7 @@
                     <td class="font-mono text-xs">{{ $certificate->certificate_number }}</td>
                     <td>{{ $certificate->type_label }}</td>
                     <td>{{ $certificate->student?->full_name }}</td>
-                    <td>{{ $certificate->formation?->name ?? '—' }}</td>
+                    <td>{{ $certificate->formation?->general_formation_name ?? '—' }}</td>
                     <td>{{ format_date($certificate->issued_date, 'd/m/Y') }}</td>
                     <td class="text-end">
                         @if(auth()->user()->isStudent())

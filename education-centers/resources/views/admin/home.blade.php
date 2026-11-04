@@ -60,7 +60,7 @@
             </h1>
             <p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                 @if($isSuperAdmin)
-                    {{ __('Accédez aux modules de gestion de la plateforme Education Centers. Naviguez vers vos domaines de formation, la messagerie, la gestion des stagiaires ou les finances.') }}
+                    {{ __('Accédez aux modules de gestion de la plateforme Education Centers. Naviguez vers vos formations générales, la messagerie, la gestion des stagiaires ou les finances.') }}
                 @else
                     {{ __('Accédez aux modules de gestion de votre centre. Les données affichées sont propres à votre centre et respectent vos permissions.') }}
                 @endif

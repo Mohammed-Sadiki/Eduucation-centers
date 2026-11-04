@@ -19,7 +19,7 @@
     <div class="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <x-ui.stat :label="__('Classes affectées')" :value="format_number($classes->count())" icon="classes" tone="primary" :hint="$centerName" />
         <x-ui.stat :label="__('Étudiants')" :value="format_number($studentCount)" icon="user" tone="success" :hint="__('inscrits dans vos classes')" />
-        <x-ui.stat :label="__('Domaines enseignés')" :value="format_number(count($domainLabels))" icon="academic" tone="info" :hint="implode(' · ', $domainLabels)" />
+        <x-ui.stat :label="__('Formations générales enseignées')" :value="format_number(count($domainLabels))" icon="academic" tone="info" :hint="implode(' · ', $domainLabels)" />
         <x-ui.stat :label="__('Centre')" :value="$centerName ?? '—'" icon="building" tone="warning" :hint="__('Affectation principale')" />
     </div>
 
@@ -49,10 +49,10 @@
                                     {{ $domainLabel }}
                                 </p>
                                 <h2 class="mt-1 text-lg font-bold text-slate-900 dark:text-white">
-                                    {{ $class->name }}
+                                    {{ $class->perimeter_label }}
                                 </h2>
                                 <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                    {{ $class->formation?->name ?? __('Formation') }}
+                                    {{ $class->formation?->general_formation_name ?? __('Formation') }}
                                     @if($class->code)
                                         <span class="mx-1.5 text-slate-300 dark:text-slate-600">•</span>
                                         <span class="font-mono text-xs">{{ $class->code }}</span>

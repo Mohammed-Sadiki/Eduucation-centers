@@ -13,6 +13,7 @@ class AuthAndRoleTest extends TestCase
     use RefreshDatabase;
 
     protected Center $berlinCenter;
+
     protected Center $munichCenter;
 
     protected function setUp(): void
@@ -20,19 +21,19 @@ class AuthAndRoleTest extends TestCase
         parent::setUp();
 
         $this->berlinCenter = Center::create([
-            'name'        => 'Centre Berlin',
-            'code'        => 'BERLIN',
-            'city'        => 'Berlin',
-            'country'     => 'Germany',
-            'status'      => 'active',
+            'name' => 'Centre Berlin',
+            'code' => 'BERLIN',
+            'city' => 'Berlin',
+            'country' => 'Germany',
+            'status' => 'active',
         ]);
 
         $this->munichCenter = Center::create([
-            'name'        => 'Centre Munich',
-            'code'        => 'MUNICH',
-            'city'        => 'Munich',
-            'country'     => 'Germany',
-            'status'      => 'active',
+            'name' => 'Centre Munich',
+            'code' => 'MUNICH',
+            'city' => 'Munich',
+            'country' => 'Germany',
+            'status' => 'active',
         ]);
     }
 
@@ -67,12 +68,12 @@ class AuthAndRoleTest extends TestCase
     public function test_super_admin_is_redirected_to_domaines_on_login(): void
     {
         $user = User::factory()->superAdmin()->create([
-            'email'    => 'admin@education-centers.de',
+            'email' => 'admin@education-centers.de',
             'password' => Hash::make('password123'),
         ]);
 
         $response = $this->post(route('login'), [
-            'email'    => 'admin@education-centers.de',
+            'email' => 'admin@education-centers.de',
             'password' => 'password123',
         ]);
 
@@ -83,12 +84,12 @@ class AuthAndRoleTest extends TestCase
     public function test_center_admin_is_redirected_to_dashboard_on_login(): void
     {
         $user = User::factory()->centerAdmin($this->berlinCenter->id)->create([
-            'email'    => 'centeradmin@education-centers.de',
+            'email' => 'centeradmin@education-centers.de',
             'password' => Hash::make('password123'),
         ]);
 
         $response = $this->post(route('login'), [
-            'email'    => 'centeradmin@education-centers.de',
+            'email' => 'centeradmin@education-centers.de',
             'password' => 'password123',
         ]);
 
@@ -99,12 +100,12 @@ class AuthAndRoleTest extends TestCase
     public function test_user_cannot_login_with_invalid_credentials(): void
     {
         User::factory()->superAdmin()->create([
-            'email'    => 'admin@education-centers.de',
+            'email' => 'admin@education-centers.de',
             'password' => Hash::make('password123'),
         ]);
 
         $response = $this->from(route('login'))->post(route('login'), [
-            'email'    => 'admin@education-centers.de',
+            'email' => 'admin@education-centers.de',
             'password' => 'wrong-password',
         ]);
 
@@ -169,7 +170,7 @@ class AuthAndRoleTest extends TestCase
         $response = $this->actingAs($superAdmin)->get(route('super-admin.sante.dashboard'));
         $response->assertStatus(200);
         $response->assertSee('Santé');
-        $response->assertSee('Changer de domaine');
+        $response->assertSee('Changer de formation générale');
     }
 
     public function test_center_admin_cannot_access_super_admin_domain_pages(): void
@@ -330,7 +331,7 @@ class AuthAndRoleTest extends TestCase
 
     public function test_super_admin_always_has_null_center_id(): void
     {
-        $superAdmin = new User();
+        $superAdmin = new User;
         $superAdmin->name = 'Super Admin Strict';
         $superAdmin->email = 'superstrict@centers.de';
         $superAdmin->password = Hash::make('password123');
@@ -346,7 +347,7 @@ class AuthAndRoleTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        $user = new User();
+        $user = new User;
         $user->name = 'Admin Sans Centre';
         $user->email = 'sanscentre@centers.de';
         $user->password = Hash::make('password123');

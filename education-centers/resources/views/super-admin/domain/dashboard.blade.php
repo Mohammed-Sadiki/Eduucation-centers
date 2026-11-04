@@ -34,7 +34,7 @@
 @extends('layouts.app')
 
 @section('title', __('Dashboard') . ' ' . $domainLabel . ' — ' . __('Super Admin'))
-@section('description', __('Tableau de bord du domaine') . ' ' . $domainLabel)
+@section('description', __('Tableau de bord de la formation générale') . ' ' . $domainLabel)
 
 @section('content')
 
@@ -44,7 +44,7 @@
             {{-- Badge "Domaine actif" + titre de l'espace domaine --}}
             <span class="mb-2 inline-flex items-center gap-1.5 rounded-full {{ $cfg['dot'] }}/15 px-2.5 py-0.5 text-xs font-semibold {{ $cfg['text'] }}">
                 <span class="h-1.5 w-1.5 rounded-full {{ $cfg['dot'] }}"></span>
-                {{ __('Domaine actif') }}
+                {{ __('Formation générale active') }}
             </span>
             <h1 class="ec-page-title text-slate-900 dark:text-white">
                 {{ __('Espace') }} {{ $domainLabel }}
@@ -62,9 +62,9 @@
             <a href="{{ $user->isSuperAdmin() ? route('super-admin.domaines') : route('center-admin.domaines') }}"
                id="btn-retour-domaines"
                class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-2xs transition hover:-translate-y-px hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-               title="{{ __('Retourner au portail de sélection des domaines') }}">
+               title="{{ __('Retourner au portail de sélection des formations générales') }}">
                 <x-icon name="arrow-uturn-left" class="h-4 w-4 text-slate-500 dark:text-slate-400" />
-                <span>{{ __('Changer de domaine') }}</span>
+                <span>{{ __('Changer de formation générale') }}</span>
             </a>
             <div class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
                 <x-icon name="calendar" class="h-4 w-4 text-brand-600 dark:text-brand-400" />
@@ -80,10 +80,10 @@
                 <x-icon name="book" class="h-7 w-7" />
             </span>
             <h2 class="mt-4 text-lg font-bold text-slate-900 dark:text-white">
-                {{ __('Aucune formation dans ce domaine pour le moment') }}
+                {{ __('Aucune formation générale pour le moment') }}
             </h2>
             <p class="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                {{ __('Le domaine :domain est disponible pour votre centre. Ajoutez votre première formation depuis la page « Domaines de formation » pour commencer à gérer étudiants, classes et séances.', ['domain' => $domainLabel]) }}
+                {{ __('La formation générale :domain est disponible pour votre centre. Ajoutez votre première formation depuis la page « Formations générales » pour commencer à gérer étudiants, classes et séances.', ['domain' => $domainLabel]) }}
             </p>
         </div>
     @endif
@@ -212,7 +212,7 @@
                         @forelse($recentEnrollments as $e)
                             <tr>
                                 <td class="font-medium text-slate-800 dark:text-slate-100">{{ $e->student?->full_name ?? '—' }}</td>
-                                <td>{{ $e->formation?->name ?? '—' }}</td>
+                                <td>{{ $e->formation?->general_formation_name ?? '—' }}</td>
                                 <td>{{ $e->center?->name ?? '—' }}</td>
                                 <td class="text-slate-500">{{ $e->created_at?->translatedFormat('d/m/Y') ?? '—' }}</td>
                                 <td><x-status-badge type="enrollment" :status="$e->status" /></td>
@@ -243,7 +243,7 @@
                             <span class="text-2xs text-slate-400">{{ substr($schedule->end_time, 0, 5) }}</span>
                         </div>
                         <div class="min-w-0 flex-1">
-                            <p class="truncate text-sm font-semibold text-slate-800 dark:text-white">{{ $schedule->classRoom?->name ?? '—' }}</p>
+                            <p class="truncate text-sm font-semibold text-slate-800 dark:text-white">{{ $schedule->classRoom?->perimeter_label ?? '—' }}</p>
                             <p class="truncate text-xs text-slate-500">{{ $schedule->teacher?->user?->name ?? '—' }} · {{ $schedule->room?->code ?? '—' }}</p>
                         </div>
                         <x-status-badge type="schedule_type" :status="$schedule->type ?? 'course'" />

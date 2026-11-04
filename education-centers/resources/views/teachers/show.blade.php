@@ -319,7 +319,7 @@
                                             <small class="text-muted"><i class="bi bi-clock me-1 text-primary"></i>{{ $sch->formatted_time }}</small>
                                         </td>
                                         <td>
-                                            <span class="fw-semibold text-primary">{{ $sch->classRoom->name }}</span>
+                                            <span class="fw-semibold text-primary">{{ $sch->classRoom->perimeter_label }}</span>
                                         </td>
                                         <td>
                                             <span class="badge bg-light text-dark border">{{ $sch->room->name }} ({{ $sch->room->code }})</span>

@@ -26,7 +26,7 @@
         <select name="class_id" class="ec-select">
             <option value="">{{ __('Toutes les classes') }}</option>
             @foreach($classes as $cl)
-                <option value="{{ $cl->id }}" @selected(request('class_id')==$cl->id)>{{ $cl->name }}</option>
+                <option value="{{ $cl->id }}" @selected(request('class_id')==$cl->id)>{{ $cl->perimeter_label }}</option>
             @endforeach
         </select>
         <select name="status" class="ec-select">
@@ -60,8 +60,8 @@
                     <td class="font-mono text-xs"><a href="{{ route('enrollments.show', $e) }}" class="text-brand-700 hover:underline">{{ $e->registration_number }}</a></td>
                     @if(auth()->user()->isSuperAdmin())<td>{{ $e->center->name }}</td>@endif
                     <td>{{ $e->student->full_name }}</td>
-                    <td>{{ $e->formation->name }}</td>
-                    <td>{{ $e->classRoom?->name ?? __('Non affectée') }}</td>
+                    <td>{{ $e->formation->general_formation_name }}</td>
+                    <td>{{ $e->classRoom?->perimeter_label ?? __('Non affectée') }}</td>
                     <td>{{ $e->formatted_application_date }}</td>
                     <td><x-status-badge type="enrollment" :status="$e->status" /></td>
                     <td class="text-end"><a href="{{ route('enrollments.show', $e) }}" class="ec-btn-ghost ec-btn-sm">{{ __('Voir') }}</a></td>

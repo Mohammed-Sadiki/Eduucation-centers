@@ -134,7 +134,7 @@ class CenterAdminDomainPortalTest extends TestCase
         $response = $this->actingAs($this->adminA)
             ->get(route('center-admin.domain.dashboard', 'hotellerie'))
             ->assertOk()
-            ->assertSee('Aucune formation dans ce domaine pour le moment');
+            ->assertSee('Aucune formation générale pour le moment');
 
         $stats = $response->viewData('stats');
         // Aucune formation/étudiant hotellerie dans le Centre A => périmètre vide.

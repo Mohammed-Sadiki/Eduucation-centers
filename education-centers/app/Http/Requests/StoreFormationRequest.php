@@ -64,7 +64,7 @@ class StoreFormationRequest extends FormRequest
     {
         return [
             'center_id' => __('centre éducatif'),
-            'domain' => __('domaine de formation'),
+            'domain' => __('formation générale'),
             'name' => __('intitulé de la formation'),
             'code' => __('code de la formation'),
             'description' => __('description du programme'),

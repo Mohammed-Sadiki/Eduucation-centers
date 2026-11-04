@@ -18,7 +18,7 @@
     <a href="{{ $backUrl }}"
        id="link-retour-dashboard-domaine"
        class="mb-4 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-600 shadow-2xs transition hover:-translate-y-px hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
-       title="{{ __('Revenir au tableau de bord du domaine') }} {{ $domainLabel }}">
+       title="{{ __('Revenir au tableau de bord de la formation générale') }} {{ $domainLabel }}">
         <x-icon name="arrow-uturn-left" class="h-4 w-4 text-slate-400 rtl:rotate-180 dark:text-slate-500" />
         <span>{{ __('Retour tableau de bord') }} · {{ $domainLabel }}</span>
     </a>

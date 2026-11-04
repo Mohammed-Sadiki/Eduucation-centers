@@ -79,7 +79,7 @@
                                         <option value="{{ $cl->id }}" 
                                             {{ old('class_id', $schedule->class_id) == $cl->id ? 'selected' : '' }}
                                             data-teachers="{{ $cl->teachers->pluck('id')->join(',') }}">
-                                            {{ $cl->name }} ({{ $cl->formation->name ?? __('Formation') }})
+                                            {{ $cl->perimeter_label }}
                                         </option>
                                     @endforeach
                                 </select>

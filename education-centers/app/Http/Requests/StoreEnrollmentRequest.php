@@ -6,6 +6,7 @@ use App\Models\ClassRoom;
 use App\Models\Enrollment;
 use App\Models\Formation;
 use App\Models\Student;
+use App\Support\AcademicPerimeter;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
@@ -68,13 +69,24 @@ class StoreEnrollmentRequest extends FormRequest
                 $validator->errors()->add('formation_id', __('La formation sélectionnée n\'appartient pas à ce centre.'));
             }
 
+            // 1 bis. Architecture obligatoire : une inscription ne peut viser
+            // qu'une formation générale. Une ancienne sous-formation n'est plus
+            // une option, même envoyée par requête directe.
+            if ($formation && $formation->center_id === $targetCenterId
+                && ! AcademicPerimeter::isCurrentFormation($formation)) {
+                $validator->errors()->add('formation_id', __('La formation sélectionnée n\'est plus proposée. Choisissez la formation générale équivalente.'));
+            }
+
             // 2. Contrôle de la classe si renseignée
             if ($class) {
                 if ($class->center_id !== $targetCenterId) {
                     $validator->errors()->add('class_id', __('La classe sélectionnée n\'appartient pas à ce centre.'));
                 }
 
-                if ($formation && $class->formation_id !== $formation->id) {
+                // Classe rattachée à la formation choisie : appréciée par
+                // formation générale (alias historiques compris).
+                if ($formation && ! $validator->errors()->has('class_id')
+                    && ! AcademicPerimeter::sameGeneralFormation($class->formation_id, $formation->id)) {
                     $validator->errors()->add('class_id', __('La classe sélectionnée ne fait pas partie de la formation choisie.'));
                 }
 
@@ -91,7 +103,7 @@ class StoreEnrollmentRequest extends FormRequest
                     if ($acceptedCount >= $class->capacity) {
                         $validator->errors()->add(
                             'class_id',
-                            __('La classe :name a atteint sa capacité maximale (:acceptedCount/:capacity places).', ['name' => $class->name, 'acceptedCount' => $acceptedCount, 'capacity' => $class->capacity])
+                            __('La classe :name a atteint sa capacité maximale (:acceptedCount/:capacity places).', ['name' => $class->perimeter_label, 'acceptedCount' => $acceptedCount, 'capacity' => $class->capacity])
                         );
                     }
                 }
@@ -110,7 +122,7 @@ class StoreEnrollmentRequest extends FormRequest
             // Un étudiant ne peut pas avoir deux inscriptions actives (pending, under_review, accepted) pour la même formation
             if ($student && $formation) {
                 $duplicateExists = Enrollment::where('student_id', $student->id)
-                    ->where('formation_id', $formation->id)
+                    ->whereIn('formation_id', AcademicPerimeter::equivalentIds($formation->id))
                     ->whereIn('status', [
                         Enrollment::STATUS_PENDING,
                         Enrollment::STATUS_UNDER_REVIEW,
@@ -121,7 +133,7 @@ class StoreEnrollmentRequest extends FormRequest
                 if ($duplicateExists) {
                     $validator->errors()->add(
                         'student_id',
-                        __('Cet étudiant possède déjà une inscription active ou en attente pour la formation :name.', ['name' => $formation->name])
+                        __('Cet étudiant possède déjà une inscription active ou en attente pour la formation :name.', ['name' => $formation->general_formation_name])
                     );
                 }
             }

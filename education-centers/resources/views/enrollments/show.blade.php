@@ -158,7 +158,7 @@
                             <span class="text-muted small text-uppercase d-block mb-1">{{ __('Formation postulée') }}</span>
                             <div class="fs-5 fw-bold text-dark">
                                 <a href="{{ route('formations.show', $enrollment->formation) }}" class="text-decoration-none">
-                                    {{ $enrollment->formation->name }}
+                                    {{ $enrollment->formation->general_formation_name }}
                                 </a>
                             </div>
                             <span class="badge bg-light text-muted border mt-1">{{ $enrollment->formation->code }}</span>
@@ -177,7 +177,7 @@
                             @if($enrollment->classRoom)
                                 <div class="fs-5 fw-bold text-dark">
                                     <a href="{{ route('classes.show', $enrollment->classRoom) }}" class="text-decoration-none">
-                                        {{ $enrollment->classRoom->name }}
+                                        {{ $enrollment->classRoom->perimeter_label }}
                                     </a>
                                 </div>
                                 <div class="small text-muted mt-1">
@@ -329,7 +329,7 @@
                             <option value="">{{ __('-- Conserver sans classe / choisir plus tard --') }}</option>
                             @foreach($availableClasses as $ac)
                                 <option value="{{ $ac->id }}" {{ $enrollment->class_id == $ac->id ? 'selected' : '' }}>
-                                    {{ $ac->name }} ({{ $ac->accepted_enrollments_count }}/{{ $ac->capacity ?? __('Illimitée') }} {{ __('places)') }}
+                                    {{ $ac->perimeter_label }} ({{ $ac->accepted_enrollments_count }}/{{ $ac->capacity ?? __('Illimitée') }} {{ __('places)') }}
                                 </option>
                             @endforeach
                         </select>

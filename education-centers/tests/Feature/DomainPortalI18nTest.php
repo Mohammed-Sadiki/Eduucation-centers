@@ -85,10 +85,10 @@ class DomainPortalI18nTest extends TestCase
 
         $this->assertSame('بوابة مسؤول المركز', __('Portail Admin Centre'));
         $this->assertSame('فضاء مسؤول المركز', __('Espace Admin Centre'));
-        $this->assertSame('مجالات التدريب', __('Domaines de formation'));
-        $this->assertSame('المجال النشط', __('Domaine actif'));
-        $this->assertSame('تغيير المجال', __('Changer de domaine'));
-        $this->assertSame('جميع المجالات', __('Tous les domaines'));
+        $this->assertSame('التكوينات العامة', __('Formations générales'));
+        $this->assertSame('التكوين العام النشط', __('Formation générale active'));
+        $this->assertSame('تغيير التكوين العام', __('Changer de formation générale'));
+        $this->assertSame('جميع التكوينات العامة', __('Toutes les formations générales'));
     }
 
     public function test_labels_remain_french_in_french_locale(): void

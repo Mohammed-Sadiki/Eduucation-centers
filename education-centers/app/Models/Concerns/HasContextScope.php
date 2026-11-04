@@ -2,26 +2,28 @@
 
 namespace App\Models\Concerns;
 
+use App\Support\AcademicPerimeter;
 use App\Support\UserContext;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Filtrage « dans le contexte courant » (centre + domaine).
+ * Filtrage « dans le contexte courant » (centre + formation générale).
  *
  * Contrairement à un global scope, ce filtrage est explicite et opt-in : les
  * contrôleurs qui doivent respecter le périmètre appelent `withinContext()`.
  * Il s'appuie sur :
  *  - la colonne `center_id` de la table pour le volet centre ;
- *  - le trait {@see \App\Concerns\HasDomainScope} (scope `forDomain`) pour le
- *    volet domaine, lorsque le modèle le déclare.
+ *  - l'autorité unique du périmètre
+ *    {@see AcademicPerimeter::applyTo()} pour le volet formation,
+ *    lorsque le modèle sait se rattacher à une formation.
  *
- * Super Admin sans centre restreint et sans domaine actif => aucun filtre
- * (vue globale), ce qui préserve le comportement existant.
+ * Super Admin sans centre restreint et sans espace de formation actif => aucun
+ * filtre (vue globale), ce qui préserve le comportement existant.
  */
 trait HasContextScope
 {
     /**
-     * Restreindre la requête au centre et au domaine du contexte courant.
+     * Restreindre la requête au centre et à la formation générale du contexte courant.
      */
     public function scopeWithinContext(Builder $query, ?UserContext $context = null): Builder
     {
@@ -32,9 +34,10 @@ trait HasContextScope
             $query->where($this->qualifyColumn('center_id'), $context->centerId());
         }
 
-        // Volet domaine : si le modèle sait se filtrer par domaine et qu'un domaine est actif.
-        if ($context->hasDomain() && method_exists($this, 'scopeForDomain')) {
-            $query->forDomain($context->domainSlug());
+        // Volet formation : même autorité que les listes et les menus déroulants.
+        if ($context->hasDomain()) {
+            AcademicPerimeter::for($context->user(), $context->centerId(), $context->domainSlug())
+                ->applyTo($query);
         }
 
         return $query;

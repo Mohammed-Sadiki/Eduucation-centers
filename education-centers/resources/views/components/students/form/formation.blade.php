@@ -35,9 +35,9 @@
 
         {{-- Classe déjà affectée à l'inscription (modification, tant que la formation ne change pas) --}}
         @if($mode === 'edit' && $enrollment?->classRoom)
-            <div x-show="formationId === '{{ $enrollment->formation_id }}'" class="mt-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
+            <div x-show="formationId === '{{ \App\Support\AcademicPerimeter::generalFormationId($enrollment->formation_id) }}'" class="mt-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
                 {{ __('Classe actuelle de l\'inscription') }} :
-                <strong>{{ $enrollment->classRoom->name }}</strong>
+                <strong>{{ $enrollment->classRoom->perimeter_label }}</strong>
                 <span class="text-slate-500 dark:text-slate-400">({{ $enrollment->classRoom->code }})</span>
             </div>
         @endif

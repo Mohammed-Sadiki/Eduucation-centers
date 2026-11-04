@@ -1,7 +1,7 @@
 @extends('layouts.standalone')
 
 @section('title', __('Ajouter une formation') . ' — ' . config('app.name'))
-@section('description', __('Création d\'un programme de formation pour un centre et un domaine.'))
+@section('description', __('Création d\'un programme de formation pour un centre et une formation générale.'))
 @section('standalone_title', __('Ajouter une formation'))
 
 @php
@@ -12,7 +12,7 @@
 @endphp
 
 @section('standalone_back_url', $backUrl)
-@section('standalone_back_label', __('Retour aux domaines'))
+@section('standalone_back_label', __('Retour aux formations générales'))
 
 @section('content')
 <div class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
@@ -20,7 +20,7 @@
     {{-- Titre de la page (le retour aux domaines est dans la topbar) --}}
     <x-ui.page-header
         :title="__('Ajouter une formation')"
-        :description="__('Rattachement au centre et au domaine, puis informations détaillées du programme.')" />
+        :description="__('Rattachement au centre et à la formation générale, puis informations détaillées du programme.')" />
 
     {{-- Bandeau de clarification : nouveau parcours « Centre → Formation → Classe ».
          La création libre d'une sous-formation n'est plus le chemin recommandé.
@@ -61,7 +61,7 @@
                 <h2 class="flex items-center gap-3 text-2xl font-extrabold tracking-tight text-brand-700 dark:text-brand-300">
                     <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-base font-extrabold text-brand-700 dark:bg-brand-500/20 dark:text-brand-300">1</span>
                     <x-icon name="building" class="h-6 w-6" />
-                    {{ __('Centre & domaine de formation') }}
+                    {{ __('Centre & formation générale') }}
                 </h2>
             </header>
             <div class="grid gap-5 p-6 sm:grid-cols-2">
@@ -92,9 +92,9 @@
                 @endif
 
                 <div class="{{ $isCenterAdmin ? 'sm:col-span-2' : '' }}">
-                    <label for="domain" class="ec-label text-base font-semibold">{{ __('Domaine de formation') }} <span class="text-red-500">*</span></label>
+                    <label for="domain" class="ec-label text-base font-semibold">{{ __('Formation générale') }} <span class="text-red-500">*</span></label>
                     <select id="domain" name="domain" class="ec-select text-base @error('domain') is-invalid @enderror" required>
-                        <option value="">{{ __('— Sélectionner le domaine —') }}</option>
+                        <option value="">{{ __('— Sélectionner la formation générale —') }}</option>
                         @foreach($domains as $domain)
                             <option value="{{ $domain->slug }}" @selected(old('domain') === $domain->slug)>{{ $domain->name }}</option>
                         @endforeach

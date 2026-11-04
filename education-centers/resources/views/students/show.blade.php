@@ -116,10 +116,10 @@
                             <svg class="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5"/>
                             </svg>
-                            <span>{{ $firstEnrollment->formation?->name }}</span>
+                            <span>{{ $firstEnrollment->formation?->general_formation_name }}</span>
                             @if($firstEnrollment->classRoom)
                                 <span class="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                                    {{ $firstEnrollment->classRoom->name }}
+                                    {{ $firstEnrollment->classRoom->perimeter_label }}
                                 </span>
                             @endif
                         </div>
@@ -236,7 +236,7 @@
                         <div class="rounded-2xl border border-slate-100 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-800/40">
                             <div class="flex items-center justify-between gap-2">
                                 <h3 class="text-sm font-bold text-slate-900 dark:text-white">
-                                    {{ $enrollment->formation?->name ?? __('Formation inconnue') }}
+                                    {{ $enrollment->formation?->general_formation_name ?? __('Formation inconnue') }}
                                 </h3>
                                 <span class="rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
                                     {{ ucfirst($enrollment->status) }}
@@ -245,13 +245,13 @@
 
                             <dl class="mt-3 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
                                 <div class="flex justify-between">
-                                    <dt class="text-slate-400">{{ __('Domaine') }} :</dt>
+                                    <dt class="text-slate-400">{{ __('Formation générale') }} :</dt>
                                     <dd class="font-medium capitalize">{{ $enrollment->formation?->domain ?: '—' }}</dd>
                                 </div>
                                 <div class="flex justify-between">
                                     <dt class="text-slate-400">{{ __('Classe') }} :</dt>
                                     <dd class="font-semibold text-slate-800 dark:text-slate-200">
-                                        {{ $enrollment->classRoom?->name ?? __('Non affectée') }}
+                                        {{ $enrollment->classRoom?->perimeter_label ?? __('Non affectée') }}
                                     </dd>
                                 </div>
                                 <div class="flex justify-between">

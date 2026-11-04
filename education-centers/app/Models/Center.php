@@ -89,6 +89,19 @@ class Center extends Model
     }
 
     /**
+     * Un centre propose plusieurs formations générales du fonctionnement courant :
+     * mêmes règles que {@see Formation::scopeCurrent()} (générales
+     * actives + héritées sans équivalent général), restreintes à ce centre.
+     * C'est la relation à utiliser pour compter ou afficher « les formations »
+     * d'un centre dans les tableaux de bord, catalogues et statistiques ;
+     * `formations()` reste la relation brute (hiérarchie historique complète).
+     */
+    public function generalFormations(): HasMany
+    {
+        return $this->hasMany(Formation::class)->where('status', 'active')->current();
+    }
+
+    /**
      * Un centre possède plusieurs classes.
      */
     public function classes(): HasMany

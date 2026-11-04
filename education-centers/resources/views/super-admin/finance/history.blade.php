@@ -229,8 +229,8 @@
                                     {{ __('Encaissement') }}
                                 </span>
                             </td>
-                            <td class="py-3 px-4 text-slate-700 dark:text-slate-300 max-w-xs truncate" title="{{ $payment->notes ?? $payment->enrollment->formation->name ?? __('Frais de scolarité') }}">
-                                {{ $payment->notes ?? ($payment->enrollment->formation->name ?? __('Frais de scolarité')) }}
+                            <td class="py-3 px-4 text-slate-700 dark:text-slate-300 max-w-xs truncate" title="{{ $payment->notes ?? $payment->enrollment->formation->general_formation_name ?? __('Frais de scolarité') }}">
+                                {{ $payment->notes ?? ($payment->enrollment->formation->general_formation_name ?? __('Frais de scolarité')) }}
                             </td>
                             <td class="py-3 px-4 font-semibold text-slate-900 dark:text-white whitespace-nowrap">
                                 {{ $payment->enrollment->student->full_name ?? '—' }}

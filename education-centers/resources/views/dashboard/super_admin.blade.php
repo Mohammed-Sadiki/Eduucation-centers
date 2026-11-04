@@ -35,7 +35,7 @@
                         @forelse($recentEnrollments as $e)
                             <tr>
                                 <td>{{ $e->student?->full_name ?? '—' }}</td>
-                                <td>{{ $e->formation?->name ?? '—' }}</td>
+                                <td>{{ $e->formation?->general_formation_name ?? '—' }}</td>
                                 <td>{{ $e->center?->name ?? '—' }}</td>
                                 <td><x-status-badge type="enrollment" :status="$e->status" /></td>
                             </tr>

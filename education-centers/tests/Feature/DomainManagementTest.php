@@ -6,6 +6,7 @@ use App\Http\Controllers\SuperAdminDomainController;
 use App\Models\Center;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
 /**
@@ -35,9 +36,13 @@ class DomainManagementTest extends TestCase
     use RefreshDatabase;
 
     protected Center $center;
+
     protected User $superAdmin;
+
     protected User $centerAdmin;
+
     protected User $teacher;
+
     protected User $student;
 
     protected function setUp(): void
@@ -45,11 +50,11 @@ class DomainManagementTest extends TestCase
         parent::setUp();
 
         $this->center = Center::create([
-            'name'    => 'Centre Test',
-            'code'    => 'TEST01',
-            'city'    => 'Rabat',
+            'name' => 'Centre Test',
+            'code' => 'TEST01',
+            'city' => 'Rabat',
             'country' => 'Maroc',
-            'status'  => 'active',
+            'status' => 'active',
         ]);
 
         $this->superAdmin = User::factory()->superAdmin()->create();
@@ -57,12 +62,12 @@ class DomainManagementTest extends TestCase
         $this->centerAdmin = User::factory()->centerAdmin($this->center->id)->create();
 
         $this->teacher = User::factory()->create([
-            'role'      => 'teacher',
+            'role' => 'teacher',
             'center_id' => $this->center->id,
         ]);
 
         $this->student = User::factory()->create([
-            'role'      => 'student',
+            'role' => 'student',
             'center_id' => $this->center->id,
         ]);
     }
@@ -76,7 +81,7 @@ class DomainManagementTest extends TestCase
         $response = $this->actingAs($this->superAdmin)->get(route('super-admin.domaines'));
 
         $response->assertStatus(200);
-        $response->assertSee('Domaines de formation');
+        $response->assertSee('Formations générales');
     }
 
     public function test_domaines_page_lists_all_six_domain_cards(): void
@@ -326,7 +331,7 @@ class DomainManagementTest extends TestCase
         $response = $this->actingAs($this->superAdmin)
             ->get(route('super-admin.domain.dashboard', 'informatique'));
 
-        $response->assertSee('Domaine actif');
+        $response->assertSee('Formation générale active');
         $response->assertSee('Espace Informatique');
     }
 
@@ -335,7 +340,7 @@ class DomainManagementTest extends TestCase
         $response = $this->actingAs($this->superAdmin)
             ->get(route('super-admin.sante.dashboard'));
 
-        $response->assertSee('Domaine actif');
+        $response->assertSee('Formation générale active');
         $response->assertSee('Espace Santé');
     }
 
@@ -343,7 +348,7 @@ class DomainManagementTest extends TestCase
     {
         foreach (['informatique', 'hotellerie', 'maconnerie', 'design-interieur', 'design-graphique'] as $slug) {
             $response = $this->actingAs($this->superAdmin)
-                ->get('/super-admin/domaines/' . $slug);
+                ->get('/super-admin/domaines/'.$slug);
 
             $response->assertStatus(200);
         }
@@ -358,7 +363,7 @@ class DomainManagementTest extends TestCase
         $response = $this->actingAs($this->superAdmin)
             ->get(route('super-admin.domain.dashboard', 'informatique'));
 
-        $response->assertSee('Changer de domaine');
+        $response->assertSee('Changer de formation générale');
         $response->assertSee(route('super-admin.domaines'));
     }
 
@@ -367,7 +372,7 @@ class DomainManagementTest extends TestCase
         $response = $this->actingAs($this->superAdmin)
             ->get(route('super-admin.sante.dashboard'));
 
-        $response->assertSee('Changer de domaine');
+        $response->assertSee('Changer de formation générale');
         $response->assertSee(route('super-admin.domaines'));
     }
 
@@ -509,7 +514,7 @@ class DomainManagementTest extends TestCase
 
     public function test_sante_route_still_exists_with_original_name(): void
     {
-        $this->assertTrue(\Illuminate\Support\Facades\Route::has('super-admin.sante.dashboard'));
+        $this->assertTrue(Route::has('super-admin.sante.dashboard'));
     }
 
     public function test_sante_dashboard_url_is_correct(): void
@@ -611,7 +616,7 @@ class DomainManagementTest extends TestCase
             $response = $this->actingAs($this->superAdmin)
                 ->get(route('super-admin.domain.dashboard', $slug));
 
-            $response->assertSee('Changer de domaine', false);
+            $response->assertSee('Changer de formation générale', false);
         }
     }
 

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ClassRoom;
 use App\Models\Enrollment;
+use App\Support\AcademicPerimeter;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -85,13 +86,16 @@ class EnrollmentStatusService
 
                 if (! $class->isActive()) {
                     throw ValidationException::withMessages([
-                        'class_id' => __('La classe ":name" est inactive.', ['name' => $class->name]),
+                        'class_id' => __('La classe ":name" est inactive.', ['name' => $class->perimeter_label]),
                     ]);
                 }
 
-                if ($class->formation_id !== $lockedEnrollment->formation_id) {
+                // Appartenance à la formation de l'inscription : appréciée par
+                // formation générale, une ancienne sous-formation et sa formation
+                // générale décrivant la même classe-mère.
+                if (! AcademicPerimeter::sameGeneralFormation($class->formation_id, $lockedEnrollment->formation_id)) {
                     throw ValidationException::withMessages([
-                        'class_id' => __('La classe \\":name\\" n\'appartient pas à la formation de cette inscription.', ['name' => $class->name]),
+                        'class_id' => __('La classe \\":name\\" n\'appartient pas à la formation de cette inscription.', ['name' => $class->perimeter_label]),
                     ]);
                 }
 
@@ -105,7 +109,7 @@ class EnrollmentStatusService
 
                     if ($currentAcceptedCount >= $class->capacity) {
                         throw ValidationException::withMessages([
-                            'class_id' => __('Impossible d\'accepter l\'inscription : la classe \\":name\\" est complète (:currentAcceptedCount/:capacity places).', ['name' => $class->name, 'currentAcceptedCount' => $currentAcceptedCount, 'capacity' => $class->capacity]),
+                            'class_id' => __('Impossible d\'accepter l\'inscription : la classe \\":name\\" est complète (:currentAcceptedCount/:capacity places).', ['name' => $class->perimeter_label, 'currentAcceptedCount' => $currentAcceptedCount, 'capacity' => $class->capacity]),
                         ]);
                     }
                 }

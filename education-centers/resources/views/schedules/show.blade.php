@@ -17,7 +17,7 @@
             </nav>
             <div class="d-flex align-items-center gap-3">
                 <h1 class="h3 fw-bold mb-0 text-gray-800">
-                    <i class="bi bi-calendar-event text-primary me-2"></i>{{ __('Séance :') }} {{ $schedule->classRoom->name }}
+                    <i class="bi bi-calendar-event text-primary me-2"></i>{{ __('Séance :') }} {{ $schedule->classRoom->perimeter_label }}
                 </h1>
                 @if($schedule->status === 'scheduled')
                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2">
@@ -180,11 +180,11 @@
                     <span class="text-muted small text-uppercase d-block mb-1">{{ __('Classe rattachée') }}</span>
                     <h5 class="fw-bold text-primary mb-1">
                         <a href="{{ route('classes.show', $schedule->classRoom) }}" class="text-decoration-none">
-                            {{ $schedule->classRoom->name }}
+                            {{ $schedule->classRoom->perimeter_label }}
                         </a>
                     </h5>
                     <div class="text-muted small">
-                        <i class="bi bi-journal-bookmark me-1"></i>{{ __('Formation :') }} {{ $schedule->classRoom->formation->name ?? '—' }}
+                        <i class="bi bi-journal-bookmark me-1"></i>{{ __('Formation :') }} {{ $schedule->classRoom->formation->general_formation_name ?? '—' }}
                     </div>
                 </div>
             </div>

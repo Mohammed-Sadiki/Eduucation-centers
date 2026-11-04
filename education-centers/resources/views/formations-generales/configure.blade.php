@@ -102,7 +102,7 @@
                            class="mt-1 block w-full rounded-xl border-slate-200 bg-white text-sm shadow-xs focus:border-brand-500 focus:ring-brand-500 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
                            placeholder="0.00">
                     @error('annual_price')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
-                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ __('Laisser vide pour réutiliser le tarif par défaut du domaine.') }}</p>
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ __('Laisser vide pour réutiliser le tarif par défaut de la formation générale.') }}</p>
                 </div>
 
                 {{-- Devise --}}

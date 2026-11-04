@@ -163,7 +163,7 @@ class StoreStudentRequest extends FormRequest
                 // qui créent des formations legacy), mais on conserve la
                 // vérification du centre et du statut ci-dessus.
                 if ($this->filled('domain') && $formation->domain !== $this->input('domain')) {
-                    $validator->errors()->add('formation_id', __('La formation sélectionnée n\'appartient pas au domaine choisi.'));
+                    $validator->errors()->add('formation_id', __('La formation sélectionnée n\'appartient pas à la formation générale choisie.'));
                 }
 
                 // ── Prix final personnalisé : le tarif officiel fait foi, side DB ──
@@ -228,7 +228,7 @@ class StoreStudentRequest extends FormRequest
         return [
             'user_id' => __('compte utilisateur élève'),
             'center_id' => __('centre éducatif'),
-            'domain' => __('domaine de formation'),
+            'domain' => __('formation générale'),
             'formation_id' => __('formation'),
             'first_name' => __('prénom'),
             'last_name' => __('nom'),

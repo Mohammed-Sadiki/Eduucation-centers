@@ -8,7 +8,7 @@
 @endphp
 
 @section('title', $pageTitle . ' — ' . config('app.name'))
-@section('description', __('Ajoutez une formation générale directement rattachée au centre, sans domaine ni sous-formation.'))
+@section('description', __('Ajoutez une formation générale directement rattachée au centre.'))
 
 @section('content')
 

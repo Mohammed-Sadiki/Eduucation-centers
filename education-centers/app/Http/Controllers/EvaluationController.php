@@ -12,6 +12,7 @@ use App\Services\TeacherPortalService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class EvaluationController extends Controller
@@ -22,6 +23,7 @@ class EvaluationController extends Controller
     {
         Gate::authorize('viewAny', Evaluation::class);
         $user = $request->user();
+        $perimeter = $this->perimeter($user);
         $teacher = null;
         if ($user->isCenterAdmin()) {
             $query = Evaluation::query()->with(['classRoom', 'formation', 'teacher.user'])
@@ -39,8 +41,9 @@ class EvaluationController extends Controller
         } else {
             $query = Evaluation::query()->with(['classRoom', 'formation', 'teacher.user']);
         }
-        // Filtrage par domaine actif
-        $query = $this->applyDomainScope($query);
+        // Périmètre pédagogique unique : formations générales actives du centre
+        // autorité + domaine actif. Le tableau suit donc exactement le filtre.
+        $query = $perimeter->applyTo($query);
         if ($classId = $request->input('class_id')) {
             $query->where('class_id', $classId);
         }
@@ -48,11 +51,12 @@ class EvaluationController extends Controller
             $query->where('type', $type);
         }
         $evaluations = $query->latest('evaluation_date')->paginate(15)->withQueryString();
-        $centerId = $user->isSuperAdmin() ? null : $user->center_id;
         if ($user->isTeacher()) {
-            $classes = $this->portal->classesQuery($teacher)->orderBy('name')->get();
+            // Un professeur ne voit que ses classes affectées, rattachées à une
+            // formation générale de son centre.
+            $classes = $perimeter->classesForSelect($this->portal->classIds($teacher));
         } else {
-            $classes = ClassRoom::when($centerId, fn ($q) => $q->where('center_id', $centerId))->orderBy('name')->get();
+            $classes = $perimeter->classesForSelect();
         }
         $centers = $user->isSuperAdmin() ? Center::orderBy('name')->get() : collect();
 
@@ -63,13 +67,13 @@ class EvaluationController extends Controller
     {
         Gate::authorize('create', Evaluation::class);
         $user = $request->user();
+        $perimeter = $this->perimeter($user, $user->isSuperAdmin() ? $request->input('center_id') : null);
         $centerId = $user->isSuperAdmin() ? $request->input('center_id') : $user->center_id;
         if ($user->isTeacher()) {
             // Création possible uniquement pour une classe affectée au professeur.
-            $classes = $this->portal->classesQuery($this->portal->teacherFor($user))
-                ->where('status', 'active')->orderBy('name')->get();
+            $classes = $perimeter->classesForSelect($this->portal->classIds($this->portal->teacherFor($user)), activeOnly: true);
         } else {
-            $classes = ClassRoom::when($centerId, fn ($q) => $q->where('center_id', $centerId))->where('status', 'active')->orderBy('name')->get();
+            $classes = $perimeter->classesForSelect(activeOnly: true);
         }
         $centers = $user->isSuperAdmin() ? Center::orderBy('name')->get() : collect();
 
@@ -80,6 +84,7 @@ class EvaluationController extends Controller
     {
         Gate::authorize('create', Evaluation::class);
         $user = $request->user();
+        $perimeter = $this->perimeter($user);
         $centerId = $user->isSuperAdmin() ? (int) $request->input('center_id') : $user->center_id;
         $data = $request->validate([
             'class_id' => ['required', 'integer', 'exists:classes,id'],
@@ -100,8 +105,17 @@ class EvaluationController extends Controller
             // une classe non attribuée est refusée même via requête directe.
             $this->portal->assertClassAccess($this->portal->teacherFor($user), $class);
         }
+        // La classe doit relever d'une formation générale active du périmètre
+        // autorisé : un `<select>` n'est jamais une sécurité.
+        if (! $perimeter->allowsClass((int) $class->id)) {
+            throw ValidationException::withMessages([
+                'class_id' => __('La classe doit appartenir à une formation générale active de votre périmètre.'),
+            ]);
+        }
         $data['center_id'] = $centerId;
-        $data['formation_id'] = $class->formation_id;
+        // Rattachement à la formation générale de la classe : la nouvelle donnée
+        // est d'emblée conforme à l'architecture Centre → Formation → Classe.
+        $data['formation_id'] = $class->generalFormationModel()?->id ?? $class->formation_id;
         // teacher_id est toujours dérivé de l'utilisateur authentifié pour un
         // professeur ; jamais de la requête du navigateur.
         $data['teacher_id'] = $user->isTeacher() ? $this->portal->teacherFor($user)?->id : ($request->input('teacher_id') ?: null);
@@ -127,10 +141,11 @@ class EvaluationController extends Controller
         Gate::authorize('update', $evaluation);
         $user = request()->user();
         $evaluation->load(['classRoom']);
+        $perimeter = $this->perimeter($user, $evaluation->center_id);
         if ($user->isTeacher()) {
-            $classes = $this->portal->classesQuery($this->portal->teacherFor($user))->orderBy('name')->get();
+            $classes = $perimeter->classesForSelect($this->portal->classIds($this->portal->teacherFor($user)));
         } else {
-            $classes = ClassRoom::where('center_id', $evaluation->center_id)->orderBy('name')->get();
+            $classes = $perimeter->classesForSelect();
         }
 
         return view('evaluations.edit', compact('evaluation', 'classes'));

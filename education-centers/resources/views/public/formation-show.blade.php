@@ -18,7 +18,7 @@
     <ul class="mt-4 space-y-2">
         @forelse($formation->classes as $class)
             <li class="rounded-lg border border-slate-200 px-4 py-3 text-sm dark:border-slate-800">
-                {{ $class->name }} ({{ $class->code }}{{ __(') · capacité') }} {{ $class->capacity ?? __('illimitée') }}
+                {{ $class->perimeter_label }} ({{ $class->code }}{{ __(') · capacité') }} {{ $class->capacity ?? __('illimitée') }}
             </li>
         @empty
             <li class="text-sm text-slate-500">{{ __('Aucune classe listée.') }}</li>

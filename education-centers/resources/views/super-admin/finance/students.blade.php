@@ -336,7 +336,7 @@
                                                 {{ $pay->student->full_name }}
                                             </td>
                                             <td class="py-3 px-4 text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                                                {{ $pay->formation->name }}
+                                                {{ $pay->formation->general_formation_name }}
                                                 <span class="text-slate-400 text-xs">({{ $pay->formation->center->name ?? '' }})</span>
                                             </td>
                                             <td class="py-3 px-4 whitespace-nowrap">
@@ -411,7 +411,7 @@
                                 </td>
                                 <td class="py-3 px-4 whitespace-nowrap">
                                     <div class="font-medium text-slate-800 dark:text-slate-200">
-                                        {{ $row->formation->name }}
+                                        {{ $row->formation->general_formation_name }}
                                     </div>
                                     <div class="text-2xs text-slate-400">
                                         {{ $row->formation->center->name ?? '' }} · {{ $row->enrollment->school_year }}
@@ -513,7 +513,7 @@
                                     </div>
                                 </td>
                                 <td class="py-3 px-4 whitespace-nowrap">
-                                    <div class="font-medium text-slate-800 dark:text-slate-200">{{ $debtor->formation->name }}</div>
+                                    <div class="font-medium text-slate-800 dark:text-slate-200">{{ $debtor->formation->general_formation_name }}</div>
                                     <div class="text-2xs text-slate-400">{{ $debtor->formation->center->name ?? '' }}</div>
                                 </td>
                                 <td class="py-3 px-4 text-end text-slate-600 dark:text-slate-300 whitespace-nowrap">

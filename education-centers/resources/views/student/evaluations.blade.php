@@ -41,7 +41,7 @@
                         <option value="">{{ __('Toutes mes classes') }}</option>
                         @foreach($classes as $class)
                             <option value="{{ $class->id }}" @selected((int) $classId === (int) $class->id)>
-                                {{ $class->name }}{{ $class->code ? ' ('.$class->code.')' : '' }}
+                                {{ $class->perimeter_label }}{{ $class->code ? ' ('.$class->code.')' : '' }}
                             </option>
                         @endforeach
                     </select>
@@ -91,9 +91,9 @@
                         <td>
                             <p class="font-semibold text-slate-800 dark:text-slate-100">{{ $evaluation->title }}</p>
                             <p class="mt-0.5 text-xs text-slate-500">
-                                {{ $evaluation->formation?->name ?? __('Formation') }}
+                                {{ $evaluation->formation?->general_formation_name ?? __('Formation') }}
                                 @if($evaluation->classRoom?->name)
-                                    · {{ $evaluation->classRoom->name }}
+                                    · {{ $evaluation->classRoom->perimeter_label }}
                                 @endif
                             </p>
                             @if($evaluation->teacher?->full_name)

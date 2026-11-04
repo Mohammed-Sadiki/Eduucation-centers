@@ -35,10 +35,10 @@
         <a href="{{ $backRoute }}"
            id="class-plan-back-domaines"
            class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:border-slate-300 hover:bg-slate-50 hover:text-brand-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:text-brand-400 transition"
-           title="{{ __('Retour aux domaines') }}"
+           title="{{ __('Retour aux formations générales') }}"
         >
             <x-icon name="arrow-left" class="h-4 w-4 rtl:rotate-180" stroke-width="2" />
-            {{ __('Retour aux domaines') }}
+            {{ __('Retour aux formations générales') }}
         </a>
     </div>
 </div>
@@ -312,9 +312,9 @@
 @php
     $jsClasses = $classes->map(fn($c) => [
         'id' => $c->id,
-        'name' => $c->name,
+        'name' => $c->group_label,
         'code' => $c->code,
-        'formation' => $c->formation?->name,
+        'formation' => $c->formation?->general_formation_name,
     ])->values();
     // Photo : la même URL que celle de « Détails de l'étudiant ». Le chemin est
     // stocké sur le disque privé, donc asset('storage/…') (disque public) produit
@@ -333,8 +333,8 @@
         substr($selectedTeacher?->last_name ?? '', 0, 1) .
         substr($selectedTeacher?->first_name ?? '', 0, 1)
     );
-    $jsFormationName = addslashes($selectedClass?->formation?->name ?? '');
-    $jsClassName = addslashes($selectedClass?->name ?? '');
+    $jsFormationName = addslashes($selectedClass?->formation?->general_formation_name ?? '');
+    $jsClassName = addslashes($selectedClass?->group_label ?? '');
 @endphp
 <script>
 function classPlanApp() {

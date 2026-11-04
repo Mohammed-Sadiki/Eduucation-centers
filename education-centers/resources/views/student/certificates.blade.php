@@ -57,7 +57,7 @@
                         <div class="sm:col-span-2">
                             <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('Formation') }}</dt>
                             <dd class="mt-0.5 text-sm font-medium text-slate-800 dark:text-slate-100">
-                                {{ $certificate->formation?->name ?? '—' }}
+                                {{ $certificate->formation?->general_formation_name ?? '—' }}
                             </dd>
                         </div>
                         <div>

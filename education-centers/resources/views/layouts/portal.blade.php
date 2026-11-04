@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', __('Portail Domaines - Education Centers'))</title>
-    <meta name="description" content="@yield('description', __('Portail de sélection des domaines pour le Super Administrateur.'))">
+    <title>@yield('title', __('Portail des formations générales - Education Centers'))</title>
+    <meta name="description" content="@yield('description', __('Portail de sélection des formations générales pour le Super Administrateur.'))">
     @include('layouts.partials.fonts')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">

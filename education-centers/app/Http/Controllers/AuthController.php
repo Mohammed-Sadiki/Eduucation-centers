@@ -27,9 +27,9 @@ class AuthController extends Controller
         }
 
         $stats = [
-            'centers'    => Center::where('status', 'active')->count(),
-            'students'   => Student::where('status', 'active')->count(),
-            'formations' => Formation::where('status', 'active')->count(),
+            'centers' => Center::where('status', 'active')->count(),
+            'students' => Student::where('status', 'active')->count(),
+            'formations' => Formation::query()->current()->where('status', 'active')->count(),
         ];
 
         return view('auth.login', compact('stats'));

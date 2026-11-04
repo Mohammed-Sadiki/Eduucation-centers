@@ -6,7 +6,7 @@
 @section('breadcrumb')
     <li class="flex items-center gap-2">
         <x-icon name="chevron-left" class="h-3 w-3 text-slate-400 rotate-180" />
-        <a href="{{ route('super-admin.domaines') }}" class="hover:text-brand-700 dark:hover:text-brand-400 transition-colors">{{ __('Portail domaines') }}</a>
+        <a href="{{ route('super-admin.domaines') }}" class="hover:text-brand-700 dark:hover:text-brand-400 transition-colors">{{ __('Portail des formations générales') }}</a>
     </li>
     <li class="flex items-center gap-2">
         <x-icon name="chevron-left" class="h-3 w-3 text-slate-400 rotate-180" />

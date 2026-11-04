@@ -2,15 +2,23 @@
 
 namespace App\Models;
 
+use App\Concerns\HasDomainScope;
+use App\Models\Concerns\HasContextScope;
+use App\Support\AcademicPerimeter;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class Teacher extends Model
 {
+    use HasContextScope;
+    use HasDomainScope;
     use HasFactory;
-    use \App\Concerns\HasDomainScope;
-    use \App\Models\Concerns\HasContextScope;
 
     /**
      * The attributes that are mass assignable.
@@ -50,8 +58,8 @@ class Teacher extends Model
     protected function casts(): array
     {
         return [
-            'date_of_birth'  => 'date',
-            'hire_date'      => 'date',
+            'date_of_birth' => 'date',
+            'hire_date' => 'date',
             'monthly_salary' => 'decimal:2',
         ];
     }
@@ -83,7 +91,7 @@ class Teacher extends Model
     /**
      * Classes auxquelles ce professeur est affecté.
      */
-    public function classes(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function classes(): BelongsToMany
     {
         return $this->belongsToMany(ClassRoom::class, 'class_teacher', 'teacher_id', 'class_id')
             ->withTimestamps();
@@ -92,7 +100,7 @@ class Teacher extends Model
     /**
      * Relation : Séances d'emploi du temps du professeur.
      */
-    public function schedules(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function schedules(): HasMany
     {
         return $this->hasMany(Schedule::class);
     }
@@ -100,7 +108,7 @@ class Teacher extends Model
     /**
      * Fiches de salaire du professeur (module Finance existant).
      */
-    public function salaries(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function salaries(): HasMany
     {
         return $this->hasMany(TeacherSalary::class);
     }
@@ -108,7 +116,7 @@ class Teacher extends Model
     /**
      * Relation vers les modèles Domain via le pivot teacher_domains.
      */
-    public function teachingDomains(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function teachingDomains(): BelongsToMany
     {
         return $this->belongsToMany(Domain::class, 'teacher_domains', 'teacher_id', 'domain_slug', 'id', 'slug')
             ->withTimestamps();
@@ -118,7 +126,7 @@ class Teacher extends Model
      * Synchronise les domaines d'enseignement d'un professeur.
      * Met également à jour la colonne `domain` (premier domaine ou null) pour rétro-compatibilité.
      *
-     * @param array<int, string> $slugs
+     * @param  array<int, string>  $slugs
      */
     public function syncTeachingDomains(array $slugs): void
     {
@@ -137,27 +145,73 @@ class Teacher extends Model
      * son domaine principal (colonne `domain`), les domaines déclarés via `teacher_domains`
      * OU tout domaine de classe auquel il est affecté via le pivot `class_teacher`.
      */
-    public function scopeForDomain(\Illuminate\Database\Eloquent\Builder $query, ?string $slug): \Illuminate\Database\Eloquent\Builder
+    public function scopeForDomain(Builder $query, ?string $slug): Builder
     {
         if (! $slug || $slug === 'all') {
             return $query;
         }
 
-        return $query->where(function (\Illuminate\Database\Eloquent\Builder $q) use ($slug) {
+        return $query->where(function (Builder $q) use ($slug) {
             $q->where('domain', $slug)
-                ->orWhereHas('teachingDomains', fn (\Illuminate\Database\Eloquent\Builder $d) => $d->where('domains.slug', $slug))
-                ->orWhereHas('classes.formation', fn (\Illuminate\Database\Eloquent\Builder $f) => $f->where('domain', $slug));
+                ->orWhereHas('teachingDomains', fn (Builder $d) => $d->where('domains.slug', $slug))
+                ->orWhereHas('classes.formation', fn (Builder $f) => $f->where('domain', $slug));
+        });
+    }
+
+    /**
+     * Même règle que `forDomain`, mais résolue par l'autorité unique du périmètre
+     * {@see AcademicPerimeter} : un professeur relève d'une formation
+     * générale quand il y est rattaché (formation principale), quand il enseigne
+     * dans une classe de cette formation (alias historiques inclus) ou quand il
+     * déclare le domaine de cette formation (colonne propre ou pivot).
+     *
+     * Le trait `HasDomainScope` ne peut pas deviner ces chemins ici (la table
+     * `teachers` porte sa propre colonne `domain` et un rattachement multiple) :
+     * cette surcharge est donc obligatoire pour que la liste des professeurs et
+     * les espaces de formation utilisent exactement le même filtre.
+     *
+     * @param  list<int>  $formationIds
+     */
+    public function scopeWithinGeneralFormations(Builder $query, array $formationIds, bool $keepUnattached = false): Builder
+    {
+        $slugs = Formation::query()
+            ->whereIn('id', $formationIds)
+            ->whereNotNull('domain')
+            ->distinct()
+            ->pluck('domain')
+            ->all();
+
+        return $query->where(function (Builder $q) use ($formationIds, $slugs, $keepUnattached) {
+            $q->whereIn('formation_id', $formationIds)
+                ->orWhereHas('classes.formation', fn (Builder $f) => $f->whereIn('formations.id', $formationIds));
+
+            if ($slugs !== []) {
+                $q->orWhereIn('domain', $slugs)
+                    ->orWhereHas('teachingDomains', fn (Builder $d) => $d->whereIn('domains.slug', $slugs));
+            }
+
+            if ($keepUnattached) {
+                // Un professeur qui n'est rattaché à AUCUN périmètre (ni formation
+                // principale, ni classe, ni domaine déclaré) n'est pas un reliquat
+                // de l'ancienne hiérarchie : il reste visible dans la liste.
+                $q->orWhere(function (Builder $u) {
+                    $u->whereNull('formation_id')
+                        ->where(fn (Builder $d) => $d->whereNull('domain')->orWhere('domain', ''))
+                        ->doesntHave('classes')
+                        ->doesntHave('teachingDomains');
+                });
+            }
         });
     }
 
     /**
      * Slugs des domaines d'un professeur (pivot teacher_domains + domaine principal + classes affectées).
      *
-     * @return \Illuminate\Support\Collection<int, string>
+     * @return Collection<int, string>
      */
-    public function domainSlugs(): \Illuminate\Support\Collection
+    public function domainSlugs(): Collection
     {
-        $fromPivot = \Illuminate\Support\Facades\DB::table('teacher_domains')
+        $fromPivot = DB::table('teacher_domains')
             ->where('teacher_id', $this->id)
             ->pluck('domain_slug');
 
@@ -177,7 +231,7 @@ class Teacher extends Model
     /**
      * Domaines (modèles) d'un professeur.
      */
-    public function domains(): \Illuminate\Support\Collection
+    public function domains(): Collection
     {
         return Domain::whereIn('slug', $this->domainSlugs())->ordered()->get();
     }

@@ -5,11 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreEnrollmentRequest;
 use App\Http\Requests\UpdateEnrollmentRequest;
 use App\Models\Center;
-use App\Models\ClassRoom;
 use App\Models\Enrollment;
-use App\Models\Formation;
 use App\Models\Student;
 use App\Services\EnrollmentStatusService;
+use App\Support\AcademicPerimeter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -29,6 +28,7 @@ class EnrollmentController extends Controller
         Gate::authorize('viewAny', Enrollment::class);
 
         $authUser = $request->user();
+        $perimeter = $this->perimeter($authUser, $authUser->isSuperAdmin() ? (int) $request->input('center_id') : null);
 
         $query = Enrollment::query()->with([
             'center',
@@ -42,8 +42,9 @@ class EnrollmentController extends Controller
             $query->where('center_id', $authUser->center_id);
         }
 
-        // Filtrage par domaine actif
-        $query = $this->applyDomainScope($query);
+        // Périmètre pédagogique unique : formations générales actives du centre
+        // autorisé + domaine actif. Le tableau suit donc exactement les filtres.
+        $query = $perimeter->applyTo($query);
 
         // Filtre : centre pour Super Admin
         if ($authUser->isSuperAdmin() && ($centerId = $request->input('center_id'))) {
@@ -67,9 +68,11 @@ class EnrollmentController extends Controller
             $query->where('status', $status);
         }
 
-        // Filtre : formation
-        if ($formationId = $request->input('formation_id')) {
-            $query->where('formation_id', $formationId);
+        // Filtre : formation générale. Les données des anciennes sous-formations
+        // rattachées à cette formation sont incluses (même jeu que le déroulant).
+        $selectedFormationId = $request->input('formation_id') ? (int) $request->input('formation_id') : null;
+        if ($selectedFormationId) {
+            $query->whereIn('formation_id', $perimeter->formationIds($selectedFormationId));
         }
 
         // Filtre : classe
@@ -84,22 +87,12 @@ class EnrollmentController extends Controller
 
         $enrollments = $query->latest('id')->paginate(15)->withQueryString();
 
-        // Données pour les filtres
-        $targetCenterId = $authUser->isCenterAdmin() ? $authUser->center_id : $request->input('center_id');
-
-        $formationsQuery = Formation::query()
-            ->where('is_official', true)
-            ->where('status', 'active')
-            ->orderBy('name');
-        $classesQuery = ClassRoom::query()->orderBy('name');
-
-        if ($targetCenterId) {
-            $formationsQuery->where('center_id', $targetCenterId);
-            $classesQuery->where('center_id', $targetCenterId);
-        }
-
-        $formations = $formationsQuery->get();
-        $classes = $classesQuery->get();
+        // Données pour les filtres : une seule autorité. Les classes proposées
+        // appartiennent à la formation sélectionnée quand elle l'est.
+        $formations = $perimeter->formationsQuery()->get();
+        $classes = $perimeter->classesForSelect(
+            $selectedFormationId ? $perimeter->classesQuery($selectedFormationId)->pluck('id')->all() : null
+        );
         $centers = $authUser->isSuperAdmin() ? Center::orderBy('name')->get() : collect();
 
         return view('enrollments.index', compact('enrollments', 'formations', 'classes', 'centers'));
@@ -125,23 +118,13 @@ class EnrollmentController extends Controller
             ->orderBy('last_name')
             ->get();
 
-        // Nouveau parcours : seules les six formations générales officielles
-        // actives sont proposées à l'inscription. Les sous-formations legacy
-        // restent lisibles dans les fiches historiques mais ne peuvent plus
-        // accueillir de nouvelle inscription depuis ce formulaire.
-        $formations = Formation::query()
-            ->where('is_official', true)
-            ->when($selectedCenterId, fn ($q) => $q->where('center_id', $selectedCenterId))
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get();
-
-        $classes = ClassRoom::query()
-            ->when($selectedCenterId, fn ($q) => $q->where('center_id', $selectedCenterId))
-            ->where('status', 'active')
-            ->with('formation')
-            ->orderBy('name')
-            ->get();
+        // Nouveau parcours : seules les formations générales actives du centre
+        // sont proposées à l'inscription. Les sous-formations héritées ne sont
+        // jamais un choix : leurs classes apparaissent sous leur formation
+        // générale, et le champ « classe » suit la formation sélectionnée.
+        $perimeter = $this->perimeter($authUser, $selectedCenterId ? (int) $selectedCenterId : null);
+        $formations = $perimeter->formationsQuery()->get();
+        $classes = $perimeter->classesForSelect(activeOnly: true);
 
         $preselectedStudentId = $request->input('student_id');
         $preselectedFormationId = $request->input('formation_id');
@@ -196,9 +179,11 @@ class EnrollmentController extends Controller
             'classRoom.teachers.user',
         ]);
 
-        // Classes disponibles de cette formation et centre pour affectation lors du passage à 'accepted'
-        $availableClasses = ClassRoom::where('center_id', $enrollment->center_id)
-            ->where('formation_id', $enrollment->formation_id)
+        // Classes disponibles pour l'affectation lors du passage à 'accepted' :
+        // celles de la formation générale de l'inscription (alias historiques
+        // inclus), dans le centre de l'inscription.
+        $availableClasses = $this->perimeter(request()->user(), $enrollment->center_id)
+            ->classesQuery($enrollment->formation_id)
             ->where('status', 'active')
             ->get();
 
@@ -221,26 +206,20 @@ class EnrollmentController extends Controller
             ->orderBy('last_name')
             ->get();
 
-        // Édition : on conserve la formation courante si elle est legacy (elle
-        // doit rester visible pour ne pas casser l'historique), sinon on filtre
-        // sur les formations officielles du centre.
-        $formations = Formation::where('center_id', $enrollment->center_id)
-            ->where(function ($q) use ($enrollment) {
-                $q->where('is_official', true)
-                    ->orWhere('id', $enrollment->formation_id);
-            })
-            ->where('status', 'active')
-            ->orderByDesc('is_official')
-            ->orderBy('name')
-            ->get();
+        // Édition : le choix reste limité aux formations générales actives du
+        // centre. L'inscription héritée est présentée par sa formation générale
+        // (une ancienne sous-formation n'est jamais une option).
+        $perimeter = $this->perimeter($authUser, $enrollment->center_id);
+        $formations = $perimeter->formationsQuery()->get();
+        $selectedFormationId = AcademicPerimeter::generalFormationId($enrollment->formation_id) ?? $enrollment->formation_id;
 
-        $classes = ClassRoom::where('center_id', $enrollment->center_id)
-            ->where('formation_id', $enrollment->formation_id)
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get();
+        // Classes de la formation de l'inscription : celles de sa formation
+        // générale, alias historiques compris.
+        $classes = $perimeter->classesForSelect(
+            $perimeter->classesQuery($enrollment->formation_id)->pluck('id')->all()
+        );
 
-        return view('enrollments.edit', compact('enrollment', 'centers', 'students', 'formations', 'classes'));
+        return view('enrollments.edit', compact('enrollment', 'centers', 'students', 'formations', 'classes', 'selectedFormationId'));
     }
 
     /**

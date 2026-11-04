@@ -19,7 +19,7 @@
 <x-ui.card>
     <dl class="grid gap-3 text-sm sm:grid-cols-2">
         <div><dt class="text-slate-500">{{ __('Étudiant') }}</dt><dd class="font-medium">{{ $invoice->student?->full_name }}</dd></div>
-        <div><dt class="text-slate-500">{{ __('Formation') }}</dt><dd>{{ $invoice->enrollment?->formation?->name ?? $invoice->formation?->name ?? '—' }}</dd></div>
+        <div><dt class="text-slate-500">{{ __('Formation') }}</dt><dd>{{ $invoice->enrollment?->formation?->general_formation_name ?? $invoice->formation?->general_formation_name ?? '—' }}</dd></div>
         <div><dt class="text-slate-500">{{ __('Date') }}</dt><dd>{{ format_date($invoice->invoice_date, 'd/m/Y') }}</dd></div>
         <div><dt class="text-slate-500">{{ __('Statut') }}</dt><dd><x-status-badge type="invoice" :status="$invoice->status" /></dd></div>
     </dl>

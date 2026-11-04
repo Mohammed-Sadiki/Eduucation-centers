@@ -9,9 +9,11 @@ use App\Services\OfficialFormationService;
 use App\Support\DomainRegistry;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 /**
@@ -68,11 +70,11 @@ class GeneralFormationController extends Controller
             ->get();
 
         return view('formations-generales.index', [
-            'domains'        => $domains,
+            'domains' => $domains,
             'officialByCode' => $officialByCode,
             'customFormations' => $customFormations,
-            'centers'        => $centers,
-            'centerId'       => $centerId,
+            'centers' => $centers,
+            'centerId' => $centerId,
         ]);
     }
 
@@ -95,9 +97,9 @@ class GeneralFormationController extends Controller
 
         if ($authUser->isCenterAdmin()) {
             $centerId = (int) $authUser->center_id;
-            $centers  = collect();
+            $centers = collect();
         } else {
-            $centers  = Center::orderBy('name')->get();
+            $centers = Center::orderBy('name')->get();
             $centerId = (int) $request->query('center_id', (string) ($centers->first()->id ?? 0));
         }
 
@@ -118,11 +120,11 @@ class GeneralFormationController extends Controller
             ->get();
 
         return view('formations-generales.picker', [
-            'domains'          => $domains,
-            'officialByCode'   => $officialByCode,
+            'domains' => $domains,
+            'officialByCode' => $officialByCode,
             'customFormations' => $customFormations,
-            'centers'          => $centers,
-            'centerId'         => $centerId,
+            'centers' => $centers,
+            'centerId' => $centerId,
         ]);
     }
 
@@ -143,7 +145,7 @@ class GeneralFormationController extends Controller
         } else {
             // Super Admin : centre choisi via ?center_id, sinon premier centre
             // (même résolution que index()/picker() — jamais d'écran vide).
-            $centers  = Center::query()->orderBy('name')->get();
+            $centers = Center::query()->orderBy('name')->get();
             $centerId = (int) $request->query('center_id', (string) ($centers->first()->id ?? 0));
         }
 
@@ -156,7 +158,7 @@ class GeneralFormationController extends Controller
             ->get();
 
         return view('formations-generales.create-custom', [
-            'center'         => $center,
+            'center' => $center,
             'centerTeachers' => $centerTeachers,
         ]);
     }
@@ -186,18 +188,18 @@ class GeneralFormationController extends Controller
         }
 
         $data = $request->validate([
-            'name'           => ['required', 'string', 'max:255',
+            'name' => ['required', 'string', 'max:255',
                 Rule::unique('formations', 'name')
                     ->where('center_id', $centerId)
                     ->where('is_official', true)],
-            'description'    => ['nullable', 'string', 'max:2000'],
+            'description' => ['nullable', 'string', 'max:2000'],
             'duration_weeks' => ['nullable', 'integer', 'min:1', 'max:520'],
             'duration_hours' => ['nullable', 'integer', 'min:1', 'max:10000'],
-            'annual_price'   => ['required', 'numeric', 'min:0'],
-            'currency'       => ['nullable', 'string', 'max:8'],
-            'status'         => ['required', 'in:active,inactive'],
-            'teacher_id'     => ['nullable', 'integer', 'exists:teachers,id'],
-            'image'          => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'annual_price' => ['required', 'numeric', 'min:0'],
+            'currency' => ['nullable', 'string', 'max:8'],
+            'status' => ['required', 'in:active,inactive'],
+            'teacher_id' => ['nullable', 'integer', 'exists:teachers,id'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
         // Professeur du même centre obligatoirement (facultatif à la création).
@@ -217,20 +219,20 @@ class GeneralFormationController extends Controller
             : null;
 
         $formation = Formation::query()->create([
-            'center_id'      => $centerId,
-            'name'           => $data['name'],
+            'center_id' => $centerId,
+            'name' => $data['name'],
             // Code technique auto-généré, unique par centre (cf. index unique).
-            'code'           => strtoupper(sprintf('CF-%s-%s', $center->code, Str::random(6))),
-            'description'    => $data['description'] ?? null,
+            'code' => strtoupper(sprintf('CF-%s-%s', $center->code, Str::random(6))),
+            'description' => $data['description'] ?? null,
             'duration_weeks' => $data['duration_weeks'] ?? null,
             'duration_hours' => $data['duration_hours'] ?? null,
-            'annual_price'   => $data['annual_price'],
-            'currency'       => $data['currency'] ?? default_currency(),
-            'status'         => $data['status'],
-            'is_official'    => true,
-            'official_code'  => null,
-            'teacher_id'     => $data['teacher_id'] ?? null,
-            'image_path'     => $imagePath,
+            'annual_price' => $data['annual_price'],
+            'currency' => $data['currency'] ?? default_currency(),
+            'status' => $data['status'],
+            'is_official' => true,
+            'official_code' => null,
+            'teacher_id' => $data['teacher_id'] ?? null,
+            'image_path' => $imagePath,
         ]);
 
         return redirect()
@@ -257,8 +259,8 @@ class GeneralFormationController extends Controller
             ->get();
 
         return view('formations-generales.create-custom', [
-            'formation'      => $formation,
-            'center'         => $formation->center,
+            'formation' => $formation,
+            'center' => $formation->center,
             'centerTeachers' => $centerTeachers,
         ]);
     }
@@ -272,19 +274,19 @@ class GeneralFormationController extends Controller
         abort_unless($formation->official_code === null, 404);
 
         $data = $request->validate([
-            'name'           => ['required', 'string', 'max:255',
+            'name' => ['required', 'string', 'max:255',
                 Rule::unique('formations', 'name')
                     ->where('center_id', $formation->center_id)
                     ->where('is_official', true)
                     ->ignore($formation->id)],
-            'description'    => ['nullable', 'string', 'max:2000'],
+            'description' => ['nullable', 'string', 'max:2000'],
             'duration_weeks' => ['nullable', 'integer', 'min:1', 'max:520'],
             'duration_hours' => ['nullable', 'integer', 'min:1', 'max:10000'],
-            'annual_price'   => ['required', 'numeric', 'min:0'],
-            'currency'       => ['nullable', 'string', 'max:8'],
-            'status'         => ['required', 'in:active,inactive'],
-            'teacher_id'     => ['nullable', 'integer', 'exists:teachers,id'],
-            'image'          => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'annual_price' => ['required', 'numeric', 'min:0'],
+            'currency' => ['nullable', 'string', 'max:8'],
+            'status' => ['required', 'in:active,inactive'],
+            'teacher_id' => ['nullable', 'integer', 'exists:teachers,id'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
         if (! empty($data['teacher_id'])) {
@@ -302,19 +304,19 @@ class GeneralFormationController extends Controller
             $data['image'] = null;
             $formation->image_path = $request->file('image')->store('formations', 'public');
             if ($oldPath && $oldPath !== $formation->image_path) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+                Storage::disk('public')->delete($oldPath);
             }
         }
 
         $formation->fill([
-            'name'           => $data['name'],
-            'description'    => $data['description'] ?? null,
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
             'duration_weeks' => $data['duration_weeks'] ?? null,
             'duration_hours' => $data['duration_hours'] ?? null,
-            'annual_price'   => $data['annual_price'],
-            'currency'       => $data['currency'] ?? $formation->currency,
-            'status'         => $data['status'],
-            'teacher_id'     => $data['teacher_id'] ?? null,
+            'annual_price' => $data['annual_price'],
+            'currency' => $data['currency'] ?? $formation->currency,
+            'status' => $data['status'],
+            'teacher_id' => $data['teacher_id'] ?? null,
         ])->save();
 
         return redirect()
@@ -331,7 +333,7 @@ class GeneralFormationController extends Controller
         $this->authorizeOfficial($request, $formation, 'delete');
         abort_unless($formation->official_code === null, 404);
 
-        if ($formation->classes()->exists() || $formation->enrollments()->whereIn('status', ['accepted', 'pending', 'under_review'])->exists()) {
+        if ($formation->perimeterClasses()->exists() || $formation->perimeterEnrollments()->whereIn('status', ['accepted', 'pending', 'under_review'])->exists()) {
             return back()->with('error', __('Impossible de supprimer une formation qui possède encore des classes ou des inscriptions actives.'));
         }
 
@@ -339,7 +341,7 @@ class GeneralFormationController extends Controller
         $name = $formation->name;
 
         if ($formation->image_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($formation->image_path);
+            Storage::disk('public')->delete($formation->image_path);
         }
 
         $formation->delete();
@@ -363,7 +365,7 @@ class GeneralFormationController extends Controller
 
         $data = $request->validate([
             'official_code' => ['required', 'string', 'max:100'],
-            'center_id'     => ['nullable', 'integer', 'exists:centers,id'],
+            'center_id' => ['nullable', 'integer', 'exists:centers,id'],
         ]);
 
         // L'Admin Centre force son propre centre ; le Super Admin peut cibler.
@@ -389,17 +391,17 @@ class GeneralFormationController extends Controller
         // ré-exécution), on ouvre directement son édition — pas de doublon.
         $formation = Formation::query()->firstOrCreate(
             [
-                'center_id'     => $centerId,
+                'center_id' => $centerId,
                 'official_code' => $data['official_code'],
-                'is_official'   => true,
+                'is_official' => true,
             ],
             [
-                'domain'      => $data['official_code'],
-                'name'        => $domain?->name ?? $data['official_code'],
-                'code'        => sprintf('OF-%s-%s', strtoupper($center->code), strtoupper(str_replace('-', '_', $data['official_code']))),
-                'status'      => 'active',
-                'teacher_id'  => null,
-                'currency'    => default_currency(),
+                'domain' => $data['official_code'],
+                'name' => $domain?->name ?? $data['official_code'],
+                'code' => sprintf('OF-%s-%s', strtoupper($center->code), strtoupper(str_replace('-', '_', $data['official_code']))),
+                'status' => 'active',
+                'teacher_id' => null,
+                'currency' => default_currency(),
             ]
         );
 
@@ -423,8 +425,8 @@ class GeneralFormationController extends Controller
             ->get();
 
         return view('formations-generales.configure', [
-            'formation'      => $formation,
-            'domain'         => DomainRegistry::find($formation->official_code),
+            'formation' => $formation,
+            'domain' => DomainRegistry::find($formation->official_code),
             'centerTeachers' => $centerTeachers,
         ]);
     }
@@ -444,18 +446,18 @@ class GeneralFormationController extends Controller
         $isCustom = $formation->official_code === null;
 
         $data = $request->validate([
-            'name'           => [$isCustom ? 'required' : 'nullable', 'string', 'max:255',
+            'name' => [$isCustom ? 'required' : 'nullable', 'string', 'max:255',
                 Rule::unique('formations', 'name')
                     ->where('center_id', $formation->center_id)
                     ->where('is_official', true)
                     ->ignore($formation->id)],
-            'description'    => ['nullable', 'string', 'max:2000'],
-            'annual_price'   => ['nullable', 'numeric', 'min:0'],
-            'currency'       => ['nullable', 'string', 'max:8'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'annual_price' => ['nullable', 'numeric', 'min:0'],
+            'currency' => ['nullable', 'string', 'max:8'],
             'duration_hours' => ['nullable', 'integer', 'min:0', 'max:10000'],
             'duration_weeks' => ['nullable', 'integer', 'min:0', 'max:520'],
-            'status'         => ['required', 'in:active,inactive'],
-            'teacher_id'     => ['nullable', 'integer', 'exists:teachers,id'],
+            'status' => ['required', 'in:active,inactive'],
+            'teacher_id' => ['nullable', 'integer', 'exists:teachers,id'],
         ]);
 
         // Le professeur doit appartenir au même centre que la formation
@@ -473,14 +475,14 @@ class GeneralFormationController extends Controller
         // is_official : la configuration reste strictement cantonnée aux champs
         // métier affichés. Le nom n'est modifiable que pour les personnalisées.
         $formation->fill(array_filter([
-            'name'           => $isCustom ? ($data['name'] ?? null) : null,
-            'description'    => $data['description']    ?? $formation->description,
-            'annual_price'   => $data['annual_price']   ?? null,
-            'currency'       => $data['currency']       ?? $formation->currency,
+            'name' => $isCustom ? ($data['name'] ?? null) : null,
+            'description' => $data['description'] ?? $formation->description,
+            'annual_price' => $data['annual_price'] ?? null,
+            'currency' => $data['currency'] ?? $formation->currency,
             'duration_hours' => $data['duration_hours'] ?? null,
             'duration_weeks' => $data['duration_weeks'] ?? null,
-            'status'         => $data['status'],
-            'teacher_id'     => $data['teacher_id']     ?? null,
+            'status' => $data['status'],
+            'teacher_id' => $data['teacher_id'] ?? null,
         ], fn ($v) => $v !== null))->save();
 
         return redirect()
@@ -498,9 +500,12 @@ class GeneralFormationController extends Controller
 
         $formation->load(['center', 'teacher']);
 
-        $classes = $formation->classes()->orderBy('code')->get();
+        // Classes et élèves du périmètre (alias historiques inclus) : sans cela,
+        // une formation générale officielle dont les classes sont encore rattachées
+        // à une ancienne sous-formation afficherait un espace vide.
+        $classes = $formation->perimeterClasses()->orderBy('code')->get();
 
-        $studentsCount = $formation->enrollments()
+        $studentsCount = $formation->perimeterEnrollments()
             ->whereIn('status', ['accepted', 'pending', 'under_review'])
             ->distinct('student_id')
             ->count('student_id');
@@ -522,14 +527,14 @@ class GeneralFormationController extends Controller
             ->get();
 
         return view('formations-generales.show', [
-            'formation'      => $formation,
-            'domain'         => DomainRegistry::find($formation->official_code),
-            'classes'        => $classes,
-            'studentsCount'  => $studentsCount,
+            'formation' => $formation,
+            'domain' => DomainRegistry::find($formation->official_code),
+            'classes' => $classes,
+            'studentsCount' => $studentsCount,
             'legacyFormations' => $legacyFormations,
             'centerTeachers' => $centerTeachers,
             'domainDashboardRoute' => $this->domainDashboardRoute($request, (string) $formation->official_code),
-            'maxClasses'     => Formation::MAX_CLASSES,
+            'maxClasses' => Formation::MAX_CLASSES,
         ]);
     }
 
@@ -541,11 +546,11 @@ class GeneralFormationController extends Controller
         $this->authorizeOfficial($request, $formation, 'update');
 
         $data = $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
-            'code'        => ['required', 'string', 'max:100', 'unique:classes,code'],
-            'capacity'    => ['nullable', 'integer', 'min:1'],
-            'start_date'  => ['nullable', 'date'],
-            'end_date'    => ['nullable', 'date', 'after_or_equal:start_date'],
+            'name' => ['required', 'string', 'max:255'],
+            'code' => ['required', 'string', 'max:100', 'unique:classes,code'],
+            'capacity' => ['nullable', 'integer', 'min:1'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
         ]);
 
         // Le centre est dérivé de la formation (jamais fourni par le client).
@@ -554,7 +559,7 @@ class GeneralFormationController extends Controller
 
         try {
             $class = $this->formations->createClass($formation, $data);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return back()->withInput()->with('error', $e->getMessage());
         }
 
@@ -579,7 +584,7 @@ class GeneralFormationController extends Controller
 
         try {
             $this->formations->assignResponsible($formation, $teacher);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return back()->withInput()->with('error', $e->getMessage());
         }
 

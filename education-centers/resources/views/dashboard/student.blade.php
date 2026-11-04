@@ -163,13 +163,13 @@
                                 {{ format_date($nextSession->date, 'D d M Y') }} · {{ $nextSession->formatted_time }}
                             </p>
                             <h2 class="mt-1.5 truncate text-xl font-bold text-slate-900 dark:text-white">
-                                {{ $nextSession->title ?: $nextSession->classRoom?->name }}
+                                {{ $nextSession->title ?: $nextSession->classRoom?->perimeter_label }}
                             </h2>
                             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                {{ $nextSession->classRoom?->formation?->name ?? __('Formation') }}
+                                {{ $nextSession->classRoom?->formation?->general_formation_name ?? __('Formation') }}
                                 @if($nextSession->classRoom?->name)
                                     <span class="mx-1.5 text-slate-300 dark:text-slate-600">•</span>
-                                    {{ $nextSession->classRoom->name }}
+                                    {{ $nextSession->classRoom->perimeter_label }}
                                 @endif
                             </p>
                         </div>
@@ -217,7 +217,7 @@
                         $formationEnrollments = $acceptedEnrollments->where('formation_id', $formation->id);
                     @endphp
                     <div class="px-5 py-3.5">
-                        <p class="truncate text-sm font-semibold text-slate-800 dark:text-white">{{ $formation->name }}</p>
+                        <p class="truncate text-sm font-semibold text-slate-800 dark:text-white">{{ $formation->general_formation_name }}</p>
                         <p class="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
                             {{ $formationEnrollments->pluck('classRoom.name')->filter()->unique()->join(', ') ?: __('Classe non affectée') }}
                         </p>
@@ -251,7 +251,7 @@
                         <div class="min-w-0">
                             <p class="truncate font-medium text-slate-800 dark:text-slate-100">{{ $grade->evaluation?->title ?? '—' }}</p>
                             <p class="truncate text-xs text-slate-500">
-                                {{ $grade->evaluation?->formation?->name ?? '' }}
+                                {{ $grade->evaluation?->formation?->general_formation_name ?? '' }}
                                 @if($grade->evaluation?->evaluation_date)
                                     · {{ format_date($grade->evaluation->evaluation_date, 'd/m/Y') }}
                                 @endif

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $class->name)
+@section('title', $class->perimeter_label)
 
 @php
     $centerName = $class->center?->name ?? auth()->user()->center?->name;
@@ -8,8 +8,8 @@
 
 @section('content')
     <x-ui.page-header
-        :title="$class->name"
-        :description="($class->formation?->name ?? __('Formation')) . ' · ' . ($domainLabel ?? '—') . ' · ' . ($centerName ?? '')"
+        :title="$class->perimeter_label"
+        :description="($class->formation?->general_formation_name ?? __('Formation')) . ' · ' . ($domainLabel ?? '—') . ' · ' . ($centerName ?? '')"
     >
         <a href="{{ route('teacher.classes') }}" class="ec-btn-secondary">
             <x-icon name="arrow-uturn-left" class="h-4 w-4 rtl:rotate-180" /> {{ __('Retour') }}
@@ -23,7 +23,7 @@
         <x-ui.stat :label="__('Étudiants inscrits')" :value="format_number($students->count())" icon="user" tone="primary" :hint="$class->capacity ? __('Capacité') . ' : ' . format_number($class->capacity) : null" />
         <x-ui.stat :label="__('Séances programmées')" :value="format_number($schedules->count())" icon="calendar" tone="info" :hint="__('votre classe')" />
         <x-ui.stat :label="__('Évaluations')" :value="format_number($evaluations->count())" icon="chart" tone="warning" :hint="__('10 dernières')" />
-        <x-ui.stat :label="__('Domaine')" :value="$domainLabel ?? '—'" icon="academic" tone="success" :hint="__('Formation')" />
+        <x-ui.stat :label="__('Formation générale')" :value="$domainLabel ?? '—'" icon="academic" tone="success" :hint="__('Formation')" />
     </div>
 
     <div class="grid gap-6 xl:grid-cols-3">
@@ -84,7 +84,7 @@
                     </div>
                     <div class="flex justify-between gap-3">
                         <dt class="text-slate-500">{{ __('Formation') }}</dt>
-                        <dd class="truncate font-medium text-slate-800 dark:text-slate-100">{{ $class->formation?->name ?? '—' }}</dd>
+                        <dd class="truncate font-medium text-slate-800 dark:text-slate-100">{{ $class->formation?->general_formation_name ?? '—' }}</dd>
                     </div>
                     <div class="flex justify-between gap-3">
                         <dt class="text-slate-500">{{ __('Centre') }}</dt>
@@ -126,7 +126,7 @@
                                 <span class="text-2xs text-slate-400" dir="ltr">{{ substr((string) $schedule->end_time, 0, 5) }}</span>
                             </div>
                             <div class="min-w-0 flex-1">
-                                <p class="truncate font-semibold text-slate-800 dark:text-white">{{ $schedule->title ?: $class->name }}</p>
+                                <p class="truncate font-semibold text-slate-800 dark:text-white">{{ $schedule->title ?: $class->perimeter_label }}</p>
                                 <p class="truncate text-xs text-slate-500">
                                     {{ format_date($schedule->date, 'd/m/Y') }}
                                     @if($schedule->room) · {{ $schedule->room->name }} @endif

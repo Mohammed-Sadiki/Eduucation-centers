@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Teacher;
 use App\Models\ClassRoom;
 use App\Models\Enrollment;
-use Illuminate\Http\Request;
+use App\Models\Teacher;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\Gate;
 
 class ClassPlanController extends Controller
 {
@@ -47,7 +46,7 @@ class ClassPlanController extends Controller
             if ($selectedTeacher) {
                 // Classes du professeur
                 $classesQuery = $selectedTeacher->classes()
-                    ->with('formation:id,name,domain')
+                    ->with('formation')
                     ->orderBy('name');
 
                 $classes = $classesQuery->get();
@@ -111,14 +110,18 @@ class ClassPlanController extends Controller
         }
 
         $classes = $teacher->classes()
-            ->with('formation:id,name,domain')
+            ->with('formation')
             ->orderBy('name')
             ->get()
-            ->map(fn ($c) => [
+            // Libellés du périmètre : le groupe seul (« Groupe A »), car la
+            // formation générale est renvoyée à côté ; jamais le nom d'une
+            // ancienne sous-formation — y compris dans l'API appelée par le
+            // sélecteur de la page.
+            ->map(fn (ClassRoom $c) => [
                 'id' => $c->id,
-                'name' => $c->name,
+                'name' => $c->group_label,
                 'code' => $c->code,
-                'formation' => $c->formation?->name,
+                'formation' => $c->formation?->general_formation_name,
                 'status' => $c->status,
             ]);
 

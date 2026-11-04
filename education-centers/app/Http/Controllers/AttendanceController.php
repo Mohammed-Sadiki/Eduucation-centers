@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use App\Models\Center;
-use App\Models\ClassRoom;
 use App\Models\Enrollment;
 use App\Models\Schedule;
 use App\Models\Student;
@@ -13,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class AttendanceController extends Controller
@@ -23,6 +23,7 @@ class AttendanceController extends Controller
     {
         Gate::authorize('viewAny', Attendance::class);
         $user = $request->user();
+        $perimeter = $this->perimeter($user);
         $query = Attendance::query()->with(['student', 'classRoom', 'schedule']);
         $teacher = null;
         if ($user->isCenterAdmin()) {
@@ -36,8 +37,9 @@ class AttendanceController extends Controller
             $studentId = $user->student?->id;
             $query->where('student_id', $studentId)->where('center_id', $user->center_id);
         }
-        // Filtrage par domaine actif
-        $query = $this->applyDomainScope($query);
+        // Périmètre pédagogique unique : formations générales actives du centre
+        // autorisé + domaine actif. Le tableau suit donc exactement le filtre.
+        $query = $perimeter->applyTo($query);
         if ($classId = $request->input('class_id')) {
             $query->where('class_id', $classId);
         }
@@ -54,11 +56,12 @@ class AttendanceController extends Controller
             $query->where('student_id', $studentId);
         }
         $attendances = $query->latest('date')->paginate(20)->withQueryString();
-        $centerId = $user->isCenterAdmin() || $user->isTeacher() ? $user->center_id : null;
+        // Le filtre « Classe » propose uniquement les classes des formations
+        // générales actives du périmètre, libellées « Formation · Groupe X ».
         if ($user->isTeacher()) {
-            $classes = $this->portal->classesQuery($teacher)->orderBy('name')->get();
+            $classes = $perimeter->classesForSelect($this->portal->classIds($teacher));
         } else {
-            $classes = ClassRoom::when($centerId, fn ($q) => $q->where('center_id', $centerId))->orderBy('name')->get();
+            $classes = $perimeter->classesForSelect();
         }
         $centers = $user->isSuperAdmin() ? Center::orderBy('name')->get() : collect();
 
@@ -69,6 +72,7 @@ class AttendanceController extends Controller
     {
         Gate::authorize('create', Attendance::class);
         $user = $request->user();
+        $perimeter = $this->perimeter($user, $user->isSuperAdmin() ? $request->input('center_id') : null);
         $centerId = $user->isSuperAdmin() ? $request->input('center_id') : $user->center_id;
         $scheduleId = $request->input('schedule_id');
         $schedule = $scheduleId ? Schedule::find($scheduleId) : null;
@@ -79,14 +83,17 @@ class AttendanceController extends Controller
             if ($schedule) {
                 $this->portal->assertScheduleAccess($teacher, $schedule);
             }
-            $classes = $this->portal->classesQuery($teacher)->where('status', 'active')->orderBy('name')->get();
-            $schedules = $this->portal->schedulesQuery($teacher)
-                ->where('status', 'scheduled')
-                ->with('classRoom')
-                ->orderBy('date')->orderBy('start_time')->get();
+            $classes = $perimeter->classesForSelect($this->portal->classIds($teacher), activeOnly: true);
+            $schedules = $perimeter->applyThroughFormation(
+                $this->portal->schedulesQuery($teacher)->where('status', 'scheduled'),
+                'classRoom.formation'
+            )->with('classRoom')->orderBy('date')->orderBy('start_time')->get();
         } else {
-            $classes = ClassRoom::when($centerId, fn ($q) => $q->where('center_id', $centerId))->where('status', 'active')->orderBy('name')->get();
-            $schedules = Schedule::when($centerId, fn ($q) => $q->where('center_id', $centerId))->where('status', 'scheduled')->with('classRoom')->orderBy('date')->orderBy('start_time')->get();
+            $classes = $perimeter->classesForSelect(activeOnly: true);
+            $schedules = $perimeter->applyThroughFormation(
+                Schedule::when($centerId, fn ($q) => $q->where('center_id', $centerId))->where('status', 'scheduled'),
+                'classRoom.formation'
+            )->with('classRoom')->orderBy('date')->orderBy('start_time')->get();
         }
         $students = collect();
         if ($schedule) {
@@ -102,6 +109,7 @@ class AttendanceController extends Controller
     {
         Gate::authorize('create', Attendance::class);
         $user = $request->user();
+        $perimeter = $this->perimeter($user, $user->isSuperAdmin() ? (int) $request->input('center_id') : null);
         $centerId = $user->isSuperAdmin() ? (int) $request->input('center_id') : $user->center_id;
         $request->validate([
             'schedule_id' => ['required', 'integer', 'exists:schedules,id'],
@@ -121,6 +129,13 @@ class AttendanceController extends Controller
             // ou le formulaire : la séance doit être au professeur et dans une
             // classe qui lui est affectée.
             $this->portal->assertScheduleAccess($this->portal->teacherFor($user), $schedule);
+        }
+        // La séance doit porter une classe rattachée à une formation générale
+        // active du périmètre autorisé : un `<select>` n'est jamais une sécurité.
+        if ($schedule->class_id && ! $perimeter->allowsClass((int) $schedule->class_id)) {
+            throw ValidationException::withMessages([
+                'schedule_id' => __('La séance ne relève pas d\'une formation générale active de votre périmètre.'),
+            ]);
         }
         $count = 0;
         foreach ($request->input('attendances', []) as $att) {
@@ -193,6 +208,11 @@ class AttendanceController extends Controller
         }
         if ($user->isTeacher()) {
             $this->portal->assertScheduleAccess($this->portal->teacherFor($user), $schedule);
+        }
+        // Même périmètre que le formulaire : la liste des élèves ne peut porter
+        // que sur une classe d'une formation générale active autorisée.
+        if ($schedule->class_id && ! $this->perimeter($user, $schedule->center_id)->allowsClass((int) $schedule->class_id)) {
+            abort(403);
         }
         $enrolledStudentIds = Enrollment::where('class_id', $schedule->class_id)->where('status', 'accepted')->pluck('student_id');
         $students = Student::whereIn('id', $enrolledStudentIds)->where('status', 'active')->orderBy('last_name')->get(['id', 'first_name', 'last_name', 'student_number']);

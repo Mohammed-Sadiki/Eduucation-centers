@@ -38,7 +38,7 @@ class ResolveDomainContext
 
             return redirect()
                 ->route($this->pickerRoute($user))
-                ->with('error', __('Domaine non reconnu. Veuillez le reselecter.'));
+                ->with('error', __('Formation générale non reconnue. Veuillez la reselecter.'));
         }
 
         $activeDomain = ($activeDomain && $activeDomain !== 'all') ? $activeDomain : null;

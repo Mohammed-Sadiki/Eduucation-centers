@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
 use App\Models\Center;
-use App\Models\ClassRoom;
 use App\Models\Room;
 use App\Models\Schedule;
 use App\Models\Teacher;
+use App\Services\NotificationService;
 use App\Services\ScheduleConflictService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,10 +21,10 @@ class ScheduleController extends Controller
      * Palette de couleurs par type de séance (fond pastel + bordure colorée).
      */
     public const TYPE_COLORS = [
-        'course'   => '#3b82f6', // bleu
+        'course' => '#3b82f6', // bleu
         'workshop' => '#10b981', // vert
-        'exam'     => '#f59e0b', // ambre
-        'other'    => '#ef4444', // rouge
+        'exam' => '#f59e0b', // ambre
+        'other' => '#ef4444', // rouge
     ];
 
     /**
@@ -39,6 +39,7 @@ class ScheduleController extends Controller
         Gate::authorize('viewAny', Schedule::class);
 
         $authUser = $request->user();
+        $perimeter = $this->perimeter($authUser, $authUser->isSuperAdmin() ? $request->input('center_id') : null);
 
         $query = Schedule::query()->with([
             'center',
@@ -52,8 +53,9 @@ class ScheduleController extends Controller
             $query->where('center_id', $authUser->center_id);
         }
 
-        // Filtrage par domaine actif
-        $query = $this->applyDomainScope($query);
+        // Périmètre pédagogique unique : formations générales actives du centre
+        // autorisé + domaine actif. Le calendrier suit donc exactement les filtres.
+        $query = $perimeter->applyTo($query);
 
         // Filtre : centre (Super Admin seulement)
         if ($authUser->isSuperAdmin() && ($centerId = $request->input('center_id'))) {
@@ -109,39 +111,39 @@ class ScheduleController extends Controller
             }
 
             return [
-                'id'    => (string) $s->id,
-                'title' => $s->title ?: ($s->classRoom?->name ?: __('Séance')),
+                'id' => (string) $s->id,
+                'title' => $s->title ?: ($s->classRoom?->perimeter_label ?: __('Séance')),
                 'start' => $s->date?->format('Y-m-d').'T'.substr((string) $s->start_time, 0, 5),
-                'end'   => $s->date?->format('Y-m-d').'T'.substr((string) $s->end_time, 0, 5),
+                'end' => $s->date?->format('Y-m-d').'T'.substr((string) $s->end_time, 0, 5),
                 'allDay' => false,
                 'classNames' => $classes,
                 'extendedProps' => [
-                    'type'         => $type,
-                    'typeLabel'    => $s->type_label,
-                    'color'        => self::TYPE_COLORS[$type],
-                    'status'       => $s->status,
-                    'statusLabel'  => match ($s->status) {
+                    'type' => $type,
+                    'typeLabel' => $s->type_label,
+                    'color' => self::TYPE_COLORS[$type],
+                    'status' => $s->status,
+                    'statusLabel' => match ($s->status) {
                         'completed' => __('Terminé'),
                         'cancelled' => __('Annulé'),
                         default => __('Planifié'),
                     },
-                    'time'         => substr((string) $s->start_time, 0, 5).' – '.substr((string) $s->end_time, 0, 5),
-                    'date'         => $s->formatted_date,
-                    'className'    => $s->classRoom?->name,
-                    'classCode'    => $s->classRoom?->code,
-                    'teacherName'  => $s->teacher?->full_name,
-                    'roomName'     => $s->room?->name,
-                    'roomCode'     => $s->room?->code,
-                    'centerName'   => $s->center?->name,
-                    'description'  => $s->description,
-                    'conflict'     => isset($conflictIds[$s->id]),
-                    'showUrl'      => route('schedules.show', $s),
-                    'editUrl'      => route('schedules.edit', $s),
-                    'statusUrl'    => route('schedules.toggle-status', $s),
-                    'canEdit'      => $authUser->can('update', $s),
-                    'canCancel'    => $authUser->can('toggleStatus', $s) && ! $s->isCancelled(),
-                    'canComplete'  => $authUser->can('toggleStatus', $s) && $s->isScheduled(),
-                    'canReactivate'=> $authUser->can('toggleStatus', $s) && $s->isCancelled(),
+                    'time' => substr((string) $s->start_time, 0, 5).' – '.substr((string) $s->end_time, 0, 5),
+                    'date' => $s->formatted_date,
+                    'className' => $s->classRoom?->perimeter_label,
+                    'classCode' => $s->classRoom?->code,
+                    'teacherName' => $s->teacher?->full_name,
+                    'roomName' => $s->room?->name,
+                    'roomCode' => $s->room?->code,
+                    'centerName' => $s->center?->name,
+                    'description' => $s->description,
+                    'conflict' => isset($conflictIds[$s->id]),
+                    'showUrl' => route('schedules.show', $s),
+                    'editUrl' => route('schedules.edit', $s),
+                    'statusUrl' => route('schedules.toggle-status', $s),
+                    'canEdit' => $authUser->can('update', $s),
+                    'canCancel' => $authUser->can('toggleStatus', $s) && ! $s->isCancelled(),
+                    'canComplete' => $authUser->can('toggleStatus', $s) && $s->isScheduled(),
+                    'canReactivate' => $authUser->can('toggleStatus', $s) && $s->isCancelled(),
                 ],
             ];
         })->values();
@@ -149,26 +151,27 @@ class ScheduleController extends Controller
         // Données pour les filtres
         $targetCenterId = $authUser->isCenterAdmin() ? $authUser->center_id : $request->input('center_id');
 
-        $classesQuery = ClassRoom::query()->orderBy('name');
+        // Le filtre « Classe » ne propose que des classes de formations générales
+        // actives du périmètre (mêmes règles que le calendrier).
+        $classes = $perimeter->classesForSelect();
+
         $teachersQuery = Teacher::query()->orderBy('first_name');
         $roomsQuery = Room::query()->orderBy('name');
 
         if ($targetCenterId) {
-            $classesQuery->where('center_id', $targetCenterId);
             $teachersQuery->where('center_id', $targetCenterId);
             $roomsQuery->where('center_id', $targetCenterId);
         }
 
-        $classes = $classesQuery->get();
         $teachers = $teachersQuery->get();
         $rooms = $roomsQuery->get();
         $centers = $authUser->isSuperAdmin() ? Center::orderBy('name')->get() : collect();
 
         $typeOptions = [
-            'course'   => __('Cours'),
+            'course' => __('Cours'),
             'workshop' => __('Atelier / TP'),
-            'exam'     => __('Examen'),
-            'other'    => __('Autre'),
+            'exam' => __('Examen'),
+            'other' => __('Autre'),
         ];
 
         $initialDate = $request->input('date') ?: now()->format('Y-m-d');
@@ -194,12 +197,13 @@ class ScheduleController extends Controller
             ? $authUser->center_id
             : ($request->input('center_id') ?? $centers->first()?->id);
 
-        $classes = ClassRoom::query()
-            ->when($selectedCenterId, fn ($q) => $q->where('center_id', $selectedCenterId))
-            ->where('status', 'active')
-            ->with('formation', 'teachers')
-            ->orderBy('name')
-            ->get();
+        $perimeter = $this->perimeter($authUser, $authUser->isSuperAdmin() ? (int) $request->input('center_id') : null);
+
+        // Classes des formations générales actives du périmètre, libellées
+        // « Formation · Groupe X » ; les professeurs de la classe restent
+        // nécessaires à l'Alpine du formulaire.
+        $classes = $perimeter->classesForSelect(activeOnly: true);
+        $classes->load('teachers');
 
         $rooms = Room::query()
             ->when($selectedCenterId, fn ($q) => $q->where('center_id', $selectedCenterId))
@@ -264,11 +268,8 @@ class ScheduleController extends Controller
 
         $centerId = $schedule->center_id;
 
-        $classes = ClassRoom::query()
-            ->where('center_id', $centerId)
-            ->with('formation', 'teachers')
-            ->orderBy('name')
-            ->get();
+        $classes = $this->perimeter($authUser, $schedule->center_id)->classesForSelect();
+        $classes->load('teachers');
 
         $rooms = Room::query()
             ->where('center_id', $centerId)
@@ -305,11 +306,11 @@ class ScheduleController extends Controller
 
         // Notification emploi du temps modifié : professeurs réellement concernés
         // (nouvel affecté + ancien si réaffectation). Un seul destinataire par user.
-        $notifier = app(\App\Services\NotificationService::class);
+        $notifier = app(NotificationService::class);
         $dateLabel = $schedule->date?->format('d/m/Y') ?? '';
         $affectedTeacherIds = array_filter([$schedule->teacher_id, $previousTeacherId]);
         foreach ($affectedTeacherIds as $teacherId) {
-            $teacherUser = \App\Models\Teacher::with('user')->find($teacherId)?->user;
+            $teacherUser = Teacher::with('user')->find($teacherId)?->user;
             if (! $teacherUser) {
                 continue;
             }
@@ -318,13 +319,13 @@ class ScheduleController extends Controller
                 'schedule_change',
                 __('Emploi du temps modifié'),
                 __('Votre séance du :date a été modifiée (:créneau).', [
-                    'date'    => $dateLabel,
+                    'date' => $dateLabel,
                     'créneau' => trim(($schedule->start_time ?? '').'-'.($schedule->end_time ?? ''), '-'),
                 ]),
                 route('schedules.show', $schedule),
                 'bi-calendar',
                 $schedule->center_id,
-                \App\Models\Schedule::class,
+                Schedule::class,
                 $schedule->id,
             );
         }

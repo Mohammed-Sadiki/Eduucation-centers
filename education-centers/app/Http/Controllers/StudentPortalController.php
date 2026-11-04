@@ -8,9 +8,11 @@ use App\Models\Document;
 use App\Models\Evaluation;
 use App\Models\Schedule;
 use App\Models\Student;
+use App\Services\PersonalFinanceService;
 use App\Services\StudentPortalService;
 use App\Support\DomainRegistry;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -286,7 +288,7 @@ class StudentPortalController extends Controller
      * factures/échéances). Le périmètre est dérivé de l'utilisateur connecté ;
      * aucun student_id du navigateur n'est utilisé pour les calculs.
      */
-    public function payments(Request $request, \App\Services\PersonalFinanceService $finance): View
+    public function payments(Request $request, PersonalFinanceService $finance): View
     {
         $student = $this->portal->studentFor($request->user());
         $this->guardStudentParameter($request, $student);
@@ -330,7 +332,7 @@ class StudentPortalController extends Controller
 
         return [
             'id' => (string) $schedule->id,
-            'title' => $schedule->title ?: ($schedule->classRoom?->name ?: __('Séance')),
+            'title' => $schedule->title ?: ($schedule->classRoom?->perimeter_label ?: __('Séance')),
             'start' => $schedule->date?->format('Y-m-d').'T'.substr((string) $schedule->start_time, 0, 5),
             'end' => $schedule->date?->format('Y-m-d').'T'.substr((string) $schedule->end_time, 0, 5),
             'allDay' => false,
@@ -348,8 +350,8 @@ class StudentPortalController extends Controller
                 },
                 'date' => format_date($schedule->date, 'D d M Y'),
                 'time' => $schedule->formatted_time,
-                'className' => $schedule->classRoom?->name,
-                'formationName' => $schedule->classRoom?->formation?->name,
+                'className' => $schedule->classRoom?->perimeter_label,
+                'formationName' => $schedule->classRoom?->general_formation_name,
                 'teacherName' => $schedule->teacher?->full_name,
                 'roomName' => $schedule->room?->name,
                 'centerName' => $schedule->center?->name,
@@ -361,9 +363,9 @@ class StudentPortalController extends Controller
     /**
      * Positionne le calendrier sur la prochaine séance, sinon la plus récente.
      *
-     * @param  \Illuminate\Support\Collection<int, Schedule>  $schedules
+     * @param  Collection<int, Schedule>  $schedules
      */
-    private function initialScheduleDate(\Illuminate\Support\Collection $schedules): string
+    private function initialScheduleDate(Collection $schedules): string
     {
         $today = now()->toDateString();
 

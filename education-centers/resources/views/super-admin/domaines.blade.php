@@ -1,7 +1,7 @@
 @extends('layouts.portal')
 
-@section('title', __('Sélection du domaine') . ' — ' . config('app.name'))
-@section('description', __('Choisissez le domaine d\'activité à administrer.'))
+@section('title', __('Sélection de la formation générale') . ' — ' . config('app.name'))
+@section('description', __('Choisissez la formation générale à administrer.'))
 
 @section('content')
 
@@ -16,10 +16,10 @@
             </span>
             <div>
                 <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
-                    {{ __('Domaines de formation') }}
+                    {{ __('Formations générales') }}
                 </h1>
                 <p class="text-sm text-slate-500 dark:text-slate-400">
-                    {{ __('Filières de formation pédagogique et gestion des centres par domaine.') }}
+                    {{ __('Filières de formation pédagogique et gestion des centres par formation générale.') }}
                 </p>
             </div>
         </div>

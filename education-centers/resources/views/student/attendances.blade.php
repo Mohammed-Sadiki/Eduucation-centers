@@ -33,7 +33,7 @@
                         <option value="">{{ __('Toutes mes classes') }}</option>
                         @foreach($classes as $class)
                             <option value="{{ $class->id }}" @selected((int) $classId === (int) $class->id)>
-                                {{ $class->name }}{{ $class->code ? ' ('.$class->code.')' : '' }}
+                                {{ $class->perimeter_label }}{{ $class->code ? ' ('.$class->code.')' : '' }}
                             </option>
                         @endforeach
                     </select>
@@ -88,7 +88,7 @@
                             {{ $attendance->schedule?->formatted_time ?? ($attendance->arrival_time ? substr((string) $attendance->arrival_time, 0, 5) : '—') }}
                         </td>
                         <td class="text-slate-600 dark:text-slate-300">
-                            {{ $attendance->classRoom?->name ?? '—' }}
+                            {{ $attendance->classRoom?->perimeter_label ?? '—' }}
                         </td>
                         <td><x-status-badge type="attendance" :status="$attendance->status" /></td>
                         <td class="whitespace-nowrap text-slate-600 dark:text-slate-300">

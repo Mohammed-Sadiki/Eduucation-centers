@@ -9,7 +9,7 @@
 <x-ui.card>
     <dl class="grid gap-3 text-sm sm:grid-cols-2">
         <div><dt class="text-slate-500">{{ __('Étudiant') }}</dt><dd class="font-medium">{{ $certificate->student?->full_name }}</dd></div>
-        <div><dt class="text-slate-500">{{ __('Formation') }}</dt><dd>{{ $certificate->formation?->name ?? '—' }}</dd></div>
+        <div><dt class="text-slate-500">{{ __('Formation') }}</dt><dd>{{ $certificate->formation?->general_formation_name ?? '—' }}</dd></div>
         <div><dt class="text-slate-500">{{ __('Date d’émission') }}</dt><dd>{{ format_date($certificate->issued_date, 'd/m/Y') }}</dd></div>
         <div><dt class="text-slate-500">{{ __('Statut') }}</dt><dd><x-status-badge :status="$certificate->status" type="certificate" /></dd></div>
     </dl>

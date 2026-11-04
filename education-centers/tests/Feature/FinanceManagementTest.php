@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Center;
 use App\Models\Enrollment;
+use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use App\Models\Formation;
 use App\Models\Payment;
 use App\Models\Student;
@@ -20,14 +22,23 @@ class FinanceManagementTest extends TestCase
     use RefreshDatabase;
 
     protected Center $centerBerlin;
+
     protected Center $centerMunich;
+
     protected User $superAdmin;
+
     protected User $adminBerlin;
+
     protected User $teacherUser;
+
     protected User $studentUser;
+
     protected Teacher $teacher;
+
     protected Student $student;
+
     protected Formation $formationInformatique;
+
     protected Formation $formationSante;
 
     protected function setUp(): void
@@ -112,7 +123,7 @@ class FinanceManagementTest extends TestCase
         $this->actingAs($this->superAdmin)
             ->get(route('super-admin.domaines'))
             ->assertOk()
-            ->assertSee('Domaines de formation');
+            ->assertSee('Formations générales');
     }
 
     /**
@@ -249,7 +260,7 @@ class FinanceManagementTest extends TestCase
      */
     private function extractCardTag(string $html, string $id): string
     {
-        $pos = strpos($html, 'id="' . $id . '"');
+        $pos = strpos($html, 'id="'.$id.'"');
         $this->assertNotFalse($pos, "Carte #{$id} absente.");
         $start = strrpos(substr($html, 0, $pos), '<a');
         $end = strpos($html, '>', $pos);
@@ -443,10 +454,10 @@ class FinanceManagementTest extends TestCase
     public static function centerProvider(): array
     {
         return [
-            'Tanger'    => ['Tanger', 'TGR'],
+            'Tanger' => ['Tanger', 'TGR'],
             'Essaouira' => ['Essaouira', 'ESS'],
-            'Agadir'    => ['Agadir', 'AGD'],
-            'Tétouane'  => ['Tétouane', 'TET'],
+            'Agadir' => ['Agadir', 'AGD'],
+            'Tétouane' => ['Tétouane', 'TET'],
         ];
     }
 
@@ -455,7 +466,7 @@ class FinanceManagementTest extends TestCase
     {
         $center = Center::factory()->create(['name' => $centerName, 'code' => $code]);
         $admin = User::factory()->centerAdmin($center->id)->create([
-            'email' => 'admin.' . strtolower($code) . '.finance@test.com',
+            'email' => 'admin.'.strtolower($code).'.finance@test.com',
             'status' => 'active',
         ]);
 
@@ -471,7 +482,7 @@ class FinanceManagementTest extends TestCase
         $this->assertStringContainsString('id="sidebar-changer-finance"', $sidebar);
 
         // Le filtre Centre affiche SON centre et uniquement lui (bloc lecture seule).
-        $this->assertStringContainsString($center->translated('name'), $sidebar . $response->getContent());
+        $this->assertStringContainsString($center->translated('name'), $sidebar.$response->getContent());
         $this->assertStringNotContainsString('finance-nav-center-admin', $response->getContent());
     }
 
@@ -504,8 +515,8 @@ class FinanceManagementTest extends TestCase
      */
     public function test_center_admin_cannot_cancel_foreign_expense(): void
     {
-        $category = \App\Models\ExpenseCategory::create(['name' => 'Fournitures', 'code' => 'FRN-TEST']);
-        $foreignExpense = \App\Models\Expense::create([
+        $category = ExpenseCategory::create(['name' => 'Fournitures', 'code' => 'FRN-TEST']);
+        $foreignExpense = Expense::create([
             'center_id' => $this->centerMunich->id,
             'category_id' => $category->id,
             'title' => 'Dépense Munich',
@@ -567,7 +578,7 @@ class FinanceManagementTest extends TestCase
             'status' => 'paid',
         ]);
 
-        $service = new FinanceService();
+        $service = new FinanceService;
         $rows = $service->getStudentFinancialRows(null, '2026/2027', $this->centerBerlin->id);
         $studentRow = $rows->firstWhere('student.id', $this->student->id);
 
@@ -607,7 +618,7 @@ class FinanceManagementTest extends TestCase
             'status' => 'paid',
         ]);
 
-        $service = new FinanceService();
+        $service = new FinanceService;
         $rows = $service->getStudentFinancialRows(null, '2026/2027', $this->centerBerlin->id);
         $studentRow = $rows->firstWhere('student.id', $this->student->id);
 
@@ -643,7 +654,7 @@ class FinanceManagementTest extends TestCase
             'status' => 'paid',
         ]);
 
-        $service = new FinanceService();
+        $service = new FinanceService;
         $rows = $service->getStudentFinancialRows(null, '2026/2027', $this->centerBerlin->id);
         $studentRow = $rows->firstWhere('student.id', $this->student->id);
 
@@ -666,7 +677,7 @@ class FinanceManagementTest extends TestCase
             'status' => 'accepted',
         ]);
 
-        $service = new FinanceService();
+        $service = new FinanceService;
         $rows = $service->getStudentFinancialRows(null, '2026/2027', $this->centerBerlin->id);
         $studentRow = $rows->firstWhere('student.id', $this->student->id);
 
@@ -732,7 +743,7 @@ class FinanceManagementTest extends TestCase
             'status' => 'paid',
         ]);
 
-        $service = new FinanceService();
+        $service = new FinanceService;
         $rows = $service->getStudentFinancialRows(null, '2026/2027', $this->centerBerlin->id);
         $studentRow = $rows->firstWhere('student.id', $this->student->id);
 
@@ -746,7 +757,7 @@ class FinanceManagementTest extends TestCase
      */
     public function test_teacher_salaries_are_calculated_correctly(): void
     {
-        $service = new FinanceService();
+        $service = new FinanceService;
         $rows = $service->getTeacherSalaryRows(null, 10, 2026, '2026/2027', $this->centerBerlin->id);
         $teacherRow = $rows->firstWhere('teacher.id', $this->teacher->id);
 
@@ -777,7 +788,7 @@ class FinanceManagementTest extends TestCase
             'payment_date' => '2026-10-28',
         ]);
 
-        $service = new FinanceService();
+        $service = new FinanceService;
         $rows = $service->getTeacherSalaryRows(null, 10, 2026, '2026/2027', $this->centerBerlin->id);
         $teacherRow = $rows->firstWhere('teacher.id', $this->teacher->id);
 
@@ -807,7 +818,7 @@ class FinanceManagementTest extends TestCase
             'status' => 'accepted',
         ]);
 
-        $service = new FinanceService();
+        $service = new FinanceService;
 
         // Filtre Informatique
         $infoRows = $service->getStudentFinancialRows('informatique', '2026/2027');
@@ -843,7 +854,7 @@ class FinanceManagementTest extends TestCase
             'status' => 'accepted',
         ]);
 
-        $service = new FinanceService();
+        $service = new FinanceService;
         $rows26 = $service->getStudentFinancialRows(null, '2026/2027');
         $rows27 = $service->getStudentFinancialRows(null, '2027/2028');
 
@@ -870,7 +881,7 @@ class FinanceManagementTest extends TestCase
             'status' => 'paid',
         ]);
 
-        $service = new FinanceService();
+        $service = new FinanceService;
         $octRows = $service->getTeacherSalaryRows(null, 10, 2026);
         $novRows = $service->getTeacherSalaryRows(null, 11, 2026);
 
@@ -907,7 +918,7 @@ class FinanceManagementTest extends TestCase
             'status' => 'active',
         ]);
 
-        $service = new FinanceService();
+        $service = new FinanceService;
 
         // Vue filtrée sur Berlin
         $berlinRows = $service->getTeacherSalaryRows(null, 10, 2026, '2026/2027', $this->centerBerlin->id);
@@ -995,15 +1006,15 @@ class FinanceManagementTest extends TestCase
     {
         $response = $this->actingAs($this->superAdmin)
             ->post(route('super-admin.finance.students.payment.store'), [
-                'student_id'   => $this->student->id,
+                'student_id' => $this->student->id,
                 'formation_id' => $this->formationInformatique->id,
-                'amount'       => 3500.00,
-                'currency'     => 'MAD',
+                'amount' => 3500.00,
+                'currency' => 'MAD',
                 'payment_date' => now()->toDateString(),
-                'school_year'  => '2026/2027',
-                'method'       => 'bank_transfer',
-                'reference'    => 'VIR-TEST-888',
-                'notes'        => 'Acompte 1',
+                'school_year' => '2026/2027',
+                'method' => 'bank_transfer',
+                'reference' => 'VIR-TEST-888',
+                'notes' => 'Acompte 1',
             ]);
 
         $response->assertRedirect();
@@ -1021,15 +1032,15 @@ class FinanceManagementTest extends TestCase
     {
         $response = $this->actingAs($this->superAdmin)
             ->post(route('super-admin.finance.teachers.salary.store'), [
-                'teacher_id'      => $this->teacher->id,
-                'month'           => 10,
-                'year'            => 2026,
-                'school_year'     => '2026/2027',
+                'teacher_id' => $this->teacher->id,
+                'month' => 10,
+                'year' => 2026,
+                'school_year' => '2026/2027',
                 'expected_amount' => 6000.00,
-                'paid_amount'     => 6000.00,
-                'currency'        => 'MAD',
-                'payment_date'    => now()->toDateString(),
-                'payment_method'  => 'Virement bancaire',
+                'paid_amount' => 6000.00,
+                'currency' => 'MAD',
+                'payment_date' => now()->toDateString(),
+                'payment_method' => 'Virement bancaire',
             ]);
 
         $response->assertRedirect();
@@ -1153,14 +1164,14 @@ class FinanceManagementTest extends TestCase
         // Test de l'enregistrement avec articles multiples et calcul automatique
         $postResponse = $this->actingAs($this->superAdmin)
             ->post(route('super-admin.finance.expenses.store'), [
-                'center_id'      => $this->centerBerlin->id,
-                'title'          => 'Achat de fournitures scolaires',
-                'supplier'       => 'Librairie Centrale',
-                'expense_date'   => now()->toDateString(),
+                'center_id' => $this->centerBerlin->id,
+                'title' => 'Achat de fournitures scolaires',
+                'supplier' => 'Librairie Centrale',
+                'expense_date' => now()->toDateString(),
                 'payment_method' => 'bank_transfer',
-                'reference'      => 'DEP-TEST-001',
-                'school_year'    => '2026/2027',
-                'items'          => [
+                'reference' => 'DEP-TEST-001',
+                'school_year' => '2026/2027',
+                'items' => [
                     ['name' => 'Feutres', 'quantity' => 5, 'unit_price' => 20.00],
                     ['name' => 'Papier A4', 'quantity' => 2, 'unit_price' => 50.00],
                     ['name' => 'Stylos', 'quantity' => 10, 'unit_price' => 3.00],
@@ -1170,24 +1181,24 @@ class FinanceManagementTest extends TestCase
         $postResponse->assertRedirect();
         // Le montant total calculé doit être 100 + 100 + 30 = 230 DH
         $this->assertDatabaseHas('expenses', [
-            'title'     => 'Achat de fournitures scolaires',
-            'amount'    => 230.00,
-            'supplier'  => 'Librairie Centrale',
+            'title' => 'Achat de fournitures scolaires',
+            'amount' => 230.00,
+            'supplier' => 'Librairie Centrale',
             'center_id' => $this->centerBerlin->id,
         ]);
         $this->assertDatabaseHas('expense_items', [
-            'name'       => 'Feutres',
-            'quantity'   => 5,
+            'name' => 'Feutres',
+            'quantity' => 5,
             'unit_price' => 20.00,
         ]);
         $this->assertDatabaseHas('bank_transactions', [
-            'type'      => 'withdrawal',
-            'amount'    => 230.00,
+            'type' => 'withdrawal',
+            'amount' => 230.00,
             'center_id' => $this->centerBerlin->id,
         ]);
 
         // Test d'annulation de dépense
-        $createdExpense = \App\Models\Expense::where('reference', 'DEP-TEST-001')->first();
+        $createdExpense = Expense::where('reference', 'DEP-TEST-001')->first();
         $cancelResponse = $this->actingAs($this->superAdmin)
             ->patch(route('super-admin.finance.expenses.cancel', $createdExpense->id));
         $cancelResponse->assertRedirect();
@@ -1223,21 +1234,21 @@ class FinanceManagementTest extends TestCase
 
         $postResponse = $this->actingAs($this->superAdmin)
             ->post(route('super-admin.finance.bank.store'), [
-                'center_id'        => $this->centerBerlin->id,
+                'center_id' => $this->centerBerlin->id,
                 'transaction_date' => now()->toDateString(),
-                'label'            => 'Dépôt espèces scolarités',
-                'origin'           => 'Caisse',
-                'method'           => 'cash',
-                'type'             => 'deposit',
-                'amount'           => 12000.00,
-                'reference'        => 'DEPOT-ESPECES-01',
+                'label' => 'Dépôt espèces scolarités',
+                'origin' => 'Caisse',
+                'method' => 'cash',
+                'type' => 'deposit',
+                'amount' => 12000.00,
+                'reference' => 'DEPOT-ESPECES-01',
             ]);
 
         $postResponse->assertRedirect();
         $this->assertDatabaseHas('bank_transactions', [
-            'label'     => 'Dépôt espèces scolarités',
-            'type'      => 'deposit',
-            'amount'    => 12000.00,
+            'label' => 'Dépôt espèces scolarités',
+            'type' => 'deposit',
+            'amount' => 12000.00,
             'center_id' => $this->centerBerlin->id,
         ]);
     }

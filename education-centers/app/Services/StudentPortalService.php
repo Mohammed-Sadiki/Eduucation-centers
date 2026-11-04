@@ -5,13 +5,16 @@ namespace App\Services;
 use App\Models\AppNotification;
 use App\Models\Attendance;
 use App\Models\Certificate;
+use App\Models\ClassRoom;
 use App\Models\Document;
 use App\Models\Enrollment;
 use App\Models\Evaluation;
+use App\Models\Formation;
 use App\Models\Grade;
 use App\Models\Schedule;
 use App\Models\Student;
 use App\Models\User;
+use App\Support\AcademicPerimeter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
@@ -104,7 +107,10 @@ class StudentPortalService
                     && $enrollment->class_id !== null
                     && $class !== null
                     && (int) $class->center_id === (int) $student->center_id
-                    && (int) $class->formation_id === (int) $enrollment->formation_id;
+                    // L'inscription et la classe doivent décrire la même
+                    // formation générale : une ancienne sous-formation et sa
+                    // formation générale sont équivalentes (transition de données).
+                    && AcademicPerimeter::sameGeneralFormation($class->formation_id, $enrollment->formation_id);
             })
             ->values();
     }
@@ -139,7 +145,7 @@ class StudentPortalService
 
     /**
      * @param  EloquentCollection<int, Enrollment>  $acceptedEnrollments
-     * @return Collection<int, \App\Models\ClassRoom>
+     * @return Collection<int, ClassRoom>
      */
     public function classes(EloquentCollection $acceptedEnrollments): Collection
     {
@@ -153,7 +159,7 @@ class StudentPortalService
 
     /**
      * @param  EloquentCollection<int, Enrollment>  $acceptedEnrollments
-     * @return Collection<int, \App\Models\Formation>
+     * @return Collection<int, Formation>
      */
     public function formations(EloquentCollection $acceptedEnrollments): Collection
     {

@@ -19,6 +19,7 @@ use App\Models\Student;
 use App\Models\Teacher;
 use App\Models\TeacherSalary;
 use App\Services\FinanceService;
+use App\Services\NotificationService;
 use App\Services\PdfService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -126,7 +127,7 @@ class FinanceDashboardController extends Controller
         $studentsList = Student::with('center')->where('status', 'active')
             ->when($centerScoped, fn ($q) => $q->where('center_id', $centerScoped))
             ->orderBy('last_name')->get();
-        $formationsList = Formation::with('center')->where('status', 'active')
+        $formationsList = Formation::with('center')->where('status', 'active')->current()
             ->when($centerScoped, fn ($q) => $q->where('center_id', $centerScoped))
             ->orderBy('name')->get();
         $teachersList = Teacher::with('center')->where('status', 'active')
@@ -140,8 +141,10 @@ class FinanceDashboardController extends Controller
                 'student_name' => $row->student->full_name,
                 'student_number' => $row->student->student_number,
                 'center_name' => $row->center?->name ?? 'N/A',
-                'formation_id' => $row->formation->id,
-                'formation_name' => $row->formation->name,
+                // La formation générale, jamais l'ancienne sous-formation : c'est
+                // la clé attendue par le `<select>` du modal de paiement.
+                'formation_id' => $row->formation->general_formation_id ?? $row->formation->id,
+                'formation_name' => $row->formation->general_formation_name,
                 'annual_price' => $row->annual_price,
                 'paid_amount' => $row->paid_amount,
                 'remaining_amount' => $row->remaining_amount,
@@ -240,7 +243,7 @@ class FinanceDashboardController extends Controller
         $schoolYears = FinanceService::SCHOOL_YEARS;
         $centers = Center::orderBy('name')->get();
         $studentsList = Student::with('center')->where('status', 'active')->orderBy('last_name')->get();
-        $formationsList = Formation::with('center')->where('status', 'active')->orderBy('name')->get();
+        $formationsList = Formation::with('center')->where('status', 'active')->current()->orderBy('name')->get();
 
         // Données JSON pour le modal
         $studentFinancialMap = $allStudentRows->keyBy('student.id')->map(function ($row) {
@@ -249,8 +252,8 @@ class FinanceDashboardController extends Controller
                 'student_name' => $row->student->full_name,
                 'student_number' => $row->student->student_number,
                 'center_name' => $row->center?->name ?? 'N/A',
-                'formation_id' => $row->formation->id,
-                'formation_name' => $row->formation->name,
+                'formation_id' => $row->formation->general_formation_id ?? $row->formation->id,
+                'formation_name' => $row->formation->general_formation_name,
                 'annual_price' => $row->annual_price,
                 'paid_amount' => $row->paid_amount,
                 'remaining_amount' => $row->remaining_amount,
@@ -384,7 +387,7 @@ class FinanceDashboardController extends Controller
     {
         $centerId = $this->resolveCenterScope($request);
 
-        $formationsQuery = Formation::with('center')->orderBy('name');
+        $formationsQuery = Formation::with('center')->current()->orderBy('name');
         $teachersQuery = Teacher::with(['user', 'center'])->orderBy('last_name');
 
         // Admin Centre : uniquement les formations/professeurs de SON centre.
@@ -502,13 +505,13 @@ class FinanceDashboardController extends Controller
 
         // Notification interne : paiement réellement encaissé. Le responsable du
         // centre est alerté (sauf s'il est l'auteur de l'encaissement).
-        app(\App\Services\NotificationService::class)->notifyCenterAdmins(
+        app(NotificationService::class)->notifyCenterAdmins(
             centerId: $student->center_id,
             type: 'payment',
             title: __('Nouveau paiement encaissé'),
             message: __('Paiement de :amount encaissé pour :name.', [
                 'amount' => format_price($data['amount'], $data['currency']),
-                'name'   => $student->full_name,
+                'name' => $student->full_name,
             ]),
             link: route('super-admin.finance.students'),
             exceptUserId: $request->user()->id,
@@ -1001,12 +1004,12 @@ class FinanceDashboardController extends Controller
 
             // Dépasse le seuil « important » configurable → alerte le Super Admin.
             if ($finalAmount > (float) config('notifications.expense_threshold', 5000)) {
-                app(\App\Services\NotificationService::class)->notifySuperAdmins(
+                app(NotificationService::class)->notifySuperAdmins(
                     type: 'expense',
                     title: __('Dépense importante'),
                     message: __('Dépense de :amount (:title) au centre :center.', [
                         'amount' => format_price($finalAmount, 'MAD'),
-                        'title'  => $validated['title'],
+                        'title' => $validated['title'],
                         'center' => $expense->center?->name ?? '—',
                     ]),
                     link: route('super-admin.finance.expenses'),
@@ -1199,7 +1202,7 @@ class FinanceDashboardController extends Controller
             $debtors = $debtors->filter(function ($row) use ($search) {
                 return str_contains(strtolower($row->student->full_name), strtolower($search))
                     || str_contains(strtolower($row->student->student_number ?? ''), strtolower($search))
-                    || str_contains(strtolower($row->formation->name), strtolower($search));
+                    || str_contains(strtolower($row->formation->general_formation_name), strtolower($search));
             });
         }
 

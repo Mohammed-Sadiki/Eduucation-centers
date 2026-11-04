@@ -14,7 +14,7 @@
             <select name="class_id" class="ec-select">
                 <option value="">{{ auth()->user()->isTeacher() ? __('Toutes mes classes') : __('Toutes les classes') }}</option>
                 @foreach($classes as $class)
-                    <option value="{{ $class->id }}" @selected(request('class_id')==$class->id)>{{ $class->name }}</option>
+                    <option value="{{ $class->id }}" @selected(request('class_id')==$class->id)>{{ $class->perimeter_label }}</option>
                 @endforeach
             </select>
         @endif
@@ -34,7 +34,7 @@
             @forelse($evaluations as $evaluation)
                 <tr>
                     <td class="font-medium">{{ $evaluation->title }}</td>
-                    <td>{{ $evaluation->classRoom?->name }}</td>
+                    <td>{{ $evaluation->classRoom?->perimeter_label }}</td>
                     <td>{{ $evaluation->type_label }}</td>
                     <td>{{ format_date($evaluation->evaluation_date, 'd/m/Y') }}</td>
                     <td><x-status-badge type="evaluation" :status="$evaluation->status" /></td>

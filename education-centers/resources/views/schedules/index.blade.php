@@ -44,7 +44,7 @@
             <select name="class_id" class="ec-select">
                 <option value="">{{ __('Toutes les classes') }}</option>
                 @foreach($classes as $cl)
-                    <option value="{{ $cl->id }}" @selected(request('class_id') == $cl->id)>{{ $cl->name }}</option>
+                    <option value="{{ $cl->id }}" @selected(request('class_id') == $cl->id)>{{ $cl->perimeter_label }}</option>
                 @endforeach
             </select>
         </div>

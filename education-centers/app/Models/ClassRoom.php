@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Concerns\HasDomainScope;
+use App\Models\Concerns\HasContextScope;
+use App\Support\AcademicPerimeter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,9 +14,9 @@ use Illuminate\Validation\ValidationException;
 
 class ClassRoom extends Model
 {
+    use HasContextScope;
+    use HasDomainScope;
     use HasFactory;
-    use \App\Concerns\HasDomainScope;
-    use \App\Models\Concerns\HasContextScope;
 
     /**
      * Garde dur (défense en profondeur, règle 3.2) : une formation générale
@@ -33,7 +36,13 @@ class ClassRoom extends Model
                 return;
             }
 
-            $existing = static::query()->where('formation_id', $formation->id)->count();
+            // Comptage du périmètre de la formation : les classes encore
+            // rattachées à ses alias historiques comptent, sinon la règle des
+            // deux classes maximum serait contournée tant que les données ne
+            // sont pas reparentées.
+            $existing = static::query()
+                ->whereIn('formation_id', AcademicPerimeter::equivalentIds($formation))
+                ->count();
 
             if ($existing >= Formation::MAX_CLASSES) {
                 throw ValidationException::withMessages([
@@ -42,6 +51,16 @@ class ClassRoom extends Model
                     ]),
                 ]);
             }
+        });
+
+        // Une écriture de classe change la numérotation des groupes résolue par
+        // le périmètre : le cache de libellés doit être invalidé.
+        static::saved(function (): void {
+            AcademicPerimeter::flush();
+        });
+
+        static::deleted(function (): void {
+            AcademicPerimeter::flush();
         });
     }
 
@@ -193,9 +212,63 @@ class ClassRoom extends Model
      */
     public function getFullLabelAttribute(): string
     {
-        $formationName = $this->formation?->name ?? 'Formation';
+        $formationName = $this->general_formation_name ?: 'Formation';
 
         return "{$this->code} — {$formationName}";
+    }
+
+    /**
+     * Accessor : libellé de groupe, sans mention d'une ancienne sous-formation
+     * (« Groupe A`). Résolu par l'autorité unique du périmètre.
+     */
+    public function getGroupLabelAttribute(): string
+    {
+        return AcademicPerimeter::groupLabelOf($this);
+    }
+
+    /**
+     * Accessor : libellé métier « Formation générale · Groupe X » utilisé par
+     * tous les filtres et listes de classes de l'application.
+     */
+    public function getPerimeterLabelAttribute(): string
+    {
+        return AcademicPerimeter::labelOf($this);
+    }
+
+    /**
+     * Formation générale dont relève cette classe (la sienne si elle est déjà
+     * rattachée à une formation générale). Nommée `generalFormationModel()` car
+     * ce n'est pas une relation Eloquent : la résolution passe par le périmètre.
+     */
+    public function generalFormationModel(): ?Formation
+    {
+        return AcademicPerimeter::generalFormation($this->formation);
+    }
+
+    /**
+     * Accessor : identifiant de la formation générale dont relève cette classe.
+     * C'est la clé de regroupement réelle des classes (une ancienne
+     * sous-formation et sa formation générale décrivent la même classe-mère) :
+     * les cascades « formation → classes » des formulaires l'utilisent.
+     */
+    public function getGeneralFormationIdAttribute(): ?int
+    {
+        return $this->generalFormationModel()?->id;
+    }
+
+    /**
+     * Accessor : nom de la formation générale de rattachement, sans mention
+     * d'une ancienne sous-formation.
+     */
+    public function getGeneralFormationNameAttribute(): string
+    {
+        $general = $this->generalFormationModel();
+
+        if (! $general) {
+            return (string) ($this->formation?->translated('name') ?? $this->formation?->name ?? '');
+        }
+
+        return (string) ($general->translated('name') ?? $general->name);
     }
 
     /**

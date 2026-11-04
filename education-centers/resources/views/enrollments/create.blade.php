@@ -128,9 +128,9 @@
                                     <option value="">{{ __('-- Aucune affectation immédiate --') }}</option>
                                     @foreach($classes as $cl)
                                         <option value="{{ $cl->id }}" 
-                                            data-formation-id="{{ $cl->formation_id }}"
+                                            data-formation-id="{{ $cl->general_formation_id }}"
                                             {{ old('class_id', $preselectedClassId) == $cl->id ? 'selected' : '' }}>
-                                            {{ $cl->name }} ({{ $cl->formation->name }} {{ __('— Capacité:') }} {{ $cl->capacity ?? __('Illimitée') }})
+                                            {{ $cl->perimeter_label }} {{ __('— Capacité:') }} {{ $cl->capacity ?? __('Illimitée') }}
                                         </option>
                                     @endforeach
                                 </select>
