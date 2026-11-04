@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\Attendance;
 use App\Models\AppNotification;
+use App\Models\Attendance;
 use App\Models\Center;
 use App\Models\ClassRoom;
 use App\Models\Formation;
@@ -41,31 +41,39 @@ class NotificationSystemTest extends TestCase
     use RefreshDatabase;
 
     private Center $tanger;
+
     private Center $essaouira;
+
     private Center $agadir;
+
     private Center $tetouane;
 
     private User $superAdmin;
+
     private User $adminTanger;
+
     private User $adminAgadir;
+
     private Teacher $teacherTanger;
+
     private Teacher $teacherTanger2;
+
     private Formation $formationTanger;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->tanger     = Center::factory()->create(['name' => 'Centre Tanger', 'code' => 'TNG']);
-        $this->essaouira  = Center::factory()->create(['name' => 'Centre Essaouira', 'code' => 'ESS']);
-        $this->agadir     = Center::factory()->create(['name' => 'Centre Agadir', 'code' => 'AGD']);
-        $this->tetouane   = Center::factory()->create(['name' => 'Centre Tétouane', 'code' => 'TET']);
+        $this->tanger = Center::factory()->create(['name' => 'Centre Tanger', 'code' => 'TNG']);
+        $this->essaouira = Center::factory()->create(['name' => 'Centre Essaouira', 'code' => 'ESS']);
+        $this->agadir = Center::factory()->create(['name' => 'Centre Agadir', 'code' => 'AGD']);
+        $this->tetouane = Center::factory()->create(['name' => 'Centre Tétouane', 'code' => 'TET']);
 
-        $this->superAdmin  = User::factory()->superAdmin()->create(['email' => 'sa@tst.ma']);
+        $this->superAdmin = User::factory()->superAdmin()->create(['email' => 'sa@tst.ma']);
         $this->adminTanger = User::factory()->centerAdmin($this->tanger->id)->create(['email' => 'ca.tanger@tst.ma']);
         $this->adminAgadir = User::factory()->centerAdmin($this->agadir->id)->create(['email' => 'ca.agadir@tst.ma']);
 
-        $this->teacherTanger  = Teacher::factory()->forCenter($this->tanger)->create();
+        $this->teacherTanger = Teacher::factory()->forCenter($this->tanger)->create();
         $this->teacherTanger2 = Teacher::factory()->forCenter($this->tanger)->create();
 
         $this->formationTanger = Formation::factory()
@@ -83,14 +91,14 @@ class NotificationSystemTest extends TestCase
     public function test_new_enrollment_notifies_center_administrators_of_that_center(): void
     {
         $response = $this->actingAs($this->superAdmin)->post(route('students.store'), [
-            'center_id'     => $this->tanger->id,
-            'domain'        => 'informatique',
-            'formation_id'  => $this->formationTanger->id,
-            'first_name'    => 'Hanae',
-            'last_name'     => 'Benali',
+            'center_id' => $this->tanger->id,
+            'domain' => 'informatique',
+            'formation_id' => $this->formationTanger->id,
+            'first_name' => 'Hanae',
+            'last_name' => 'Benali',
             'date_of_birth' => '2002-03-10',
-            'nationality'   => 'Marocaine',
-            'phone'         => '+212 600000001',
+            'nationality' => 'Marocaine',
+            'phone' => '+212 600000001',
         ]);
 
         $response->assertSessionHasNoErrors();
@@ -100,11 +108,11 @@ class NotificationSystemTest extends TestCase
         // L'Admin Centre de Tanger est notifié (inscription + dossier incomplet, CIN absente).
         $this->assertDatabaseHas('app_notifications', [
             'user_id' => $this->adminTanger->id,
-            'type'    => 'enrollment',
+            'type' => 'enrollment',
         ]);
         $this->assertDatabaseHas('app_notifications', [
             'user_id' => $this->adminTanger->id,
-            'type'    => 'dossier_incomplete',
+            'type' => 'dossier_incomplete',
         ]);
 
         // Le lien pointe vers le dossier étudiant autorisé.
@@ -117,14 +125,14 @@ class NotificationSystemTest extends TestCase
     public function test_enrollment_does_not_leak_to_other_centers(): void
     {
         $this->actingAs($this->superAdmin)->post(route('students.store'), [
-            'center_id'     => $this->tanger->id,
-            'domain'        => 'informatique',
-            'formation_id'  => $this->formationTanger->id,
-            'first_name'    => 'Omar',
-            'last_name'     => 'Idrissi',
+            'center_id' => $this->tanger->id,
+            'domain' => 'informatique',
+            'formation_id' => $this->formationTanger->id,
+            'first_name' => 'Omar',
+            'last_name' => 'Idrissi',
             'date_of_birth' => '2001-01-01',
-            'nationality'   => 'Marocaine',
-            'phone'         => '+212 600000002',
+            'nationality' => 'Marocaine',
+            'phone' => '+212 600000002',
         ])->assertSessionHasNoErrors();
 
         // Aucun administrateur d'un autre centre ne reçoit la notification.
@@ -140,10 +148,10 @@ class NotificationSystemTest extends TestCase
     {
         // Dossier invalide (pas de prénom) → aucune inscription, aucune notification.
         $this->actingAs($this->superAdmin)->post(route('students.store'), [
-            'center_id'    => $this->tanger->id,
-            'domain'       => 'informatique',
+            'center_id' => $this->tanger->id,
+            'domain' => 'informatique',
             'formation_id' => $this->formationTanger->id,
-            'last_name'    => 'SansPrenom',
+            'last_name' => 'SansPrenom',
         ])->assertSessionHasErrors();
 
         $this->assertDatabaseCount('students', 0);
@@ -158,14 +166,14 @@ class NotificationSystemTest extends TestCase
         // de la diffusion (notifyCenterAdmins exceptUserId) et ne doit donc recevoir
         // aucune notification pour son propre acte.
         $this->actingAs($this->adminTanger)->post(route('students.store'), [
-            'center_id'     => $this->tanger->id,
-            'domain'        => 'informatique',
-            'formation_id'  => $this->formationTanger->id,
-            'first_name'    => 'Nadia',
-            'last_name'     => 'Hamdi',
+            'center_id' => $this->tanger->id,
+            'domain' => 'informatique',
+            'formation_id' => $this->formationTanger->id,
+            'first_name' => 'Nadia',
+            'last_name' => 'Hamdi',
             'date_of_birth' => '2002-07-07',
-            'nationality'   => 'Marocaine',
-            'phone'         => '+212 600000020',
+            'nationality' => 'Marocaine',
+            'phone' => '+212 600000020',
         ])->assertSessionHasNoErrors();
 
         $this->assertSame(
@@ -340,7 +348,7 @@ class NotificationSystemTest extends TestCase
     public function test_teacher_cannot_access_another_teacher_notification(): void
     {
         $svc = $this->service();
-        $mine   = $svc->send($this->teacherTanger->user, 'teacher_assignment', 'MA-CLASSE-UNIQ', 'm', route('teacher.classes'), null, $this->tanger->id);
+        $mine = $svc->send($this->teacherTanger->user, 'teacher_assignment', 'MA-CLASSE-UNIQ', 'm', route('teacher.classes'), null, $this->tanger->id);
         $others = $svc->send($this->teacherTanger2->user, 'teacher_assignment', 'AUTRE-CLASSE-UNIQ', 'm', route('teacher.classes'), null, $this->tanger->id);
 
         // La page de notifications n'expose QUE ses propres notifications.
@@ -360,21 +368,21 @@ class NotificationSystemTest extends TestCase
     {
         $student = Student::factory()->forCenter($this->tanger)->create();
         Invoice::create([
-            'center_id'      => $this->tanger->id,
-            'student_id'     => $student->id,
+            'center_id' => $this->tanger->id,
+            'student_id' => $student->id,
             'invoice_number' => 'INV-TNG-000001',
-            'total_amount'   => 1500,
-            'currency'       => 'MAD',
-            'invoice_date'   => Carbon::today()->toDateString(),
-            'due_date'       => Carbon::today()->addDays(2)->toDateString(),
-            'status'         => 'sent',
+            'total_amount' => 1500,
+            'currency' => 'MAD',
+            'invoice_date' => Carbon::today()->toDateString(),
+            'due_date' => Carbon::today()->addDays(2)->toDateString(),
+            'status' => 'sent',
         ]);
 
         $created = app(ReminderNotificationService::class)->paymentDueSoon();
         $this->assertGreaterThanOrEqual(1, $created);
         $this->assertDatabaseHas('app_notifications', [
             'user_id' => $this->adminTanger->id,
-            'type'    => 'payment_due',
+            'type' => 'payment_due',
         ]);
     }
 
@@ -382,14 +390,14 @@ class NotificationSystemTest extends TestCase
     {
         $student = Student::factory()->forCenter($this->tanger)->create();
         Invoice::create([
-            'center_id'      => $this->tanger->id,
-            'student_id'     => $student->id,
+            'center_id' => $this->tanger->id,
+            'student_id' => $student->id,
             'invoice_number' => 'INV-TNG-000002',
-            'total_amount'   => 1500,
-            'currency'       => 'MAD',
-            'invoice_date'   => Carbon::today()->toDateString(),
-            'due_date'       => Carbon::today()->addDays(2)->toDateString(),
-            'status'         => 'paid',
+            'total_amount' => 1500,
+            'currency' => 'MAD',
+            'invoice_date' => Carbon::today()->toDateString(),
+            'due_date' => Carbon::today()->addDays(2)->toDateString(),
+            'status' => 'paid',
         ]);
 
         $this->assertSame(0, app(ReminderNotificationService::class)->paymentDueSoon());
@@ -400,18 +408,18 @@ class NotificationSystemTest extends TestCase
     {
         $student = Student::factory()->forCenter($this->tanger)->create();
         Invoice::create([
-            'center_id'      => $this->tanger->id,
-            'student_id'     => $student->id,
+            'center_id' => $this->tanger->id,
+            'student_id' => $student->id,
             'invoice_number' => 'INV-TNG-000003',
-            'total_amount'   => 2000,
-            'currency'       => 'MAD',
-            'invoice_date'   => Carbon::today()->subDays(10)->toDateString(),
-            'due_date'       => Carbon::today()->subDays(3)->toDateString(),
-            'status'         => 'sent',
+            'total_amount' => 2000,
+            'currency' => 'MAD',
+            'invoice_date' => Carbon::today()->subDays(10)->toDateString(),
+            'due_date' => Carbon::today()->subDays(3)->toDateString(),
+            'status' => 'sent',
         ]);
 
         $svc = app(ReminderNotificationService::class);
-        $first  = $svc->paymentOverdue();
+        $first = $svc->paymentOverdue();
         $second = $svc->paymentOverdue(); // rappel : cooldown → rien de nouveau
 
         $this->assertGreaterThanOrEqual(1, $first);
@@ -422,14 +430,14 @@ class NotificationSystemTest extends TestCase
     public function test_salary_reminder_only_for_unpaid_real_dates(): void
     {
         TeacherSalary::create([
-            'center_id'              => $this->tanger->id,
-            'teacher_id'             => $this->teacherTanger->id,
-            'month'                  => (int) Carbon::today()->format('m'),
-            'year'                   => (int) Carbon::today()->format('Y'),
-            'expected_amount'        => 5000,
-            'paid_amount'            => 0,
-            'currency'               => 'MAD',
-            'status'                 => 'unpaid',
+            'center_id' => $this->tanger->id,
+            'teacher_id' => $this->teacherTanger->id,
+            'month' => (int) Carbon::today()->format('m'),
+            'year' => (int) Carbon::today()->format('Y'),
+            'expected_amount' => 5000,
+            'paid_amount' => 0,
+            'currency' => 'MAD',
+            'status' => 'unpaid',
             'scheduled_payment_date' => Carbon::today()->addDays(3)->toDateString(),
         ]);
 
@@ -442,15 +450,15 @@ class NotificationSystemTest extends TestCase
         $class = ClassRoom::factory()->create(['center_id' => $this->tanger->id, 'formation_id' => $this->formationTanger->id]);
         $room = Room::create(['center_id' => $this->tanger->id, 'name' => 'Salle A', 'code' => 'RA-01', 'capacity' => 30, 'status' => 'active']);
         $schedule = Schedule::create([
-            'center_id'   => $this->tanger->id,
-            'class_id'    => $class->id,
-            'room_id'     => $room->id,
-            'teacher_id'  => $this->teacherTanger->id,
-            'date'        => Carbon::today()->subDays(2)->toDateString(),
-            'start_time'  => '09:00:00',
-            'end_time'    => '11:00:00',
-            'type'        => 'course',
-            'status'      => 'completed',
+            'center_id' => $this->tanger->id,
+            'class_id' => $class->id,
+            'room_id' => $room->id,
+            'teacher_id' => $this->teacherTanger->id,
+            'date' => Carbon::today()->subDays(2)->toDateString(),
+            'start_time' => '09:00:00',
+            'end_time' => '11:00:00',
+            'type' => 'course',
+            'status' => 'completed',
         ]);
 
         $reminder = app(ReminderNotificationService::class);
@@ -459,18 +467,18 @@ class NotificationSystemTest extends TestCase
         $this->assertGreaterThanOrEqual(1, $reminder->missingAttendance());
         $this->assertDatabaseHas('app_notifications', [
             'user_id' => $this->teacherTanger->user->id,
-            'type'    => 'attendance',
+            'type' => 'attendance',
         ]);
 
         // Présence déjà enregistrée → plus aucune nouvelle alerte pour cette séance.
         $student = Student::factory()->forCenter($this->tanger)->create();
         Attendance::create([
-            'center_id'   => $this->tanger->id,
-            'class_id'    => $class->id,
+            'center_id' => $this->tanger->id,
+            'class_id' => $class->id,
             'schedule_id' => $schedule->id,
-            'student_id'  => $student->id,
-            'date'        => $schedule->date->toDateString(),
-            'status'      => 'present',
+            'student_id' => $student->id,
+            'date' => $schedule->date->toDateString(),
+            'status' => 'present',
         ]);
 
         // Nouvelle séance : on purge le cooldown en supprimant l'alerte existante pour repartir proprement.
@@ -484,20 +492,23 @@ class NotificationSystemTest extends TestCase
     {
         // Le Super Admin enregistre un stagiaire à Tanger (dossier complet, CIN fournie).
         $this->actingAs($this->superAdmin)->post(route('stagiaires.store'), [
-            'center_id'               => $this->tanger->id,
-            'first_name'              => 'Youssef',
-            'last_name'               => 'Alami',
-            'date_of_birth'           => '1999-09-09',
-            'nationality'             => 'Marocaine',
-            'phone'                   => '+212600000009',
-            'whatsapp'                => '+212600000009',
+            'center_id' => $this->tanger->id,
+            'first_name' => 'Youssef',
+            'last_name' => 'Alami',
+            'date_of_birth' => '1999-09-09',
+            'nationality' => 'Marocaine',
+            'phone' => '+212600000009',
+            'whatsapp' => '+212600000009',
             'emergency_contact_phone' => '+212600000019',
-            'company_name'            => 'ACME Tanger',
-            'company_phone'           => '+212500000000',
-            'company_location'        => 'Tanger',
-            'cin_recto'               => UploadedFile::fake()->image('recto.jpg'),
-            'cin_verso'               => UploadedFile::fake()->image('verso.jpg'),
-            'profile_photo'           => UploadedFile::fake()->image('photo.jpg'),
+            'company_name' => 'ACME Tanger',
+            'company_phone' => '+212500000000',
+            'company_location' => 'Tanger',
+            'stage_start_date' => '2026-09-01',
+            'stage_end_date' => '2027-02-28',
+            'stage_price' => 1200.00,
+            'cin_recto' => UploadedFile::fake()->image('recto.jpg'),
+            'cin_verso' => UploadedFile::fake()->image('verso.jpg'),
+            'profile_photo' => UploadedFile::fake()->image('photo.jpg'),
         ])->assertSessionHasNoErrors();
 
         $stagiaire = Stagiaire::first();
@@ -545,14 +556,14 @@ class NotificationSystemTest extends TestCase
         Mail::fake();
 
         $this->actingAs($this->superAdmin)->post(route('students.store'), [
-            'center_id'     => $this->tanger->id,
-            'domain'        => 'informatique',
-            'formation_id'  => $this->formationTanger->id,
-            'first_name'    => 'Salma',
-            'last_name'     => 'Fassi',
+            'center_id' => $this->tanger->id,
+            'domain' => 'informatique',
+            'formation_id' => $this->formationTanger->id,
+            'first_name' => 'Salma',
+            'last_name' => 'Fassi',
             'date_of_birth' => '2003-02-02',
-            'nationality'   => 'Marocaine',
-            'phone'         => '+212 600000010',
+            'nationality' => 'Marocaine',
+            'phone' => '+212 600000010',
         ])->assertSessionHasNoErrors();
 
         Mail::assertNothingSent();
@@ -585,14 +596,14 @@ class NotificationSystemTest extends TestCase
         // Super Admin : seules les alertes globales (ex. dépense importante) le
         // concernent. On vérifie ici que le Super Admin ne reçoit rien.
         $this->actingAs($this->adminTanger)->post(route('students.store'), [
-            'center_id'     => $this->tanger->id,
-            'domain'        => 'informatique',
-            'formation_id'  => $this->formationTanger->id,
-            'first_name'    => 'Kenza',
-            'last_name'     => 'Bakri',
+            'center_id' => $this->tanger->id,
+            'domain' => 'informatique',
+            'formation_id' => $this->formationTanger->id,
+            'first_name' => 'Kenza',
+            'last_name' => 'Bakri',
             'date_of_birth' => '1998-08-08',
-            'nationality'   => 'Marocaine',
-            'phone'         => '+212 600000021',
+            'nationality' => 'Marocaine',
+            'phone' => '+212 600000021',
         ])->assertSessionHasNoErrors();
 
         $this->assertSame(0, AppNotification::where('user_id', $this->superAdmin->id)->count());

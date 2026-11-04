@@ -429,6 +429,13 @@
                         </dd>
                     </div>
 
+                    <div>
+                        <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('Prix du stage') }}</dt>
+                        <dd class="mt-1 text-sm font-semibold text-slate-900 dark:text-white">
+                            {{ $stagiaire->formatted_stage_price }}
+                        </dd>
+                    </div>
+
                     <div class="pt-3 border-t border-slate-100 dark:border-slate-800">
                         <dt class="font-medium text-slate-500 dark:text-slate-400">{{ __('Centre d\'accueil') }}</dt>
                         <dd class="mt-1 text-sm font-semibold text-slate-900 dark:text-white">

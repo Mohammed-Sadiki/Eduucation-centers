@@ -19,10 +19,12 @@ use Tests\TestCase;
  * Validation stricte des formulaires « Ajouter un stagiaire » et « Modifier un stagiaire ».
  *
  * Règle maîtresse : toutes les informations personnelles (dont WhatsApp, téléphone
- * d'urgence, photos CIN et photo de profil) et les trois champs de l'entreprise de
- * stage sont obligatoires. Seule la section « Autres fichiers » peut rester vide.
- * Les champs hérités de l'ancien formulaire (email, adresse, stage, notes…) restent
- * acceptés mais facultatifs ; dès qu'ils sont fournis, leur format est contrôlé.
+ * d'urgence, photos CIN et photo de profil), les trois champs de l'entreprise de
+ * stage et les trois champs « Informations du stage » (dates de début/fin, prix)
+ * sont obligatoires. Seule la section « Autres fichiers » peut rester vide.
+ * Les autres champs hérités de l'ancien formulaire (email, adresse, type de stage,
+ * notes…) restent acceptés mais facultatifs ; dès qu'ils sont fournis, leur format
+ * est contrôlé.
  *
  * Les sections dynamiques « Diplômes » et « Autres documents » (legacy) suivent
  * toujours la logique « tout ou rien » : une ligne commencée exige tous ses champs.
@@ -36,9 +38,13 @@ class StagiaireFormValidationTest extends TestCase
     use RefreshDatabase;
 
     protected Center $berlin;
+
     protected Center $munich;
+
     protected User $superAdmin;
+
     protected User $adminBerlin;
+
     protected User $adminMunich;
 
     protected function setUp(): void
@@ -102,6 +108,7 @@ class StagiaireFormValidationTest extends TestCase
             'phone', 'whatsapp', 'emergency_contact_phone',
             'cin_recto', 'cin_verso', 'profile_photo',
             'company_name', 'company_phone', 'company_location',
+            'stage_start_date', 'stage_end_date', 'stage_price',
         ];
 
         foreach ($requiredFields as $field) {
@@ -584,13 +591,15 @@ class StagiaireFormValidationTest extends TestCase
         $this->assertStringContainsString('novalidate', $html);
         $this->assertStringContainsString('Facultatif', $html);
 
-        // Les deux cartes demandées sont bien présentes.
+        // Les trois cartes demandées sont bien présentes.
         $this->assertStringContainsString('Informations personnelles', $html);
         $this->assertStringContainsString('Entreprise où le stagiaire effectuera son stage', $html);
+        $this->assertStringContainsString('Informations du stage', $html);
 
         foreach (['first_name', 'last_name', 'center_id', 'date_of_birth', 'nationality',
             'phone', 'whatsapp', 'emergency_contact_phone',
-            'company_name', 'company_phone', 'company_location'] as $field) {
+            'company_name', 'company_phone', 'company_location',
+            'stage_start_date', 'stage_end_date', 'stage_price'] as $field) {
             preg_match_all(
                 '/<(?:input|select|textarea)\b[^>]*\bname="'.preg_quote($field, '/').'"[^>]*>/s',
                 $html,
@@ -730,7 +739,8 @@ class StagiaireFormValidationTest extends TestCase
             ->assertStatus(422)
             ->assertJsonValidationErrors(['date_of_birth', 'nationality', 'phone', 'whatsapp',
                 'emergency_contact_phone', 'cin_recto', 'cin_verso', 'profile_photo',
-                'company_name', 'company_phone', 'company_location']);
+                'company_name', 'company_phone', 'company_location',
+                'stage_start_date', 'stage_end_date', 'stage_price']);
 
         $this->assertDatabaseCount('stagiaires', 0);
     }
@@ -803,6 +813,7 @@ class StagiaireFormValidationTest extends TestCase
                 'first_name', 'center_id', 'date_of_birth', 'nationality', 'phone',
                 'whatsapp', 'emergency_contact_phone', 'cin_recto', 'profile_photo',
                 'company_name', 'company_phone', 'company_location',
+                'stage_start_date', 'stage_end_date', 'stage_price',
             ]);
 
         $this->assertDatabaseHas('stagiaires', ['id' => $stagiaire->id, 'last_name' => 'Weiss']);
@@ -1000,6 +1011,13 @@ class StagiaireFormValidationTest extends TestCase
         $this->assertContains('required', $request->rules()['cin_recto']);
         $this->assertContains('required', $request->rules()['profile_photo']);
         $this->assertContains('required', $request->rules()['company_name']);
+        // « Informations du stage » : période et montant exigés, date de fin
+        // contrôlée par rapport à la date de début, montant positif ou nul.
+        $this->assertContains('required', $request->rules()['stage_start_date']);
+        $this->assertContains('required', $request->rules()['stage_end_date']);
+        $this->assertContains('after_or_equal:stage_start_date', $request->rules()['stage_end_date']);
+        $this->assertContains('required', $request->rules()['stage_price']);
+        $this->assertContains('min:0', $request->rules()['stage_price']);
         // Les champs hérités de l'ancien formulaire restent facultatifs.
         $this->assertContains('nullable', $request->rules()['notes']);
     }

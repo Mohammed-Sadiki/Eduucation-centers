@@ -28,10 +28,15 @@ class StagiaireInterfaceSimplificationTest extends TestCase
     use RefreshDatabase;
 
     protected Center $centerBerlin;
+
     protected Center $centerMunich;
+
     protected User $superAdmin;
+
     protected User $adminBerlin;
+
     protected User $teacher;
+
     protected User $studentUser;
 
     protected function setUp(): void
@@ -269,6 +274,7 @@ class StagiaireInterfaceSimplificationTest extends TestCase
                 'phone', 'whatsapp', 'emergency_contact_phone',
                 'cin_recto', 'cin_verso', 'profile_photo',
                 'company_name', 'company_phone', 'company_location',
+                'stage_start_date', 'stage_end_date', 'stage_price',
             ]);
     }
 

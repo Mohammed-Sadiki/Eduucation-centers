@@ -9,16 +9,17 @@ use Illuminate\Validation\Rule;
  * Règles de validation partagées par les formulaires « Ajouter un stagiaire »
  * et « Modifier un stagiaire ».
  *
- * Principe de la refonte : le formulaire ne comporte que deux sections —
- * « Informations personnelles » et « Entreprise où le stagiaire effectuera son
- * stage » — et tous les champs affichés sont obligatoires, à l'exception des
- * « Autres fichiers » (section facultative).
+ * Principe de la refonte : les cartes saisissables du formulaire couvrent trois
+ * sections — « Informations personnelles », « Informations du stage » (période et
+ * prix convenus) et « Entreprise où le stagiaire effectuera son stage » — et tous
+ * les champs affichés sont obligatoires, à l'exception des « Autres fichiers »
+ * (seule section facultative).
  *
- * Les informations administratives qui ne figurent plus dans le formulaire
- * (lieu de naissance, sexe, e-mail, adresse, numéro CIN, période et prix du
- * stage, statut, notes, diplômes et documents existants) restent acceptées par
- * le serveur — leurs formats sont toujours contrôlés — mais ne sont plus
- * exigées : aucun dossier existant n'est mis en défaut et aucune valeur déjà
+ * Les informations administratives qui ne figurent toujours pas dans le
+ * formulaire (lieu de naissance, sexe, e-mail, adresse, numéro CIN, type de
+ * stage, devise, statut, notes, diplômes et documents existants) restent
+ * acceptées par le serveur — leurs formats sont toujours contrôlés — mais ne sont
+ * plus exigées : aucun dossier existant n'est mis en défaut et aucune valeur déjà
  * enregistrée n'est effacée.
  *
  * Les lignes facultatives « Diplômes obtenus » et « Autres documents » conservent
@@ -28,7 +29,7 @@ use Illuminate\Validation\Rule;
 trait HasStagiaireValidation
 {
     /**
-     * Champs des deux cartes du formulaire : obligatoires et formatés.
+     * Champs des cartes du formulaire : obligatoires et formatés.
      *
      * Les fichiers CIN ne figurent pas ici : leur caractère obligatoire diffère
      * entre la création (toujours exigés) et la modification (un scan déjà
@@ -46,7 +47,14 @@ trait HasStagiaireValidation
             'whatsapp' => ['required', 'string', 'max:30', 'regex:/^[0-9+().\s-]+$/'],
             'emergency_contact_phone' => ['required', 'string', 'max:30', 'regex:/^[0-9+().\s-]+$/'],
 
-            // 2. Entreprise où le stagiaire effectuera son stage (3 champs, exigés)
+            // 2. Informations du stage (3 champs, exigés) : période et montant
+            // convenus. La date de fin ne peut jamais précéder la date de début,
+            // et le prix reste un montant positif ou nul (devise par défaut MAD).
+            'stage_start_date' => ['required', 'date'],
+            'stage_end_date' => ['required', 'date', 'after_or_equal:stage_start_date'],
+            'stage_price' => ['required', 'numeric', 'min:0', 'max:999999.99'],
+
+            // 3. Entreprise où le stagiaire effectuera son stage (3 champs, exigés)
             'company_name' => ['required', 'string', 'max:255'],
             'company_phone' => ['required', 'string', 'max:30', 'regex:/^[0-9+().\s-]+$/'],
             'company_location' => ['required', 'string', 'max:255'],
@@ -54,7 +62,7 @@ trait HasStagiaireValidation
             // Rattachement : jamais choisi par un Admin Centre (résolu côté serveur).
             'center_id' => ['required', 'integer', 'exists:centers,id'],
 
-            // 3. Téléversements du formulaire. La photo de profil fait partie des
+            // 4. Téléversements du formulaire. La photo de profil fait partie des
             // informations personnelles exigées : son caractère obligatoire est
             // fixé par chaque requête (à la modification, une photo déjà
             // enregistrée peut être conservée). Les « Autres fichiers » restent
@@ -71,10 +79,7 @@ trait HasStagiaireValidation
             'cin_number' => ['nullable', 'string', 'max:50'],
             'cin_issued_date' => ['nullable', 'date'],
             'cin_issued_place' => ['nullable', 'string', 'max:255'],
-            'stage_start_date' => ['nullable', 'date'],
-            'stage_end_date' => ['nullable', 'date', 'after_or_equal:stage_start_date'],
             'stage_type' => ['nullable', 'string', 'max:255'],
-            'stage_price' => ['nullable', 'numeric', 'min:0', 'max:999999.99'],
             'currency' => ['nullable', 'string', 'max:10'],
             'status' => ['nullable', 'string', Rule::in(['nouveau', 'en_cours', 'termine', 'suspendu', 'annule'])],
             'notes' => ['nullable', 'string', 'max:2000'],
@@ -189,9 +194,13 @@ trait HasStagiaireValidation
     protected function stagiaireMessages(): array
     {
         return [
+            'stage_start_date.required' => __('La date de début du stage est obligatoire.'),
+            'stage_start_date.date' => __('La date de début du stage doit être une date valide.'),
+            'stage_end_date.required' => __('La date de fin du stage est obligatoire.'),
+            'stage_end_date.after_or_equal' => __('La date de fin du stage doit être postérieure ou égale à la date de début.'),
+            'stage_price.required' => __('Le prix du stage est obligatoire.'),
             'stage_price.numeric' => __('Le prix du stage doit être un montant numérique valide.'),
             'stage_price.min' => __('Le prix du stage doit être supérieur ou égal à 0.'),
-            'stage_end_date.after_or_equal' => __('La date de fin du stage doit être postérieure ou égale à la date de début.'),
             'phone.regex' => __('Le numéro de téléphone est invalide.'),
             'whatsapp.regex' => __('Le numéro WhatsApp est invalide.'),
             'emergency_contact_phone.regex' => __('Le numéro de téléphone d\'urgence est invalide.'),

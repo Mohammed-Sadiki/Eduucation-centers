@@ -8,9 +8,10 @@ use Illuminate\Http\UploadedFile;
  * Constructeur de données du formulaire stagiaire.
  *
  * Le formulaire « Ajouter un stagiaire » exige désormais toutes ses informations
- * personnelles (dont WhatsApp, téléphone d'urgence, photos CIN et photo de profil)
- * ainsi que les trois champs de l'entreprise de stage. Les champs hérités de
- * l'ancien formulaire (email, adresse, stage, notes…) restent acceptés mais
+ * personnelles (dont WhatsApp, téléphone d'urgence, photos CIN et photo de profil),
+ * les trois champs de l'entreprise de stage ainsi que la section « Informations du
+ * stage » (dates de début/fin et prix). Les autres champs hérités de l'ancien
+ * formulaire (email, adresse, type de stage, notes…) restent acceptés mais
  * facultatifs. Les tests partagent donc un jeu de données complet, qu'ils
  * dégradent volontairement pour vérifier un refus précis.
  */
@@ -35,6 +36,10 @@ trait HasStagiaireFormData
             'company_name' => 'Atlas Technologies',
             'company_phone' => '+212527000000',
             'company_location' => 'Casablanca, Maroc',
+            // Section « Informations du stage » : trois champs obligatoires.
+            'stage_start_date' => '2026-11-01',
+            'stage_end_date' => '2027-04-30',
+            'stage_price' => 1500.00,
             // Champs hérités, désormais facultatifs mais toujours acceptés.
             'place_of_birth' => 'Casablanca',
             'gender' => 'male',
@@ -43,10 +48,7 @@ trait HasStagiaireFormData
             'cin_number' => 'AB123456',
             'cin_issued_date' => '2020-01-15',
             'cin_issued_place' => 'Préfecture Paris',
-            'stage_start_date' => '2026-11-01',
-            'stage_end_date' => '2027-04-30',
             'stage_type' => "Stage de fin d'études",
-            'stage_price' => 1500.00,
             'currency' => 'EUR',
             'status' => 'nouveau',
             'notes' => 'Candidature spontanée acceptée.',

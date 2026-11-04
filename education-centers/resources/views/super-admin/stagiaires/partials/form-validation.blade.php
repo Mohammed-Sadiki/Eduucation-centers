@@ -6,8 +6,10 @@
     multiples facultatifs, mais format et taille vérifiés s'ils sont fournis).
 
     Le contrôle ne se limite pas aux attributs HTML `required` : formats e-mail,
-    téléphone, montant, date, extensions et taille de fichier sont vérifiés, et
-    la soumission est bloquée tant qu'une erreur reste affichée.
+    téléphone, montant, date, extensions et taille de fichier sont vérifiés, la
+    cohérence de la période de stage également (date de fin ≥ date de début,
+    montant positif ou nul), et la soumission est bloquée tant qu'une erreur
+    reste affichée.
 --}}
 <script>
 (function () {
@@ -19,6 +21,8 @@
         invalidEmail: @js(__('Cette adresse e-mail est invalide.')),
         invalidPhone: @js(__('Ce numéro de téléphone est invalide.')),
         invalidNumber: @js(__('Ce montant doit être un nombre valide.')),
+        negativeNumber: @js(__('Ce montant doit être positif ou nul.')),
+        dateBeforeStart: @js(__('La date de fin doit être postérieure ou égale à la date de début.')),
         invalidDate: @js(__('Cette date est invalide.')),
         badFileFormat: @js(__('Format de fichier non autorisé.')),
         tooLargeFile: @js(__('Fichier trop volumineux : taille maximale dépassée.')),
@@ -85,11 +89,27 @@
         if (field.type === 'number' && !NUMBER_PATTERN.test(value)) {
             return MESSAGES.invalidNumber;
         }
+        if (field.type === 'number') {
+            const min = parseFloat(field.getAttribute('min'));
+
+            if (Number.isFinite(min) && parseFloat(value.replace(',', '.')) < min) {
+                return MESSAGES.negativeNumber;
+            }
+        }
         if (field.hasAttribute('data-numeric') && !/^\d{4}$/.test(value)) {
             return MESSAGES.invalidNumber;
         }
         if (field.type === 'date' && Number.isNaN(Date.parse(value))) {
             return MESSAGES.invalidDate;
+        }
+        // Cohérence d'une paire de dates (fin de stage ≥ début de stage) : la
+        // même règle que le serveur, reflétée avant la soumission.
+        if (field.type === 'date') {
+            const start = document.getElementById(field.getAttribute('data-date-not-before') || '');
+
+            if (start && valueOf(start) !== '' && !Number.isNaN(Date.parse(valueOf(start))) && Date.parse(value) < Date.parse(valueOf(start))) {
+                return MESSAGES.dateBeforeStart;
+            }
         }
 
         return null;
@@ -121,6 +141,31 @@
         error.dataset.stagiaireError = '1';
         error.textContent = message;
         holder.appendChild(error);
+    }
+
+    /**
+     * Un champ modifié peut rendre valide ou invalide le champ qui lui est
+     * comparé (date de fin ≥ date de début) : celui-ci est revérifié
+     * immédiatement plutôt que de garder une erreur périmée.
+     */
+    function revalidateDependents(form, field) {
+        if (! field.id) {
+            return;
+        }
+
+        form.querySelectorAll(`[data-date-not-before="${field.id}"]`).forEach((dependent) => {
+            clearFieldError(dependent);
+
+            if (valueOf(dependent) === '') {
+                return;
+            }
+
+            const error = checkField(dependent, dependent.hasAttribute('data-required'));
+
+            if (error) {
+                showFieldError(dependent, error);
+            }
+        });
     }
 
     function clearFormErrors(form) {
@@ -266,12 +311,14 @@
         form.addEventListener('input', (event) => {
             if (event.target.matches('[data-required], [data-row-field], [data-optional-files]')) {
                 clearFieldError(event.target);
+                revalidateDependents(form, event.target);
             }
         });
 
         form.addEventListener('change', (event) => {
             if (event.target.matches('[data-required], [data-row-field], [data-optional-files]')) {
                 clearFieldError(event.target);
+                revalidateDependents(form, event.target);
             }
         });
     });

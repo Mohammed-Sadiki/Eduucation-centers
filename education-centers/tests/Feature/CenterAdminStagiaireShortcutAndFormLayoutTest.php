@@ -20,9 +20,9 @@ use Tests\TestCase;
  *
  * 2. Le formulaire « Ajouter un stagiaire » retrouve sa disposition en cartes
  *    côte à côte : deux colonnes équilibrées sur desktop (« Informations
- *    personnelles » à côté de « Documents et fichiers »), la section la plus
- *    longue (entreprise de stage) en pleine largeur, une seule colonne sur
- *    tablette/mobile. Aucun champ, aucune validation, aucun upload n'est modifié.
+ *    personnelles » à côté de « Documents et fichiers »), les sections les plus
+ *    longues (entreprise de stage, puis « Informations du stage ») en pleine
+ *    largeur, une seule colonne sur tablette/mobile. Aucun upload n'est modifié.
  */
 class CenterAdminStagiaireShortcutAndFormLayoutTest extends TestCase
 {
@@ -30,7 +30,9 @@ class CenterAdminStagiaireShortcutAndFormLayoutTest extends TestCase
     use RefreshDatabase;
 
     protected Center $berlin;
+
     protected User $superAdmin;
+
     protected User $adminBerlin;
 
     protected function setUp(): void
@@ -41,7 +43,7 @@ class CenterAdminStagiaireShortcutAndFormLayoutTest extends TestCase
 
         $this->berlin = Center::factory()->create(['name' => 'Centre Berlin', 'code' => 'BER']);
 
-        $this->superAdmin  = User::factory()->superAdmin()->create(['email' => 'sa-shortcut@test.de']);
+        $this->superAdmin = User::factory()->superAdmin()->create(['email' => 'sa-shortcut@test.de']);
         $this->adminBerlin = User::factory()->centerAdmin($this->berlin->id)->create(['email' => 'ab-shortcut@test.de']);
     }
 
@@ -130,28 +132,31 @@ class CenterAdminStagiaireShortcutAndFormLayoutTest extends TestCase
     {
         $html = $this->actingAs($this->adminBerlin)->get(route('stagiaires.create'))->assertOk()->getContent();
 
-        // Trois cartes : personnelles, documents/ fichiers, entreprise.
-        $this->assertSame(3, preg_match_all('/<section class="ec-card overflow-hidden( lg:col-span-2)?">/', $html),
-            'Le formulaire doit rendre exactement trois cartes.');
+        // Quatre cartes : personnelles, documents/fichiers, entreprise, stage.
+        $this->assertSame(4, preg_match_all('/<section class="ec-card overflow-hidden( lg:col-span-2)?">/', $html),
+            'Le formulaire doit rendre exactement quatre cartes.');
 
         $posPersonnel = strpos($html, __('Informations personnelles'));
         $posDocuments = strpos($html, __('Documents et fichiers'));
         $posEntreprise = strpos($html, __('Entreprise où le stagiaire effectuera son stage'));
+        $posStage = strpos($html, __('Informations du stage'));
 
         $this->assertNotFalse($posPersonnel);
         $this->assertNotFalse($posDocuments, 'La carte « Documents et fichiers » doit exister à côté des informations personnelles.');
         $this->assertNotFalse($posEntreprise);
+        $this->assertNotFalse($posStage, 'La carte « Informations du stage » doit être rendue.');
         $this->assertLessThan($posDocuments, $posPersonnel);
         $this->assertLessThan($posEntreprise, $posDocuments);
+        $this->assertLessThan($posStage, $posEntreprise);
 
         // Les deux premières cartes partagent une ligne (pas de pleine largeur),
-        // la section la plus longue occupe toute la largeur.
+        // les sections les plus longues occupent toute la largeur.
         $this->assertMatchesRegularExpression('/<section class="ec-card overflow-hidden">/', $html);
         $this->assertMatchesRegularExpression('/<section class="ec-card overflow-hidden lg:col-span-2">/', $html);
 
-        // Numérotation cohérente 1 → 2 → 3.
+        // Numérotation cohérente 1 → 2 → 3 → 4.
         preg_match_all('/rounded-full bg-brand-100[^>]*>(\d)<\/span>/', $html, $badges);
-        $this->assertSame(['1', '2', '3'], $badges[1]);
+        $this->assertSame(['1', '2', '3', '4'], $badges[1]);
     }
 
     public function test_super_admin_form_keeps_the_same_layout_and_its_center_selector(): void
@@ -184,6 +189,7 @@ class CenterAdminStagiaireShortcutAndFormLayoutTest extends TestCase
             'whatsapp', 'emergency_contact_phone',
             'cin_recto', 'cin_verso', 'profile_photo', 'other_files[]',
             'company_name', 'company_phone', 'company_location',
+            'stage_start_date', 'stage_end_date', 'stage_price',
         ];
 
         foreach ($fields as $field) {

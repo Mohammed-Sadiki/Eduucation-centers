@@ -36,9 +36,13 @@ class StagiaireInternFormTest extends TestCase
     use RefreshDatabase;
 
     protected Center $berlin;
+
     protected Center $munich;
+
     protected User $superAdmin;
+
     protected User $adminBerlin;
+
     protected User $adminMunich;
 
     protected function setUp(): void
@@ -78,9 +82,10 @@ class StagiaireInternFormTest extends TestCase
             $this->assertStringContainsString($marker, $html, "Le marqueur « {$marker} » doit être présent.");
         }
 
-        // Aucun champ hors périmètre n'a été ajouté (ni les anciens retirés).
+        // Aucun champ hors périmètre n'a été ajouté (ni les anciens retirés,
+        // hors ceux de la section « Informations du stage » désormais exigés).
         foreach (['name="email"', 'name="address"', 'name="gender"', 'name="place_of_birth"',
-            'name="cin_number"', 'name="stage_price"', 'name="stage_start_date"', 'name="notes"'] as $absent) {
+            'name="cin_number"', 'name="notes"'] as $absent) {
             $this->assertStringNotContainsString($absent, $html, "Le champ « {$absent} » ne doit plus figurer au formulaire.");
         }
     }

@@ -4,8 +4,9 @@
     // Disposition : des cartes côte à côte sur desktop (deux colonnes équilibrées),
     // une seule colonne sur tablette/mobile. « Informations personnelles » à côté
     // de « Documents et fichiers », puis « Entreprise où le stagiaire effectuera
-    // son stage » en pleine largeur. Tous les champs affichés sont obligatoires,
-    // à l'exception de la section « Autres fichiers ».
+    // son stage » et « Informations du stage » (période et prix convenus) en
+    // pleine largeur. Tous les champs affichés sont obligatoires, à l'exception
+    // de la section « Autres fichiers ».
     $authUser = auth()->user();
     $isCenterAdmin = $authUser->isCenterAdmin();
     $forcedCenter = $isCenterAdmin ? $authUser->center : null;
@@ -43,7 +44,7 @@
                 {{ __('Ajouter un stagiaire') }}
             </h1>
             <p class="mt-2 text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                {{ __('Renseignez les informations personnelles du stagiaire et l\'entreprise où il effectuera son stage.') }}
+                {{ __('Renseignez les informations personnelles du stagiaire, les informations de son stage et l\'entreprise où il effectuera son stage.') }}
             </p>
             <p class="mt-2 text-sm text-slate-500 dark:text-slate-400" id="legende-champs-obligatoires">
                 <span class="text-rose-500 font-bold">*</span> {{ __('Les champs marqués d\'un astérisque sont obligatoires.') }}
@@ -295,6 +296,43 @@
                     <input type="text" id="company_location" name="company_location" value="{{ old('company_location') }}" required data-required data-label="{{ __('Lieu de l\'entreprise') }}"
                            class="ec-input text-base @error('company_location') is-invalid @enderror" placeholder="{{ __('Ex: Casablanca, Maroc') }}">
                     @error('company_location') <p class="ec-error text-sm">{{ $message }}</p> @enderror
+                </div>
+            </div>
+        </section>
+
+        {{-- ══════════════════════════════════════════════════════════════
+             CARTE 4 — INFORMATIONS DU STAGE (période + prix convenu)
+             Pleine largeur, même présentation que les autres cartes.
+        ══════════════════════════════════════════════════════════════ --}}
+        <section class="ec-card overflow-hidden lg:col-span-2">
+            <header class="border-b border-slate-100 bg-slate-50/60 px-6 py-5 dark:border-slate-800 dark:bg-slate-800/40">
+                <h2 class="flex items-center gap-3 text-2xl font-extrabold tracking-tight text-brand-700 dark:text-brand-300">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-base font-extrabold text-brand-700 dark:bg-brand-500/20 dark:text-brand-300">4</span>
+                    <x-icon name="briefcase" class="h-6 w-6" />
+                    {{ __('Informations du stage') }}
+                </h2>
+            </header>
+
+            <div class="grid gap-5 p-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div>
+                    <label for="stage_start_date" class="ec-label text-base font-semibold">{{ __('Date de début de stage') }} <span class="text-rose-500">*</span></label>
+                    <input type="date" id="stage_start_date" name="stage_start_date" value="{{ old('stage_start_date') }}" required data-required data-label="{{ __('Date de début de stage') }}"
+                           class="ec-input text-base @error('stage_start_date') is-invalid @enderror">
+                    @error('stage_start_date') <p class="ec-error text-sm">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label for="stage_end_date" class="ec-label text-base font-semibold">{{ __('Date de fin de stage') }} <span class="text-rose-500">*</span></label>
+                    <input type="date" id="stage_end_date" name="stage_end_date" value="{{ old('stage_end_date') }}" required data-required data-label="{{ __('Date de fin de stage') }}" data-date-not-before="stage_start_date"
+                           class="ec-input text-base @error('stage_end_date') is-invalid @enderror">
+                    @error('stage_end_date') <p class="ec-error text-sm">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label for="stage_price" class="ec-label text-base font-semibold">{{ __('Prix du stage (DH)') }} <span class="text-rose-500">*</span></label>
+                    <input type="number" id="stage_price" name="stage_price" value="{{ old('stage_price') }}" step="0.01" min="0" required data-required data-label="{{ __('Prix du stage (DH)') }}" inputmode="decimal"
+                           class="ec-input text-base @error('stage_price') is-invalid @enderror" placeholder="0.00">
+                    @error('stage_price') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                 </div>
             </div>
         </section>

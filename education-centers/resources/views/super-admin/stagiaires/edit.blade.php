@@ -2,9 +2,10 @@
 
 @php
     // Le formulaire de modification reprend à l'identique la présentation du
-    // formulaire « Ajouter un stagiaire » : deux cartes (Informations personnelles,
-    // Entreprise de stage). Les pièces déjà enregistrées (scans CIN, photo de
-    // profil, documents) sont conservées lorsqu'aucun nouveau fichier n'est envoyé.
+    // formulaire « Ajouter un stagiaire » : trois cartes (Informations
+    // personnelles, Entreprise de stage, Informations du stage). Les pièces déjà
+    // enregistrées (scans CIN, photo de profil, documents) sont conservées
+    // lorsqu'aucun nouveau fichier n'est envoyé.
     $authUser = auth()->user();
     $isCenterAdmin = $authUser->isCenterAdmin();
     $forcedCenter = $isCenterAdmin ? $authUser->center : null;
@@ -31,7 +32,7 @@
                 {{ __('Modifier le dossier :') }} {{ $stagiaire->first_name }} {{ $stagiaire->last_name }}
             </h1>
             <p class="mt-2 text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                {{ __('Mise à jour des informations personnelles et de l\'entreprise de stage.') }}
+                {{ __('Mise à jour des informations personnelles, du stage et de l\'entreprise.') }}
             </p>
             <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
                 <span class="text-rose-500 font-bold">*</span> {{ __('Les champs marqués d\'un astérisque sont obligatoires.') }}
@@ -333,6 +334,43 @@
                     <input type="text" id="company_location" name="company_location" value="{{ old('company_location', $stagiaire->company_location) }}" required data-required data-label="{{ __('Lieu de l\'entreprise') }}"
                            class="ec-input text-base @error('company_location') is-invalid @enderror">
                     @error('company_location') <p class="ec-error text-sm">{{ $message }}</p> @enderror
+                </div>
+            </div>
+        </section>
+
+        {{-- ══════════════════════════════════════════════════════════════
+             CARTE 3 — INFORMATIONS DU STAGE (période + prix convenu)
+             Même section que dans le formulaire d'ajout, valeurs préremplies.
+        ══════════════════════════════════════════════════════════════ --}}
+        <section class="ec-card overflow-hidden">
+            <header class="border-b border-slate-100 bg-slate-50/60 px-6 py-5 dark:border-slate-800 dark:bg-slate-800/40">
+                <h2 class="flex items-center gap-3 text-2xl font-extrabold tracking-tight text-brand-700 dark:text-brand-300">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-base font-extrabold text-brand-700 dark:bg-brand-500/20 dark:text-brand-300">3</span>
+                    <x-icon name="briefcase" class="h-6 w-6" />
+                    {{ __('Informations du stage') }}
+                </h2>
+            </header>
+
+            <div class="grid gap-5 p-6 sm:grid-cols-2">
+                <div>
+                    <label for="stage_start_date" class="ec-label text-base font-semibold">{{ __('Date de début de stage') }} <span class="text-rose-500">*</span></label>
+                    <input type="date" id="stage_start_date" name="stage_start_date" value="{{ old('stage_start_date', $stagiaire->stage_start_date?->format('Y-m-d')) }}" required data-required data-label="{{ __('Date de début de stage') }}"
+                           class="ec-input text-base @error('stage_start_date') is-invalid @enderror">
+                    @error('stage_start_date') <p class="ec-error text-sm">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label for="stage_end_date" class="ec-label text-base font-semibold">{{ __('Date de fin de stage') }} <span class="text-rose-500">*</span></label>
+                    <input type="date" id="stage_end_date" name="stage_end_date" value="{{ old('stage_end_date', $stagiaire->stage_end_date?->format('Y-m-d')) }}" required data-required data-label="{{ __('Date de fin de stage') }}" data-date-not-before="stage_start_date"
+                           class="ec-input text-base @error('stage_end_date') is-invalid @enderror">
+                    @error('stage_end_date') <p class="ec-error text-sm">{{ $message }}</p> @enderror
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label for="stage_price" class="ec-label text-base font-semibold">{{ __('Prix du stage (DH)') }} <span class="text-rose-500">*</span></label>
+                    <input type="number" id="stage_price" name="stage_price" value="{{ old('stage_price', (float) $stagiaire->stage_price) }}" step="0.01" min="0" required data-required data-label="{{ __('Prix du stage (DH)') }}" inputmode="decimal"
+                           class="ec-input text-base @error('stage_price') is-invalid @enderror" placeholder="0.00">
+                    @error('stage_price') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                 </div>
             </div>
         </section>
