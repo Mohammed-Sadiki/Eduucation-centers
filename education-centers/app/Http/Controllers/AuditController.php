@@ -7,9 +7,9 @@ use Illuminate\View\View;
 class AuditController extends Controller {
     public function index(Request $request): View {
         $user = $request->user();
-        if (!$user->isSuperAdmin() && !$user->isCenterAdmin()) abort(403);
+        if (!$user->isSuperAdmin() && !$user->isCenterAdmin() && !$user->isSecretary()) abort(403);
         $query = AuditLog::query()->with('user');
-        if ($user->isCenterAdmin()) $query->where('center_id', $user->center_id);
+        if ($user->isCenterAdmin() || $user->isSecretary()) $query->where('center_id', $user->center_id);
         if ($action = $request->input('action')) $query->where('action',$action);
         if ($userId = $request->input('user_id')) $query->where('user_id',$userId);
         if ($date = $request->input('date')) $query->whereDate('created_at',$date);

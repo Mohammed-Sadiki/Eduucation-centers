@@ -44,7 +44,7 @@ class ResolveDomainContext
         $activeDomain = ($activeDomain && $activeDomain !== 'all') ? $activeDomain : null;
 
         // ── Centre : forcé pour l'Admin Centre, optionnel pour le Super Admin ──
-        if ($user->isCenterAdmin() || $user->isTeacher() || $user->isStudent()) {
+        if ($user->isCenterAdmin() || $user->isSecretary() || $user->isTeacher() || $user->isStudent()) {
             $centerId = $user->center_id;
         } else {
             // Super Admin : restriction volontaire via ?center_id (jamais persistée).

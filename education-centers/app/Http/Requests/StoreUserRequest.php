@@ -18,9 +18,10 @@ class StoreUserRequest extends FormRequest
         $authUser = $this->user();
         $isSuperAdmin = $authUser->isSuperAdmin();
 
-        // Rôles autorisés : création uniquement de compte Professeur via ce formulaire
-        // Seul le rôle Professeur est autorisé (imposé automatiquement ou vérifié serveur)
-        $allowedRoles = [User::ROLE_TEACHER];
+        $isTeacher = $this->input('role', User::ROLE_TEACHER) === User::ROLE_TEACHER;
+        $allowedRoles = $isSuperAdmin
+            ? [User::ROLE_SUPER_ADMIN, User::ROLE_CENTER_ADMIN, User::ROLE_SECRETARY, User::ROLE_TEACHER]
+            : [User::ROLE_TEACHER];
 
         $rules = [
             'name' => ['required', 'string', 'max:150'],
@@ -34,7 +35,8 @@ class StoreUserRequest extends FormRequest
             // comptes historiques et les tests existants, mais plus jamais requis.
             'domain' => ['nullable', 'string', Rule::exists('domains', 'slug')],
             'formation_id' => [
-                'required',
+                Rule::requiredIf($isTeacher),
+                'nullable',
                 'integer',
                 Rule::exists('formations', 'id')->where(function ($query) use ($isSuperAdmin, $authUser) {
                     // La formation doit appartenir au centre de rattachement.

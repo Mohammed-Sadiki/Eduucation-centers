@@ -22,22 +22,22 @@ class TeacherPolicy
 
     /**
      * viewAny : voir la liste des dossiers professeurs.
-     * Seuls Super Admin et Admin Centre y ont accès.
+     * Super Admin, Responsable Centre et Secrétaire y ont accès.
      * Professeur et Élève : 403.
      */
     public function viewAny(User $authUser): bool
     {
-        return $authUser->isCenterAdmin();
+        return $authUser->isCenterAdmin() || $authUser->isSecretary();
     }
 
     /**
      * view : consulter un dossier professeur.
-     * Admin Centre : uniquement les professeurs de son propre centre.
+     * Responsable Centre & Secrétaire : uniquement les professeurs de leur propre centre.
      */
     public function view(User $authUser, Teacher $teacher): bool
     {
-        if ($authUser->isCenterAdmin()) {
-            return $authUser->center_id === $teacher->center_id;
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
+            return (int) $authUser->center_id === (int) $teacher->center_id;
         }
 
         return false;
@@ -45,7 +45,7 @@ class TeacherPolicy
 
     /**
      * create : créer un dossier professeur.
-     * Exclusivité Super Admin : aucun Admin Centre ne peut créer de dossier professeur.
+     * Exclusivité Super Admin.
      */
     public function create(User $authUser): bool
     {
@@ -54,38 +54,29 @@ class TeacherPolicy
 
     /**
      * update : modifier un dossier professeur.
-     * Admin Centre : uniquement les professeurs de son propre centre.
+     * Super Admin uniquement.
+     * Responsable Centre & Secrétaire : lecture seule sur les profils enseignants.
      */
     public function update(User $authUser, Teacher $teacher): bool
     {
-        if ($authUser->isCenterAdmin()) {
-            return $authUser->center_id === $teacher->center_id;
-        }
-
         return false;
     }
 
     /**
      * toggleStatus : activer / désactiver un dossier professeur.
+     * Super Admin uniquement.
      */
     public function toggleStatus(User $authUser, Teacher $teacher): bool
     {
-        if ($authUser->isCenterAdmin()) {
-            return $authUser->center_id === $teacher->center_id;
-        }
-
         return false;
     }
 
     /**
      * delete : supprimer un dossier professeur.
+     * Super Admin uniquement.
      */
     public function delete(User $authUser, Teacher $teacher): bool
     {
-        if ($authUser->isCenterAdmin()) {
-            return $authUser->center_id === $teacher->center_id;
-        }
-
         return false;
     }
 }

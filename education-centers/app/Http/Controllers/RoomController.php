@@ -25,7 +25,7 @@ class RoomController extends Controller
         $query = Room::with('center');
 
         // Isolation multi-centres stricte côté serveur
-        if ($authUser->isCenterAdmin()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $query->where('center_id', $authUser->center_id);
         }
 
@@ -76,7 +76,7 @@ class RoomController extends Controller
         $authUser = $request->user();
 
         // Détermination stricte du center_id côté serveur (jamais faire confiance au client)
-        $centerId = $authUser->isCenterAdmin() ? $authUser->center_id : (int) $request->input('center_id');
+        $centerId = ($authUser->isCenterAdmin() || $authUser->isSecretary()) ? $authUser->center_id : (int) $request->input('center_id');
 
         $data = $request->validated();
         $data['center_id'] = $centerId;

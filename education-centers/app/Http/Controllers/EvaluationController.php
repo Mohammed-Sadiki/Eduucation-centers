@@ -25,7 +25,7 @@ class EvaluationController extends Controller
         $user = $request->user();
         $perimeter = $this->perimeter($user);
         $teacher = null;
-        if ($user->isCenterAdmin()) {
+        if ($user->isCenterAdmin() || $user->isSecretary()) {
             $query = Evaluation::query()->with(['classRoom', 'formation', 'teacher.user'])
                 ->where('center_id', $user->center_id);
         } elseif ($user->isTeacher()) {

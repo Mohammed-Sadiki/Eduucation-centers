@@ -26,7 +26,7 @@ class TeacherController extends Controller
         $query = Teacher::with(['user', 'center']);
 
         // Isolation multi-centres stricte
-        if ($authUser->isCenterAdmin()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $query->where('center_id', $authUser->center_id);
         }
 
@@ -84,7 +84,7 @@ class TeacherController extends Controller
             ->whereDoesntHave('teacher')
             ->orderBy('name');
 
-        if ($authUser->isCenterAdmin()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $usersQuery->where('center_id', $authUser->center_id);
             $centers = collect();
         } else {
@@ -108,7 +108,7 @@ class TeacherController extends Controller
         $targetUser = User::findOrFail($request->validated('user_id'));
 
         // Détermination stricte du center_id côté serveur
-        $centerId = $authUser->isCenterAdmin() ? $authUser->center_id : $targetUser->center_id;
+        $centerId = ($authUser->isCenterAdmin() || $authUser->isSecretary()) ? $authUser->center_id : $targetUser->center_id;
         $center = Center::findOrFail($centerId);
 
         // Génération automatique du teacher_number côté serveur (ex: BER-T-000001)

@@ -25,7 +25,7 @@ class DocumentController extends Controller
         Gate::authorize('viewAny', Document::class);
         $user = $request->user();
         $query = Document::query()->with(['student', 'uploader']);
-        if ($user->isCenterAdmin()) {
+        if ($user->isCenterAdmin() || $user->isSecretary()) {
             $query->where('center_id', $user->center_id);
         } elseif ($user->isStudent()) {
             $query->where('student_id', $user->student?->id)->where('center_id', $user->center_id)->where('status', 'active');

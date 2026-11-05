@@ -7,6 +7,7 @@
     $user = auth()->user();
     $isSuperAdmin  = $user->isSuperAdmin();
     $isCenterAdmin = $user->isCenterAdmin();
+    $isSecretary   = $user->isSecretary();
     $centerName    = $user->center?->name ?? '';
 
     $formationsRoute = route('formations-generales.index');
@@ -14,17 +15,12 @@
     $communicationRoute = route('messages.index');
 
     // La « Gestion des stagiaires » est ouverte au Super Admin (tous centres
-    // autorisés) comme à l'Admin Centre (périmètre = son centre, imposé serveur).
-    // Admin Centre : la carte mène directement au formulaire « Ajouter un
-    // stagiaire » (création = acte principal de son quotidien). La page
-    // « Tous les stagiaires » reste accessible depuis la sidebar du module.
+    // autorisés) comme à l'Admin Centre / Secrétaire (périmètre = son centre, imposé serveur).
     $stagiairesRoute = $isSuperAdmin
         ? route('stagiaires.index')
-        : ($isCenterAdmin ? route('stagiaires.create') : route('dashboard'));
+        : (($isCenterAdmin || $isSecretary) ? route('stagiaires.create') : route('dashboard'));
 
-    // Le module financier est ouvert aux deux rôles : le Super Admin voit la vue
-    // globale multi-centres, l'Admin Centre voit UNIQUEMENT son centre (périmètre
-    // imposé côté serveur par FinanceDashboardController::resolveCenterScope()).
+    // Le module financier est ouvert exclusivement au Super Admin et au Responsable Centre.
     $financeRoute = route('super-admin.finance.dashboard');
 @endphp
 
@@ -51,8 +47,10 @@
             <span class="inline-flex items-center gap-1.5 rounded-full border border-brand-200/70 bg-white/80 px-3 py-1 text-xs font-semibold text-brand-700 shadow-2xs backdrop-blur dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-300">
                 @if($isSuperAdmin)
                     {{ __('Espace Super Administrateur') }}
+                @elseif($isSecretary)
+                    {{ __('Espace Secrétaire') }}@if($centerName) &middot; {{ $centerName }}@endif
                 @else
-                    {{ __('Espace Admin Centre') }}@if($centerName) &middot; {{ $centerName }}@endif
+                    {{ __('Espace Responsable Centre') }}@if($centerName) &middot; {{ $centerName }}@endif
                 @endif
             </span>
             <h1 class="mt-3 text-3xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-4xl dark:text-white">
@@ -61,8 +59,10 @@
             <p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                 @if($isSuperAdmin)
                     {{ __('Accédez aux modules de gestion de la plateforme Education Centers. Naviguez vers vos formations générales, la messagerie, la gestion des stagiaires ou les finances.') }}
-                @else
+                @elseif($isSecretary)
                     {{ __('Accédez aux modules de gestion de votre centre. Les données affichées sont propres à votre centre et respectent vos permissions.') }}
+                @else
+                    {{ __('Accédez aux modules de consultation de votre centre. Les données affichées sont propres à votre centre et respectent vos permissions.') }}
                 @endif
             </p>
         </div>
@@ -190,15 +190,16 @@
             <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ __('Consultez, organisez et suivez les stagiaires de votre établissement.') }}</p>
         </div>
         <div class="relative mt-6 flex items-center justify-between rounded-xl bg-teal-100/70 px-4 py-2.5 text-sm font-semibold text-teal-700 transition-colors group-hover:bg-teal-200/60 dark:bg-teal-500/10 dark:text-teal-300 dark:group-hover:bg-teal-500/20">
-            <span>{{ $isCenterAdmin ? __('Ajouter un stagiaire') : __('Accéder aux stagiaires') }}</span>
+            <span>{{ ($isCenterAdmin || $isSecretary) ? __('Ajouter un stagiaire') : __('Accéder aux stagiaires') }}</span>
             <span class="flex h-7 w-7 items-center justify-center rounded-full bg-teal-600 text-white shadow-sm transition-transform group-hover:translate-x-1 rtl:rotate-180">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
             </span>
         </div>
     </a>
 
-    {{-- CARTE : FINANCES (Super Admin = vue globale ; Admin Centre = vue centrée,
-         périmètre forcé sur son centre côté serveur). --}}
+    {{-- CARTE : FINANCES (Super Admin = vue globale ; Responsable Centre = vue centrée,
+         périmètre forcé sur son centre côté serveur. Masquée pour Secrétaire). --}}
+    @if($isSuperAdmin || $isCenterAdmin)
     <a href="{{ $financeRoute }}"
        id="card-home-finance"
        role="listitem"
@@ -227,6 +228,7 @@
             </span>
         </div>
     </a>
+    @endif
 
     {{-- CARTE : COMMUNICATION --}}
     <a href="{{ $communicationRoute }}"

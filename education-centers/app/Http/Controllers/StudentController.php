@@ -39,7 +39,7 @@ class StudentController extends Controller
         $query = Student::with(['user', 'center']);
 
         // Isolation multi-centres stricte
-        if ($authUser->isCenterAdmin()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $query->where('center_id', $authUser->center_id);
         }
 
@@ -97,13 +97,13 @@ class StudentController extends Controller
         $authUser = $request->user();
 
         // Liste des centres : sélectionnable uniquement par le Super Admin.
-        $centers = $authUser->isCenterAdmin() ? collect() : Center::orderBy('name')->get();
+        $centers = ($authUser->isCenterAdmin() || $authUser->isSecretary()) ? collect() : Center::orderBy('name')->get();
 
         // Catalogue des formations : uniquement les formations générales
         // officielles actives, filtrées par le centre autorisé.
-        // Admin Centre → son centre ; Super Admin → tous les centres (le select
+        // Admin Centre / Secrétaire → son centre ; Super Admin → tous les centres (le select
         // est filtré côté client dès qu'un centre est choisi).
-        $centerIds = $authUser->isCenterAdmin()
+        $centerIds = ($authUser->isCenterAdmin() || $authUser->isSecretary())
             ? [(int) $authUser->center_id]
             : null;
 
@@ -147,8 +147,8 @@ class StudentController extends Controller
 
         // Détermination stricte du center_id côté serveur. Le compte utilisateur
         // n'entre plus en compte : Super Admin = centre choisi (obligatoire à la
-        // validation), Admin Centre = son propre centre, quelle que soit la requête.
-        $centerId = $authUser->isCenterAdmin()
+        // validation), Admin Centre / Secrétaire = son propre centre, quelle que soit la requête.
+        $centerId = ($authUser->isCenterAdmin() || $authUser->isSecretary())
             ? $authUser->center_id
             : $request->validated('center_id');
         $center = Center::findOrFail($centerId);
@@ -217,6 +217,7 @@ class StudentController extends Controller
                     'center_id' => $centerId,
                     'student_id' => $student->id,
                     'formation_id' => $formationId,
+                    'created_by' => $authUser->id,
                     'application_date' => now()->toDateString(),
                     'status' => Enrollment::STATUS_PENDING,
                     'registration_number' => Enrollment::generateRegistrationNumber($center),
@@ -390,7 +391,7 @@ class StudentController extends Controller
         // Layout : pour un Admin Centre venant du Plan de classe (ou consultant depuis ce flux),
         // présentation indépendante en pleine largeur sans sidebar administrative.
         // Pour le Super Admin, conservation du layout habituel si aucun flux spécifique n'est demandé.
-        $isStandalone = $request->user()->isCenterAdmin() || $request->filled('standalone');
+        $isStandalone = $request->user()->isCenterAdmin() || $request->user()->isSecretary() || $request->filled('standalone');
 
         return view('students.show', compact(
             'student',
@@ -630,6 +631,7 @@ class StudentController extends Controller
                         'center_id' => $student->center_id,
                         'student_id' => $student->id,
                         'formation_id' => $formationId,
+                        'created_by' => $authUser->id,
                         'application_date' => now()->toDateString(),
                         'status' => Enrollment::STATUS_PENDING,
                         'registration_number' => Enrollment::generateRegistrationNumber($student->center),

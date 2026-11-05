@@ -33,7 +33,7 @@ class DashboardController extends Controller
     {
         $user = $request->user();
         // Super Admin et Admin Centre → nouvelle page d'accueil unifiée (4 cartes)
-        if ($user->isSuperAdmin() || $user->isCenterAdmin()) {
+        if ($user->isSuperAdmin() || $user->isCenterAdmin() || $user->isSecretary()) {
             return redirect()->route('admin.home');
         }
         if (view()->exists('dashboard.'.$user->role)) {

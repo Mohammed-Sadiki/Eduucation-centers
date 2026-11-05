@@ -43,7 +43,7 @@ class StoreStagiaireRequest extends FormRequest
         // Le centre d'un Admin Centre est résolu côté serveur : sa requête ne peut
         // jamais imposer un autre centre. Pour le Super Admin, le choix du formulaire
         // est conservé et devient obligatoire.
-        if ($this->user()?->isCenterAdmin()) {
+        if ($this->user()?->isCenterAdmin() || $this->user()?->isSecretary()) {
             $this->merge(['center_id' => $this->user()->center_id]);
         }
     }

@@ -22,23 +22,25 @@ class ClassPolicy
 
     /**
      * viewAny : voir la liste des classes.
-     * Admin Centre : son centre. Professeur : uniquement ses classes affectées
-     * (le contrôleur limite la requête, la policy sert de garde-fou).
+     * Admin Centre (Responsable) & Secrétaire : leur centre.
+     * Professeur : uniquement ses classes affectées.
      */
     public function viewAny(User $authUser): bool
     {
         return $authUser->isCenterAdmin()
+            || $authUser->isSecretary()
             || ($authUser->isTeacher() && $authUser->teacher !== null);
     }
 
     /**
      * view : consulter une classe spécifique.
-     * Admin Centre : son centre. Professeur : classe affectée via class_teacher.
+     * Admin Centre & Secrétaire : leur centre.
+     * Professeur : classe affectée via class_teacher.
      */
     public function view(User $authUser, ClassRoom $classRoom): bool
     {
-        if ($authUser->isCenterAdmin()) {
-            return $authUser->center_id === $classRoom->center_id;
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
+            return (int) $authUser->center_id === (int) $classRoom->center_id;
         }
 
         if ($authUser->isTeacher()) {
@@ -54,21 +56,23 @@ class ClassPolicy
 
     /**
      * create : créer une classe.
-     * Super Admin (géré par before) et Admin Centre.
+     * Super Admin et Secrétaire uniquement.
+     * Responsable Centre : lecture seule.
      */
     public function create(User $authUser): bool
     {
-        return $authUser->isCenterAdmin();
+        return $authUser->isSecretary();
     }
 
     /**
      * update : modifier une classe.
-     * Admin Centre : uniquement les classes de son propre centre.
+     * Super Admin et Secrétaire uniquement.
+     * Responsable Centre : lecture seule.
      */
     public function update(User $authUser, ClassRoom $classRoom): bool
     {
-        if ($authUser->isCenterAdmin()) {
-            return $authUser->center_id === $classRoom->center_id;
+        if ($authUser->isSecretary()) {
+            return (int) $authUser->center_id === (int) $classRoom->center_id;
         }
 
         return false;
@@ -76,11 +80,12 @@ class ClassPolicy
 
     /**
      * toggleStatus : activer / désactiver une classe.
+     * Super Admin et Secrétaire uniquement.
      */
     public function toggleStatus(User $authUser, ClassRoom $classRoom): bool
     {
-        if ($authUser->isCenterAdmin()) {
-            return $authUser->center_id === $classRoom->center_id;
+        if ($authUser->isSecretary()) {
+            return (int) $authUser->center_id === (int) $classRoom->center_id;
         }
 
         return false;
@@ -88,24 +93,21 @@ class ClassPolicy
 
     /**
      * delete : supprimer une classe.
-     * Admin Centre : uniquement dans son propre centre.
+     * Super Admin uniquement.
      */
     public function delete(User $authUser, ClassRoom $classRoom): bool
     {
-        if ($authUser->isCenterAdmin()) {
-            return $authUser->center_id === $classRoom->center_id;
-        }
-
         return false;
     }
 
     /**
      * assignTeacher : affecter un professeur à une classe.
+     * Super Admin et Secrétaire uniquement.
      */
     public function assignTeacher(User $authUser, ClassRoom $classRoom): bool
     {
-        if ($authUser->isCenterAdmin()) {
-            return $authUser->center_id === $classRoom->center_id;
+        if ($authUser->isSecretary()) {
+            return (int) $authUser->center_id === (int) $classRoom->center_id;
         }
 
         return false;
@@ -113,14 +115,14 @@ class ClassPolicy
 
     /**
      * unassignTeacher : retirer un professeur d'une classe.
+     * Super Admin et Secrétaire uniquement.
      */
     public function unassignTeacher(User $authUser, ClassRoom $classRoom): bool
     {
-        if ($authUser->isCenterAdmin()) {
-            return $authUser->center_id === $classRoom->center_id;
+        if ($authUser->isSecretary()) {
+            return (int) $authUser->center_id === (int) $classRoom->center_id;
         }
 
         return false;
     }
 }
-

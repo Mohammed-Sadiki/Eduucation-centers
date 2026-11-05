@@ -75,7 +75,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // ── Accueil commun Super Admin + Admin Centre (nouvelle page 4 cartes) ──
-    Route::middleware('role:super_admin,center_admin')->group(function () {
+    Route::middleware('role:super_admin,center_admin,secretary')->group(function () {
         Route::get('/admin/accueil', [DashboardController::class, 'adminHome'])->name('admin.home');
     });
 
@@ -168,9 +168,9 @@ Route::middleware('auth')->group(function () {
     });
 
     // ──────────────────────────────────────────────────────────────────────────
-    //  SUPER ADMIN + CENTER ADMIN
+    //  SUPER ADMIN + CENTER ADMIN + SECRETARY
     // ──────────────────────────────────────────────────────────────────────────
-    Route::middleware('role:super_admin,center_admin')->group(function () {
+    Route::middleware('role:super_admin,center_admin,secretary')->group(function () {
 
         // ── Espace Admin Centre piloté par domaine (portail + dashboard) ──
         Route::get('/center-admin/domaines', [CenterAdminDomainController::class, 'domainPicker'])
@@ -330,7 +330,7 @@ Route::middleware('auth')->group(function () {
     // ──────────────────────────────────────────────────────────────────────────
     //  4J — PRÉSENCES (Admin + Teacher)
     // ──────────────────────────────────────────────────────────────────────────
-    Route::middleware('role:super_admin,center_admin,teacher')->group(function () {
+    Route::middleware('role:super_admin,center_admin,secretary,teacher')->group(function () {
         Route::get('/attendances', [AttendanceController::class, 'index'])->name('attendances.index');
         Route::get('/attendances/create', [AttendanceController::class, 'create'])->name('attendances.create');
         Route::post('/attendances/session', [AttendanceController::class, 'storeSession'])->name('attendances.store-session');
@@ -344,7 +344,7 @@ Route::middleware('auth')->group(function () {
     // ──────────────────────────────────────────────────────────────────────────
     //  4K — ÉVALUATIONS / NOTES (Admin + Teacher)
     // ──────────────────────────────────────────────────────────────────────────
-    Route::middleware('role:super_admin,center_admin,teacher')->group(function () {
+    Route::middleware('role:super_admin,center_admin,secretary,teacher')->group(function () {
         Route::resource('evaluations', EvaluationController::class);
         Route::post('evaluations/{evaluation}/grades', [EvaluationController::class, 'saveGrades'])
             ->name('evaluations.grades.save');
@@ -353,17 +353,17 @@ Route::middleware('auth')->group(function () {
     // ──────────────────────────────────────────────────────────────────────────
     //  MESSAGERIE INTERNE (Super Admin + Center Admin + Teacher avec droit de réponse)
     // ──────────────────────────────────────────────────────────────────────────
-    Route::middleware('role:super_admin,center_admin,teacher')->group(function () {
+    Route::middleware('role:super_admin,center_admin,secretary,teacher')->group(function () {
         Route::post('/messages/conversations/{conversation}', [MessageController::class, 'sendMessage'])->name('messages.send');
     });
 
-    Route::middleware('role:super_admin,center_admin')->group(function () {
+    Route::middleware('role:super_admin,center_admin,secretary')->group(function () {
         Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
         Route::post('/messages/start-direct/{target}', [MessageController::class, 'startDirect'])->name('messages.start-direct');
     });
 
     // Routes de consultation des messages (Super Admin, Center Admin, Teacher)
-    Route::middleware('role:super_admin,center_admin,teacher')->group(function () {
+    Route::middleware('role:super_admin,center_admin,secretary,teacher')->group(function () {
         Route::get('/messages/conversations', [MessageController::class, 'getConversations'])->name('messages.conversations');
         Route::get('/messages/conversations/{conversation}', [MessageController::class, 'getMessages'])->name('messages.show');
         Route::get('/messages/unread-count', [MessageController::class, 'getUnreadCount'])->name('messages.unread-count');

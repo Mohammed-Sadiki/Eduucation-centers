@@ -23,12 +23,12 @@ class StagiairePolicy
     /**
      * Voir la liste des stagiaires.
      *
-     * Super Admin : tous les centres autorisés. Admin Centre : son centre
-     * uniquement — le périmètre est appliqué par le contrôleur.
+     * Super Admin : tous les centres autorisés.
+     * Responsable Centre & Secrétaire : leur centre uniquement.
      */
     public function viewAny(User $authUser): bool
     {
-        return $authUser->isCenterAdmin();
+        return $authUser->isCenterAdmin() || $authUser->isSecretary();
     }
 
     /**
@@ -36,27 +36,31 @@ class StagiairePolicy
      */
     public function view(User $authUser, Stagiaire $stagiaire): bool
     {
-        return $authUser->isCenterAdmin()
+        return ($authUser->isCenterAdmin() || $authUser->isSecretary())
             && $authUser->center_id !== null
             && (int) $authUser->center_id === (int) $stagiaire->center_id;
     }
 
     /**
-     * Créer un dossier stagiaire. Le centre d'un Admin Centre est imposé par
-     * le serveur (prepareForValidation + contrôleur) : il ne peut donc inscrire
-     * que des stagiaires de son propre centre.
+     * Créer un dossier stagiaire.
+     * Super Admin et Secrétaire uniquement.
+     * Responsable Centre : lecture seule.
      */
     public function create(User $authUser): bool
     {
-        return $authUser->isCenterAdmin() && $authUser->center_id !== null;
+        return $authUser->isSecretary() && $authUser->center_id !== null;
     }
 
     /**
      * Modifier un dossier stagiaire de son centre.
+     * Super Admin et Secrétaire uniquement.
+     * Responsable Centre : lecture seule.
      */
     public function update(User $authUser, Stagiaire $stagiaire): bool
     {
-        return $this->view($authUser, $stagiaire);
+        return $authUser->isSecretary()
+            && $authUser->center_id !== null
+            && (int) $authUser->center_id === (int) $stagiaire->center_id;
     }
 
     /**

@@ -3,7 +3,8 @@
 @php
     $label = match ($role) {
         'super_admin' => __('Super Admin'),
-        'center_admin' => __('Admin Centre'),
+        'center_admin' => __('Responsable Centre'),
+        'secretary' => __('Secrétaire'),
         'teacher' => __('Professeur'),
         'student' => __('Élève'),
         default => (string) $role,
@@ -11,6 +12,7 @@
     $tone = match ($role) {
         'super_admin' => 'danger',
         'center_admin' => 'primary',
+        'secretary' => 'warning',
         'teacher' => 'success',
         'student' => 'info',
         default => 'neutral',

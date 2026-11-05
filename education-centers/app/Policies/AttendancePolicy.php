@@ -1,27 +1,47 @@
 <?php
+
 namespace App\Policies;
+
 use App\Models\Attendance;
 use App\Models\User;
-class AttendancePolicy {
-    public function before(User $user, string $ability): ?bool {
-        if ($user->isSuperAdmin()) return true;
-        return null;
-    }
-    public function viewAny(User $user): bool { return $user->isCenterAdmin() || $user->isTeacher() || $user->isStudent(); }
-    public function view(User $user, Attendance $attendance): bool {
-        if ($user->isStudent()) {
-            return $user->center_id === $attendance->center_id && $user->student?->id === $attendance->student_id;
+
+class AttendancePolicy
+{
+    public function before(User $user, string $ability): ?bool
+    {
+        if ($user->isSuperAdmin()) {
+            return true;
         }
 
-        if ($user->isCenterAdmin()) {
+        return null;
+    }
+
+    public function viewAny(User $user): bool
+    {
+        return $user->isCenterAdmin() || $user->isSecretary() || $user->isTeacher() || $user->isStudent();
+    }
+
+    public function view(User $user, Attendance $attendance): bool
+    {
+        if ($user->isStudent()) {
+            return (int) $user->center_id === (int) $attendance->center_id && $user->student?->id === $attendance->student_id;
+        }
+
+        if ($user->isCenterAdmin() || $user->isSecretary()) {
             return (int) $user->center_id === (int) $attendance->center_id;
         }
 
         return $this->teacherCanAccessAttendance($user, $attendance);
     }
-    public function create(User $user): bool { return $user->isCenterAdmin() || ($user->isTeacher() && $user->teacher !== null); }
-    public function update(User $user, Attendance $attendance): bool {
-        if ($user->isCenterAdmin()) {
+
+    public function create(User $user): bool
+    {
+        return $user->isSecretary() || ($user->isTeacher() && $user->teacher !== null);
+    }
+
+    public function update(User $user, Attendance $attendance): bool
+    {
+        if ($user->isSecretary()) {
             return (int) $user->center_id === (int) $attendance->center_id;
         }
 
@@ -29,8 +49,10 @@ class AttendancePolicy {
             && $attendance->schedule !== null
             && (int) $attendance->schedule->teacher_id === (int) $user->teacher?->id;
     }
-    public function delete(User $user, Attendance $attendance): bool {
-        return $user->isCenterAdmin() && (int) $user->center_id === (int) $attendance->center_id;
+
+    public function delete(User $user, Attendance $attendance): bool
+    {
+        return $user->isSecretary() && (int) $user->center_id === (int) $attendance->center_id;
     }
 
     /**

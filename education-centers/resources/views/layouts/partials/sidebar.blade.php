@@ -135,7 +135,7 @@
             ])
         ];
 
-    } elseif (($user->isSuperAdmin() || $user->isCenterAdmin()) && $isStagiaires) {
+    } elseif (($user->isSuperAdmin() || $user->isCenterAdmin() || $user->isSecretary()) && $isStagiaires) {
         // ────────────────────────────────────────────────────────────
         // CONTEXTE DÉDIÉ : GESTION ADMINISTRATIVE DES STAGIAIRES
         // (Super Admin : tous centres autorisés — Admin Centre : son centre)
@@ -221,6 +221,37 @@
         // ci-dessus) et le banner « formation active » en haut de sidebar
         // sont inchangés — seuls les liens de navigation simplifiés ici.
 
+    } elseif ($user->isSecretary()) {
+        // ────────────────────────────────────────────────────────────
+        // SIDEBAR SECRÉTAIRE : gestion opérationnelle de son centre
+        // Consultation & gestion : Élèves, Inscriptions, Stagiaires,
+        // Pédagogie (Formations, Classes, Salles, Emploi du temps),
+        // Suivi (Présences, Évaluations, Documents, Certificats, Annonces, Notifications).
+        // AUCUN accès au module Gestion financière, ni Utilisateurs.
+        // ────────────────────────────────────────────────────────────
+        $groups[] = ['title' => null, 'items' => array_filter([
+            $link(__('Accueil'), 'admin.home', 'home', 'admin.home'),
+            $link(__('Élèves'), 'students.index', 'academic', 'students.*'),
+            $link(__('Inscriptions'), 'enrollments.index', 'clipboard', 'enrollments.*'),
+            $link(__('Stagiaires'), 'stagiaires.index', 'users', 'stagiaires.*'),
+        ])];
+
+        $groups[] = ['title' => __('Pédagogie'), 'items' => array_filter([
+            $link(__('Formations'), 'formations.index', 'book', 'formations.*'),
+            $link(__('Classes'), 'classes.index', 'classes', 'classes.*'),
+            $link(__('Salles'), 'rooms.index', 'door', 'rooms.*'),
+            $link(__('Emploi du temps'), 'schedules.index', 'calendar', 'schedules.*'),
+        ])];
+
+        $groups[] = ['title' => __('Gestion & Suivi'), 'items' => array_filter([
+            $link(__('Présences'), 'attendances.index', 'clock', 'attendances.*'),
+            $link(__('Évaluations'), 'evaluations.index', 'chart', 'evaluations.*'),
+            $link(__('Documents'), 'documents.index', 'document', 'documents.*'),
+            $link(__('Certificats'), 'certificates.index', 'certificate', 'certificates.*'),
+            $link(__('Annonces'), 'announcements.index', 'megaphone', 'announcements.*'),
+            $link(__('Notifications'), 'notifications.index', 'bell', 'notifications.*'),
+        ])];
+
     } elseif ($user->isTeacher()) {
         $groups[] = ['title' => __('Mon espace'), 'items' => array_filter([
             $link(__('Tableau de bord'), 'dashboard', 'home', 'dashboard'),
@@ -259,7 +290,7 @@
 >
     <div class="flex h-16 items-center border-b border-slate-200 px-3.5 dark:border-slate-800"
          :class="$store.ui.sidebarCollapsed ? 'justify-center' : 'justify-between'">
-        <a href="{{ ($user->isSuperAdmin() || $user->isCenterAdmin()) ? route('admin.home') : route('dashboard') }}"
+        <a href="{{ ($user->isSuperAdmin() || $user->isCenterAdmin() || $user->isSecretary()) ? route('admin.home') : route('dashboard') }}"
            class="flex min-w-0 items-center gap-2.5 font-semibold text-slate-900 dark:text-white"
            x-show="!$store.ui.sidebarCollapsed"
            x-transition.opacity.duration.200ms>
@@ -371,7 +402,7 @@
                 </div>
             </div>
         @endif
-    @elseif($user->isCenterAdmin() && $isStagiaires)
+    @elseif(($user->isCenterAdmin() || $user->isSecretary()) && $isStagiaires)
         {{-- BANNER DU CONTEXTE : GESTION DES STAGIAIRES (ADMIN CENTRE, périmètre = son centre) --}}
         <div class="border-b border-slate-200 bg-purple-50/80 p-3 dark:border-slate-800 dark:bg-purple-950/30">
             <div class="flex items-center justify-between gap-2" x-show="!$store.ui.sidebarCollapsed">
@@ -399,7 +430,7 @@
                 </a>
             </div>
         </div>
-    @elseif($user->isCenterAdmin() && !empty($activeDomain))
+    @elseif(($user->isCenterAdmin() || $user->isSecretary()) && !empty($activeDomain))
         {{-- BANNER DU CONTEXTE : DOMAINE ACTIF (ADMIN CENTRE, périmètre = son centre) --}}
         <div class="border-b border-slate-200 {{ $pal['banner_bg'] }} p-3 dark:border-slate-800"
              data-domain="{{ $activeDomain }}"

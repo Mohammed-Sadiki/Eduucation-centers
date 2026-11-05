@@ -26,7 +26,7 @@ class FormationController extends Controller
         $query = Formation::with('center');
 
         // Isolation multi-centres stricte
-        if ($authUser->isCenterAdmin()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $query->where('center_id', $authUser->center_id);
         }
 
@@ -77,7 +77,7 @@ class FormationController extends Controller
 
         // Catalogue des domaines (commun aux centres, source de vérité `domains`,
         // repli canonique si la table est vide — ex. suite de tests).
-        $domains = $authUser->isCenterAdmin()
+        $domains = ($authUser->isCenterAdmin() || $authUser->isSecretary())
             ? DomainRegistry::visibleForCenter((int) $authUser->center_id)
             : DomainRegistry::visible();
 
@@ -92,7 +92,7 @@ class FormationController extends Controller
         $authUser = $request->user();
 
         // Détermination stricte du center_id côté serveur (jamais faire confiance au client)
-        $centerId = $authUser->isCenterAdmin() ? $authUser->center_id : (int) $request->input('center_id');
+        $centerId = ($authUser->isCenterAdmin() || $authUser->isSecretary()) ? $authUser->center_id : (int) $request->input('center_id');
 
         $data = $request->validated();
         $data['center_id'] = $centerId;

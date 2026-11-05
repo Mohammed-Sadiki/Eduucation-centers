@@ -55,8 +55,8 @@ class StoreStudentRequest extends FormRequest
                         return;
                     }
 
-                    // For center admin: target user must belong to their center
-                    if ($authUser->isCenterAdmin() && $targetUser->center_id !== $authUser->center_id) {
+                    // For center admin / secretary: target user must belong to their center
+                    if (($authUser->isCenterAdmin() || $authUser->isSecretary()) && $targetUser->center_id !== $authUser->center_id) {
                         $fail(__('L\'utilisateur sélectionné n\'appartient pas à votre centre.'));
 
                         return;
@@ -143,7 +143,7 @@ class StoreStudentRequest extends FormRequest
                 // Centre effectif, déterminé côté serveur (jamais le center_id brut
                 // d'un Admin Centre). Le compte utilisateur n'entre plus en ligne de
                 // compte : pour un Super Admin, c'est le center_id choisi qui fait foi.
-                $centerId = $authUser->isCenterAdmin()
+                $centerId = ($authUser->isCenterAdmin() || $authUser->isSecretary())
                     ? (int) $authUser->center_id
                     : (int) $this->input('center_id');
 

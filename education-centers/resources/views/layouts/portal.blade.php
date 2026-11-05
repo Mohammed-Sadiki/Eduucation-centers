@@ -21,7 +21,8 @@
         $user = auth()->user();
         $roleLabel = match ($user?->role) {
             'super_admin' => __('Super Admin'),
-            'center_admin' => __('Admin Centre'),
+            'center_admin' => __('Responsable Centre'),
+            'secretary' => __('Secrétaire'),
             'teacher' => __('Professeur'),
             'student' => __('Élève'),
             default => $user?->role ?? __('Invité'),

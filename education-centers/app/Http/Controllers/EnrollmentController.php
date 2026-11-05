@@ -38,7 +38,7 @@ class EnrollmentController extends Controller
         ]);
 
         // Isolation par centre
-        if ($authUser->isCenterAdmin()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $query->where('center_id', $authUser->center_id);
         }
 
@@ -108,7 +108,7 @@ class EnrollmentController extends Controller
         $authUser = $request->user();
         $centers = $authUser->isSuperAdmin() ? Center::orderBy('name')->get() : collect();
 
-        $selectedCenterId = $authUser->isCenterAdmin()
+        $selectedCenterId = ($authUser->isCenterAdmin() || $authUser->isSecretary())
             ? $authUser->center_id
             : ($request->input('center_id') ?? $centers->first()?->id);
 
@@ -150,13 +150,14 @@ class EnrollmentController extends Controller
         $authUser = $request->user();
 
         // Détermination stricte du center_id côté serveur
-        $centerId = $authUser->isCenterAdmin() ? $authUser->center_id : (int) $request->input('center_id');
+        $centerId = ($authUser->isCenterAdmin() || $authUser->isSecretary()) ? $authUser->center_id : (int) $request->input('center_id');
         $center = Center::findOrFail($centerId);
 
         $data = $request->validated();
         $data['center_id'] = $centerId;
         $data['status'] = Enrollment::STATUS_PENDING; // Statut initial obligatoire
         $data['registration_number'] = Enrollment::generateRegistrationNumber($center);
+        $data['created_by'] = $authUser->id;
 
         $enrollment = Enrollment::create($data);
 
@@ -232,7 +233,7 @@ class EnrollmentController extends Controller
         $authUser = $request->user();
         $data = $request->validated();
 
-        if ($authUser->isCenterAdmin()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             unset($data['center_id']);
         }
 

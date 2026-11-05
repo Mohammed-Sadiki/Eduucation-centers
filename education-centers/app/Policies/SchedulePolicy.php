@@ -25,7 +25,7 @@ class SchedulePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->isCenterAdmin() || $user->isTeacher() || $user->isStudent();
+        return $user->isCenterAdmin() || $user->isSecretary() || $user->isTeacher() || $user->isStudent();
     }
 
     /**
@@ -46,7 +46,7 @@ class SchedulePolicy
                 ->exists();
         }
 
-        if ($user->isCenterAdmin()) {
+        if ($user->isCenterAdmin() || $user->isSecretary()) {
             return (int) $user->center_id === (int) $schedule->center_id;
         }
 
@@ -65,33 +65,38 @@ class SchedulePolicy
 
     /**
      * Créer une séance.
+     * Super Admin et Secrétaire uniquement.
+     * Responsable Centre : lecture seule.
      */
     public function create(User $user): bool
     {
-        return $user->isCenterAdmin();
+        return $user->isSecretary();
     }
 
     /**
      * Mettre à jour une séance.
+     * Super Admin et Secrétaire uniquement.
      */
     public function update(User $user, Schedule $schedule): bool
     {
-        return $user->isCenterAdmin() && $user->center_id === $schedule->center_id;
+        return $user->isSecretary() && (int) $user->center_id === (int) $schedule->center_id;
     }
 
     /**
      * Supprimer une séance.
+     * Super Admin uniquement.
      */
     public function delete(User $user, Schedule $schedule): bool
     {
-        return $user->isCenterAdmin() && $user->center_id === $schedule->center_id;
+        return false;
     }
 
     /**
      * Modifier le statut (annuler, terminer, etc.).
+     * Super Admin et Secrétaire uniquement.
      */
     public function toggleStatus(User $user, Schedule $schedule): bool
     {
-        return $user->isCenterAdmin() && $user->center_id === $schedule->center_id;
+        return $user->isSecretary() && (int) $user->center_id === (int) $schedule->center_id;
     }
 }

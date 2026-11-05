@@ -203,6 +203,9 @@ class FinanceDashboardController extends Controller
                 : 0.0,
         ];
 
+        // Calcul de la répartition financière 70/30 (Super Admin / Responsable Centre)
+        $revenueSplit = $this->financeService->calculateRevenueSplit($allStudentRows, $centerId);
+
         $studentRows = $allStudentRows;
 
         // Filtre par statut si renseigné
@@ -280,7 +283,8 @@ class FinanceDashboardController extends Controller
             'studentsList',
             'formationsList',
             'formations',
-            'studentFinancialMap'
+            'studentFinancialMap',
+            'revenueSplit'
         ));
     }
 
@@ -447,6 +451,10 @@ class FinanceDashboardController extends Controller
      */
     public function storeStudentPayment(StoreStudentPaymentRequest $request): RedirectResponse
     {
+        if (! $request->user()->isSuperAdmin()) {
+            abort(403, __('Action non autorisée. Seul le Super Admin peut enregistrer un encaissement direct depuis le module financier.'));
+        }
+
         $data = $request->validated();
         $student = Student::with('center')->findOrFail($data['student_id']);
         // Multi-centres : un Admin Centre ne peut encaisser qu'un étudiant de son périmètre.

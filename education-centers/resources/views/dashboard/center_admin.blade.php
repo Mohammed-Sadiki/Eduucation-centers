@@ -30,14 +30,22 @@
         <x-ui.stat :label="__('Étudiants')" :value="format_number($stats['students'])" icon="academic" tone="primary" :hint="__('inscrits')" />
         <x-ui.stat :label="__('Professeurs')" :value="format_number($stats['teachers'])" icon="user" tone="success" :hint="__('actifs')" />
         <x-ui.stat :label="__('Inscriptions acceptées')" :value="format_number($stats['enrollments_accepted'])" icon="clipboard" tone="info" :hint="__('validées')" />
+        @if(!auth()->user()->isSecretary())
         <x-ui.stat :label="__('Revenus')" :value="format_price($stats['payments_total'])" icon="banknotes" tone="warning" :hint="__('encaissés')" />
+        @else
+        <x-ui.stat :label="__('Documents')" :value="format_number($stats['documents'])" icon="document" tone="warning" :hint="__('actifs')" />
+        @endif
     </div>
 
     <div class="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <x-ui.stat :label="__('Formations')" :value="format_number($stats['formations'])" icon="book" tone="primary" />
         <x-ui.stat :label="__('Classes')" :value="format_number($stats['classes'])" icon="classes" tone="info" />
         <x-ui.stat :label="__('En attente')" :value="format_number($stats['enrollments_pending'])" icon="clock" tone="warning" :hint="__('à traiter')" />
+        @if(!auth()->user()->isSecretary())
         <x-ui.stat :label="__('Factures en attente')" :value="format_price($stats['invoices_pending'])" icon="document" tone="danger" :hint="__('à recouvrer')" />
+        @else
+        <x-ui.stat :label="__('Certificats')" :value="format_number($stats['certificates'])" icon="certificate" tone="danger" :hint="__('délivrés')" />
+        @endif
     </div>
 
     {{-- ── GRAPHIQUE + RÉSUMÉ ─────────────────────────────────────────── --}}

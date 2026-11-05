@@ -43,6 +43,7 @@ class Enrollment extends Model
         'student_id',
         'formation_id',
         'class_id',
+        'created_by',
         'school_year',
         'official_price',
         'final_price',
@@ -199,6 +200,14 @@ class Enrollment extends Model
     public function classRoom(): BelongsTo
     {
         return $this->belongsTo(ClassRoom::class, 'class_id');
+    }
+
+    /**
+     * Relation : Utilisateur ayant créé l'inscription.
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     /**

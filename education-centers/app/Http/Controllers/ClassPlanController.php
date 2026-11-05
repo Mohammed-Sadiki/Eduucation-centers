@@ -25,7 +25,7 @@ class ClassPlanController extends Controller
             ->orderBy('last_name')
             ->orderBy('first_name');
 
-        if ($authUser->isCenterAdmin()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $teachersQuery->where('center_id', $authUser->center_id);
         }
 
@@ -61,8 +61,8 @@ class ClassPlanController extends Controller
 
                 // Élèves de la classe sélectionnée
                 if ($selectedClass) {
-                    // Sécurité : vérifier que la classe appartient au même centre que le prof (pour Admin Centre)
-                    if ($authUser->isCenterAdmin() && $selectedClass->center_id !== $authUser->center_id) {
+                    // Sécurité : vérifier que la classe appartient au même centre que le prof (pour Admin Centre / Secrétaire)
+                    if (($authUser->isCenterAdmin() || $authUser->isSecretary()) && $selectedClass->center_id !== $authUser->center_id) {
                         abort(403);
                     }
 
@@ -98,8 +98,8 @@ class ClassPlanController extends Controller
 
         $teacherQuery = Teacher::where('id', $teacherId)->where('status', 'active');
 
-        // Restriction centre pour Admin Centre
-        if ($authUser->isCenterAdmin()) {
+        // Restriction centre pour Admin Centre / Secrétaire
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $teacherQuery->where('center_id', $authUser->center_id);
         }
 
@@ -142,7 +142,7 @@ class ClassPlanController extends Controller
         }
 
         // Sécurité multi-centres
-        if ($authUser->isCenterAdmin() && $classRoom->center_id !== $authUser->center_id) {
+        if (($authUser->isCenterAdmin() || $authUser->isSecretary()) && $classRoom->center_id !== $authUser->center_id) {
             return response()->json(['error' => 'Accès interdit.'], 403);
         }
 

@@ -61,6 +61,14 @@ class UserFactory extends Factory
         ]);
     }
 
+    public function secretary(?int $centerId = null): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role'      => User::ROLE_SECRETARY,
+            'center_id' => $centerId ?? \App\Models\Center::factory(),
+        ]);
+    }
+
     public function teacher(?int $centerId = null): static
     {
         return $this->state(fn (array $attributes) => [

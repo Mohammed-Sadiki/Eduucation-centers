@@ -8,6 +8,7 @@ use App\Models\Formation;
 use App\Models\Payment;
 use App\Models\Teacher;
 use App\Models\TeacherSalary;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -109,7 +110,7 @@ class FinanceService
     public function getStudentFinancialRows(?string $domain = null, string $schoolYear = '2026/2027', ?int $centerId = null): Collection
     {
         // On récupère les inscriptions de l'année scolaire ciblée (ou toutes si 'all')
-        $enrollmentsQuery = Enrollment::with(['student.user', 'formation.center', 'center'])
+        $enrollmentsQuery = Enrollment::with(['student.user', 'formation.center', 'center', 'creator'])
             ->whereIn('status', ['accepted', 'pending', 'under_review']);
 
         if ($schoolYear !== 'all') {
@@ -132,7 +133,7 @@ class FinanceService
         $enrollments = $enrollmentsQuery->get();
 
         // Récupérer tous les paiements étudiants filtrés par statut paid
-        $paymentsQuery = Payment::where('status', 'paid');
+        $paymentsQuery = Payment::with('recorder')->where('status', 'paid');
         if ($schoolYear !== 'all') {
             $paymentsQuery->where(function ($q) use ($schoolYear) {
                 $q->where('school_year', $schoolYear)
@@ -512,6 +513,84 @@ class FinanceService
             'professeurs_impayes' => $teacherRows->where('status', 'unpaid')->count(),
             'monthly_evolution' => $this->getMonthlyEvolution($domain, $schoolYear, $centerId),
             'domain_breakdown' => $this->getDomainBreakdown($schoolYear, $centerId),
+        ];
+    }
+
+    /**
+     * Calcule la répartition financière 70/30 sur les paiements réellement encaissés.
+     *
+     * Règle de répartition :
+     * - Si l'inscription a été effectuée par le Super Admin : 70% pour le Super Admin, 30% pour le Responsable Centre.
+     * - Si l'inscription a été effectuée depuis un centre (notamment par une secrétaire) : 70% pour le Responsable Centre, 30% pour le Super Admin.
+     *
+     * Origine de l'inscription :
+     * Déterminée de façon fiable via le créateur de l'inscription ($enrollment->creator / created_by),
+     * ou à défaut via le premier versement ($firstPayment->recorder / recorded_by).
+     *
+     * @param  Collection  $studentRows  Collection de StudentFinancialRow ou Payment
+     * @return array{super_admin_share: float, center_admin_share: float, total_collected: float, unclassified_count: int}
+     */
+    public function calculateRevenueSplit(Collection $studentRows, ?int $centerId = null): array
+    {
+        $superAdminShare = 0.00;
+        $centerAdminShare = 0.00;
+        $totalCollected = 0.00;
+        $unclassifiedCount = 0;
+
+        foreach ($studentRows as $row) {
+            $enrollment = $row->enrollment ?? null;
+            $payments = $row->payments ?? collect();
+            $paidAmount = (float) ($row->paid_amount ?? 0);
+
+            if ($paidAmount <= 0) {
+                continue;
+            }
+
+            $totalCollected += $paidAmount;
+
+            // Déterminer l'origine de l'inscription de façon fiable
+            $originRole = null;
+
+            // 1. Priorité à l'auteur direct de l'inscription (created_by)
+            if ($enrollment && $enrollment->creator) {
+                $originRole = $enrollment->creator->role;
+            } elseif ($enrollment && $enrollment->created_by) {
+                $creator = User::find($enrollment->created_by);
+                $originRole = $creator?->role;
+            }
+
+            // 2. Si non renseigné sur l'inscription, vérifier le premier versement (ou les paiements rattachés)
+            if (! $originRole && $payments->isNotEmpty()) {
+                $firstRecordedPayment = $payments->sortBy('created_at')->first(fn ($p) => ! empty($p->recorded_by));
+                if ($firstRecordedPayment) {
+                    $recorder = $firstRecordedPayment->recorder ?? User::find($firstRecordedPayment->recorded_by);
+                    $originRole = $recorder?->role;
+                }
+            }
+
+            // 3. Répartition selon l'origine réelle de l'inscription
+            if ($originRole === User::ROLE_SUPER_ADMIN) {
+                // Inscription par Super Admin : 70% Super Admin / 30% Responsable Centre
+                $superAdminShare += $paidAmount * 0.70;
+                $centerAdminShare += $paidAmount * 0.30;
+            } elseif ($originRole === User::ROLE_SECRETARY || $originRole === User::ROLE_CENTER_ADMIN) {
+                // Inscription depuis le centre (Secrétaire ou Admin Centre) : 70% Responsable Centre / 30% Super Admin
+                $centerAdminShare += $paidAmount * 0.70;
+                $superAdminShare += $paidAmount * 0.30;
+            } else {
+                // Origine non explicitement tracée (anciennes inscriptions historiques)
+                // Attribution par défaut : inscription effectuée en centre
+                $unclassifiedCount++;
+                $centerAdminShare += $paidAmount * 0.70;
+                $superAdminShare += $paidAmount * 0.30;
+            }
+        }
+
+        return [
+            'super_admin_share' => round($superAdminShare, 2),
+            'center_admin_share' => round($centerAdminShare, 2),
+            'total_collected' => round($totalCollected, 2),
+            'unclassified_count' => $unclassifiedCount,
         ];
     }
 }

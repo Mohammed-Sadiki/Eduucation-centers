@@ -44,7 +44,7 @@ class GeneralFormationController extends Controller
 
         $authUser = $request->user();
 
-        if ($authUser->isCenterAdmin()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $centerId = (int) $authUser->center_id;
             $centers = collect();
         } else {
@@ -95,7 +95,7 @@ class GeneralFormationController extends Controller
 
         $authUser = $request->user();
 
-        if ($authUser->isCenterAdmin()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $centerId = (int) $authUser->center_id;
             $centers = collect();
         } else {
@@ -140,7 +140,7 @@ class GeneralFormationController extends Controller
 
         $authUser = $request->user();
 
-        if ($authUser->isCenterAdmin()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $centerId = (int) $authUser->center_id;
         } else {
             // Super Admin : centre choisi via ?center_id, sinon premier centre
@@ -175,8 +175,8 @@ class GeneralFormationController extends Controller
 
         $authUser = $request->user();
 
-        // Centre forcé : Admin Centre = le sien ; Super Admin = center_id fourni.
-        if ($authUser->isCenterAdmin()) {
+        // Centre forcé : Admin Centre / Secrétaire = le sien ; Super Admin = center_id fourni.
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $centerId = (int) $authUser->center_id;
         } else {
             $centerId = (int) $request->input('center_id', 0);
@@ -368,8 +368,8 @@ class GeneralFormationController extends Controller
             'center_id' => ['nullable', 'integer', 'exists:centers,id'],
         ]);
 
-        // L'Admin Centre force son propre centre ; le Super Admin peut cibler.
-        if ($authUser->isCenterAdmin()) {
+        // L'Admin Centre / Secrétaire force son propre centre ; le Super Admin peut cibler.
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $centerId = (int) $authUser->center_id;
         } else {
             $centerId = (int) ($data['center_id'] ?? 0);

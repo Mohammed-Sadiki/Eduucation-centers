@@ -3,7 +3,8 @@
     $unreadCount = \App\Models\AppNotification::where('user_id', $user->id)->whereNull('read_at')->count();
     $roleLabel = match ($user->role) {
         'super_admin' => __('Super Admin'),
-        'center_admin' => __('Admin Centre'),
+        'center_admin' => __('Responsable Centre'),
+        'secretary' => __('Secrétaire'),
         'teacher' => __('Professeur'),
         'student' => __('Élève'),
         default => $user->role,
@@ -11,7 +12,7 @@
     $centerLabel = $user->isSuperAdmin() ? __('Tous les centres') : ($user->center?->name ?? __('N/A'));
     $isStagiaires = request()->routeIs('stagiaires.*');
     $isFinance = request()->routeIs('super-admin.finance.*');
-    $isAdmin = $user->isSuperAdmin() || $user->isCenterAdmin();
+    $isAdmin = $user->isSuperAdmin() || $user->isCenterAdmin() || $user->isSecretary();
 
     // Détection du domaine actif (session ou route)
     $activeDomain = session('active_domain');

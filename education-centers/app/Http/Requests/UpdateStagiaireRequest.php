@@ -44,7 +44,7 @@ class UpdateStagiaireRequest extends FormRequest
 
         // Centre résolu côté serveur pour un Admin Centre : impossible de déplacer
         // un stagiaire vers un centre qui n'est pas le sien.
-        if ($this->user()?->isCenterAdmin()) {
+        if ($this->user()?->isCenterAdmin() || $this->user()?->isSecretary()) {
             $this->merge(['center_id' => $this->user()->center_id]);
         }
     }

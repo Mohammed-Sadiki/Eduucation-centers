@@ -109,7 +109,7 @@ class AcademicPerimeter
         $context = function_exists('user_context') ? user_context() : null;
 
         $forcedCenter = null;
-        if ($user?->isCenterAdmin() || $user?->isTeacher()) {
+        if ($user?->isCenterAdmin() || $user?->isSecretary() || $user?->isTeacher()) {
             $forcedCenter = $user->center_id !== null ? (int) $user->center_id : null;
         } elseif ($centerId) {
             $forcedCenter = (int) $centerId;

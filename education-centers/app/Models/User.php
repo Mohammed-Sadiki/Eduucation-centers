@@ -22,6 +22,8 @@ class User extends Authenticatable
 
     public const ROLE_CENTER_ADMIN = 'center_admin';
 
+    public const ROLE_SECRETARY = 'secretary';
+
     public const ROLE_TEACHER = 'teacher';
 
     public const ROLE_STUDENT = 'student';
@@ -29,6 +31,7 @@ class User extends Authenticatable
     public const ROLES = [
         self::ROLE_SUPER_ADMIN,
         self::ROLE_CENTER_ADMIN,
+        self::ROLE_SECRETARY,
         self::ROLE_TEACHER,
         self::ROLE_STUDENT,
     ];
@@ -239,11 +242,27 @@ class User extends Authenticatable
     }
 
     /**
-     * Détermine si l'utilisateur est un Admin de Centre.
+     * Détermine si l'utilisateur est un Admin de Centre (Responsable Centre).
      */
     public function isCenterAdmin(): bool
     {
         return $this->role === self::ROLE_CENTER_ADMIN;
+    }
+
+    /**
+     * Détermine si l'utilisateur est un Responsable de Centre (alias de isCenterAdmin).
+     */
+    public function isCenterManager(): bool
+    {
+        return $this->isCenterAdmin();
+    }
+
+    /**
+     * Détermine si l'utilisateur est une Secrétaire.
+     */
+    public function isSecretary(): bool
+    {
+        return $this->role === self::ROLE_SECRETARY;
     }
 
     /**

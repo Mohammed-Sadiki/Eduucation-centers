@@ -49,7 +49,7 @@ class ScheduleController extends Controller
         ]);
 
         // Isolation stricte par centre
-        if ($authUser->isCenterAdmin()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $query->where('center_id', $authUser->center_id);
         }
 
@@ -149,7 +149,7 @@ class ScheduleController extends Controller
         })->values();
 
         // Données pour les filtres
-        $targetCenterId = $authUser->isCenterAdmin() ? $authUser->center_id : $request->input('center_id');
+        $targetCenterId = ($authUser->isCenterAdmin() || $authUser->isSecretary()) ? $authUser->center_id : $request->input('center_id');
 
         // Le filtre « Classe » ne propose que des classes de formations générales
         // actives du périmètre (mêmes règles que le calendrier).
@@ -193,7 +193,7 @@ class ScheduleController extends Controller
         $centers = $authUser->isSuperAdmin() ? Center::orderBy('name')->get() : collect();
 
         // Déterminer le centre de référence pour charger les listes déroulantes
-        $selectedCenterId = $authUser->isCenterAdmin()
+        $selectedCenterId = ($authUser->isCenterAdmin() || $authUser->isSecretary())
             ? $authUser->center_id
             : ($request->input('center_id') ?? $centers->first()?->id);
 
@@ -231,7 +231,7 @@ class ScheduleController extends Controller
         $authUser = $request->user();
 
         // Détermination stricte du center_id côté serveur
-        $centerId = $authUser->isCenterAdmin() ? $authUser->center_id : (int) $request->input('center_id');
+        $centerId = ($authUser->isCenterAdmin() || $authUser->isSecretary()) ? $authUser->center_id : (int) $request->input('center_id');
 
         $data = $request->validated();
         $data['center_id'] = $centerId;
@@ -295,8 +295,8 @@ class ScheduleController extends Controller
         $authUser = $request->user();
         $data = $request->validated();
 
-        // Pour un Admin Centre, le center_id est immuable
-        if ($authUser->isCenterAdmin()) {
+        // Pour un Admin Centre ou Secrétaire, le center_id est immuable
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             unset($data['center_id']);
         }
 

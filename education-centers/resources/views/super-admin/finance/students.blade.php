@@ -51,6 +51,7 @@
             </p>
         </div>
 
+        @if(auth()->user()->isSuperAdmin())
         <div class="flex items-center gap-2.5">
             <button type="button"
                     x-on:click="openQuickPayment('', '', '')"
@@ -59,85 +60,78 @@
                 <span>{{ __('Encaisser un versement') }}</span>
             </button>
         </div>
+        @endif
     </div>
 
     {{-- ────────────────────────────────────────────────────────────
-         KPI SYNTHÉTIQUES (4 CARTES ÉPURÉES CAD SYNDIC)
+         RÉPARTITION FINANCIÈRE 70/30 (DEUX GRANDES CARTES HORIZONTALES)
     ──────────────────────────────────────────────────────────── --}}
-    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {{-- Total Attendu --}}
-        <div class="finance-card p-4.5">
-            <div class="flex items-start justify-between">
-                <div>
-                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Total attendu') }}</span>
-                    <div class="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white whitespace-nowrap">
-                        {{ format_price($stats['total_expected'] ?? 0, 'MAD') }}
-                    </div>
+    <div class="grid gap-6 md:grid-cols-2">
+        {{-- Carte 1 — Part du Super Admin --}}
+        <div class="ec-card relative overflow-hidden rounded-2xl border border-purple-100 bg-linear-to-br from-white via-purple-50/20 to-purple-50/40 p-6 shadow-sm transition-all hover:shadow-md dark:border-purple-900/30 dark:from-slate-850 dark:via-purple-950/10 dark:to-slate-850">
+            <div class="flex items-start justify-between gap-4">
+                <div class="space-y-1.5">
+                    <span class="inline-flex items-center gap-1.5 rounded-md bg-purple-100/80 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">
+                        <span class="h-1.5 w-1.5 rounded-full bg-purple-500"></span>
+                        {{ __('Part du Super Admin') }}
+                    </span>
+                    <h3 class="text-base font-semibold text-slate-600 dark:text-slate-300">
+                        {{ __('Quote-part Super Admin (70% ou 30%)') }}
+                    </h3>
                 </div>
-                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                    <x-icon name="clipboard-document-list" class="h-5 w-5" />
+                <div class="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-purple-600 text-white shadow-md shadow-purple-600/20 dark:bg-purple-500">
+                    <x-icon name="building-office-2" class="h-6 w-6" />
                 </div>
             </div>
-            <div class="mt-3 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
-                <span>{{ __('Étudiants inscrits') }}</span>
-                <span class="font-bold text-slate-800 dark:text-slate-200">{{ $stats['total_students'] ?? 0 }}</span>
+
+            <div class="mt-5 flex items-baseline gap-2">
+                <span class="text-3xl sm:text-4xl font-extrabold tracking-tight text-purple-950 dark:text-purple-100">
+                    {{ format_price($revenueSplit['super_admin_share'] ?? 0, 'DH') }}
+                </span>
+            </div>
+
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-purple-100/70 pt-3 text-xs text-slate-500 dark:border-purple-900/30 dark:text-slate-400">
+                <span class="inline-flex items-center gap-1">
+                    <x-icon name="check-circle" class="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
+                    {{ __('Sur encaissements réels') }}
+                </span>
+                <span class="font-medium text-slate-700 dark:text-slate-300">
+                    {{ __('Total encaissé :') }} <strong class="text-purple-700 dark:text-purple-300">{{ format_price($revenueSplit['total_collected'] ?? 0, 'DH') }}</strong>
+                </span>
             </div>
         </div>
 
-        {{-- Total Encaissé --}}
-        <div class="finance-card p-4.5">
-            <div class="flex items-start justify-between">
-                <div>
-                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Total encaissé') }}</span>
-                    <div class="mt-2 text-2xl font-extrabold text-[#0DAD98] whitespace-nowrap">
-                        {{ format_price($stats['total_paid'] ?? 0, 'MAD') }}
-                    </div>
+        {{-- Carte 2 — Part du Responsable Centre --}}
+        <div class="ec-card relative overflow-hidden rounded-2xl border border-emerald-100 bg-linear-to-br from-white via-emerald-50/20 to-emerald-50/40 p-6 shadow-sm transition-all hover:shadow-md dark:border-emerald-900/30 dark:from-slate-850 dark:via-emerald-950/10 dark:to-slate-850">
+            <div class="flex items-start justify-between gap-4">
+                <div class="space-y-1.5">
+                    <span class="inline-flex items-center gap-1.5 rounded-md bg-emerald-100/80 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                        {{ __('Part du Responsable Centre') }}
+                    </span>
+                    <h3 class="text-base font-semibold text-slate-600 dark:text-slate-300">
+                        {{ __('Quote-part Responsable Centre (70% ou 30%)') }}
+                    </h3>
                 </div>
-                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#ECFDF5] text-[#0DAD98] dark:bg-[#0DAD98]/20">
-                    <x-icon name="check-circle" class="h-5 w-5" />
+                <div class="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-md shadow-emerald-600/20 dark:bg-emerald-500">
+                    <x-icon name="user" class="h-6 w-6" />
                 </div>
             </div>
-            <div class="mt-3 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
-                <span>{{ __('Taux de recouvrement') }}</span>
-                <span class="font-bold text-[#0DAD98]">{{ $stats['recovery_rate'] ?? 0 }}%</span>
-            </div>
-        </div>
 
-        {{-- Reste à Encaisser --}}
-        <div class="finance-card p-4.5">
-            <div class="flex items-start justify-between">
-                <div>
-                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Reste à encaisser') }}</span>
-                    <div class="mt-2 text-2xl font-extrabold text-amber-600 dark:text-amber-400 whitespace-nowrap">
-                        {{ format_price($stats['total_remaining'] ?? 0, 'MAD') }}
-                    </div>
-                </div>
-                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/40">
-                    <x-icon name="clock" class="h-5 w-5" />
-                </div>
+            <div class="mt-5 flex items-baseline gap-2">
+                <span class="text-3xl sm:text-4xl font-extrabold tracking-tight text-emerald-950 dark:text-emerald-100">
+                    {{ format_price($revenueSplit['center_admin_share'] ?? 0, 'DH') }}
+                </span>
             </div>
-            <div class="mt-3 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
-                <span>{{ __('Partiellement payés') }}</span>
-                <span class="font-bold text-amber-600">{{ $stats['count_partial'] ?? 0 }}</span>
-            </div>
-        </div>
 
-        {{-- Impayés Totaux --}}
-        <div class="finance-card p-4.5">
-            <div class="flex items-start justify-between">
-                <div>
-                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Non payés') }}</span>
-                    <div class="mt-2 text-2xl font-extrabold text-rose-600 dark:text-rose-400 whitespace-nowrap">
-                        {{ $stats['count_unpaid'] ?? 0 }} <span class="text-xs font-normal text-slate-400">{{ __('étudiants') }}</span>
-                    </div>
-                </div>
-                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/40">
-                    <x-icon name="exclamation-circle" class="h-5 w-5" />
-                </div>
-            </div>
-            <div class="mt-3 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 dark:border-slate-800/80 pt-2">
-                <span>{{ __('Soldés intégralement') }}</span>
-                <span class="font-bold text-emerald-600">{{ $stats['count_paid'] ?? 0 }}</span>
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-emerald-100/70 pt-3 text-xs text-slate-500 dark:border-emerald-900/30 dark:text-slate-400">
+                <span class="inline-flex items-center gap-1">
+                    <x-icon name="check-circle" class="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                    {{ __('Sur encaissements réels') }}
+                </span>
+                <span class="font-medium text-slate-700 dark:text-slate-300">
+                    {{ __('Périmètre :') }} <strong class="text-emerald-700 dark:text-emerald-300">{{ $centerId ? ($centers->firstWhere('id', $centerId)?->name ?? __('Centre sélectionné')) : __('Tous les centres') }}</strong>
+                </span>
             </div>
         </div>
     </div>
@@ -446,14 +440,22 @@
                                     @endif
                                 </td>
                                 <td class="py-3 px-4 text-end whitespace-nowrap">
-                                    @if($row->remaining_amount > 0)
-                                        <button type="button"
-                                                x-on:click="openQuickPayment('{{ $row->student->id }}', '{{ $row->formation->id }}', '{{ $row->remaining_amount }}')"
-                                                class="finance-btn-primary py-1 px-2.5 text-xs">
-                                            <span>{{ __('Encaisser') }}</span>
-                                        </button>
+                                    @if(auth()->user()->isSuperAdmin())
+                                        @if($row->remaining_amount > 0)
+                                            <button type="button"
+                                                    x-on:click="openQuickPayment('{{ $row->student->id }}', '{{ $row->formation->id }}', '{{ $row->remaining_amount }}')"
+                                                    class="finance-btn-primary py-1 px-2.5 text-xs">
+                                                <span>{{ __('Encaisser') }}</span>
+                                            </button>
+                                        @else
+                                            <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{{ __('Soldé ✓') }}</span>
+                                        @endif
                                     @else
-                                        <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{{ __('Soldé ✓') }}</span>
+                                        @if($row->remaining_amount > 0)
+                                            <span class="text-xs font-semibold text-amber-600 dark:text-amber-400">{{ __('En attente') }}</span>
+                                        @else
+                                            <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{{ __('Soldé ✓') }}</span>
+                                        @endif
                                     @endif
                                 </td>
                             </tr>
@@ -529,11 +531,15 @@
                                     {{ $debtor->last_payment?->payment_date ? format_date($debtor->last_payment->payment_date, 'd/m/Y') : __('Aucun versement') }}
                                 </td>
                                 <td class="py-3 px-4 text-end whitespace-nowrap">
-                                    <button type="button"
-                                            x-on:click="openQuickPayment('{{ $debtor->student->id }}', '{{ $debtor->formation->id }}', '{{ $debtor->remaining_amount }}')"
-                                            class="finance-btn-primary py-1 px-2.5 text-xs">
-                                        <span>{{ __('Encaisser créance') }}</span>
-                                    </button>
+                                    @if(auth()->user()->isSuperAdmin())
+                                        <button type="button"
+                                                x-on:click="openQuickPayment('{{ $debtor->student->id }}', '{{ $debtor->formation->id }}', '{{ $debtor->remaining_amount }}')"
+                                                class="finance-btn-primary py-1 px-2.5 text-xs">
+                                            <span>{{ __('Encaisser créance') }}</span>
+                                        </button>
+                                    @else
+                                        <span class="text-xs font-semibold text-rose-600 dark:text-rose-400">{{ __('Impayé') }}</span>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
@@ -550,8 +556,9 @@
     @endif
 
     {{-- ────────────────────────────────────────────────────────────
-         MODAL D'ENCAISSEMENT RAPIDE
+         MODAL D'ENCAISSEMENT RAPIDE (RÉSERVÉ AU SUPER ADMIN)
     ──────────────────────────────────────────────────────────── --}}
+    @if(auth()->user()->isSuperAdmin())
     <div x-show="paymentModalOpen"
          x-cloak
          x-transition:enter="transition ease-out duration-200"
@@ -664,6 +671,7 @@
             </form>
         </div>
     </div>
+    @endif
 
 </div>
 @endsection

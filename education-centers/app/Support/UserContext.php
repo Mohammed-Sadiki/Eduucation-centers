@@ -11,7 +11,7 @@ use App\Models\User;
  * Centralise trois dimensions qui pilotent le filtrage et la sécurité :
  *  - le rôle / l'utilisateur connecté ;
  *  - le centre de travail (null = tous les centres pour le Super Admin,
- *    forcé au centre propre pour un Admin Centre) ;
+ *    forcé au centre propre pour un Admin Centre ou Secrétaire) ;
  *  - le domaine de formation actif (slug validé côté serveur).
  *
  * Il est construit par le middleware {@see \App\Http\Middleware\ResolveDomainContext}
@@ -45,8 +45,13 @@ class UserContext
         return (bool) $this->currentUser?->isCenterAdmin();
     }
 
+    public function isSecretary(): bool
+    {
+        return (bool) $this->currentUser?->isSecretary();
+    }
+
     /**
-     * Identifiants = true pour l'Admin Centre et tous les rôles rattachés à un
+     * Identifiants = true pour l'Admin Centre, la Secrétaire et tous les rôles rattachés à un
      * centre. Le Super Admin a center_id NULL => retourne null (tous centres).
      */
     public function centerId(): ?int
@@ -64,7 +69,7 @@ class UserContext
 
     /**
      * Le Super Admin peut restreindre volontairement sa vue à un centre ;
-     * un Admin Centre est figé sur son centre (pas de changement possible).
+     * un Admin Centre ou une Secrétaire est figé sur son centre (pas de changement possible).
      */
     public function canSwitchCenter(): bool
     {

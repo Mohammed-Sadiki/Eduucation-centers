@@ -22,22 +22,22 @@ class RoomPolicy
 
     /**
      * viewAny : voir la liste des salles.
-     * Accessible au Super Admin et à l'Admin Centre.
+     * Accessible au Super Admin, au Responsable Centre et à la Secrétaire.
      * Refusé pour Professeur et Élève (403).
      */
     public function viewAny(User $authUser): bool
     {
-        return $authUser->isCenterAdmin();
+        return $authUser->isCenterAdmin() || $authUser->isSecretary();
     }
 
     /**
      * view : consulter une salle spécifique.
-     * Admin Centre : uniquement les salles de son propre centre.
+     * Responsable Centre & Secrétaire : uniquement les salles de leur propre centre.
      */
     public function view(User $authUser, Room $room): bool
     {
-        if ($authUser->isCenterAdmin()) {
-            return $authUser->center_id === $room->center_id;
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
+            return (int) $authUser->center_id === (int) $room->center_id;
         }
 
         return false;
@@ -45,21 +45,23 @@ class RoomPolicy
 
     /**
      * create : créer une salle.
-     * Super Admin (géré par before) et Admin Centre.
+     * Super Admin et Secrétaire uniquement.
+     * Responsable Centre : lecture seule.
      */
     public function create(User $authUser): bool
     {
-        return $authUser->isCenterAdmin();
+        return $authUser->isSecretary();
     }
 
     /**
      * update : modifier une salle.
-     * Admin Centre : uniquement les salles de son propre centre.
+     * Super Admin et Secrétaire uniquement.
+     * Responsable Centre : lecture seule.
      */
     public function update(User $authUser, Room $room): bool
     {
-        if ($authUser->isCenterAdmin()) {
-            return $authUser->center_id === $room->center_id;
+        if ($authUser->isSecretary()) {
+            return (int) $authUser->center_id === (int) $room->center_id;
         }
 
         return false;
@@ -67,11 +69,12 @@ class RoomPolicy
 
     /**
      * toggleStatus : activer / désactiver une salle.
+     * Super Admin et Secrétaire uniquement.
      */
     public function toggleStatus(User $authUser, Room $room): bool
     {
-        if ($authUser->isCenterAdmin()) {
-            return $authUser->center_id === $room->center_id;
+        if ($authUser->isSecretary()) {
+            return (int) $authUser->center_id === (int) $room->center_id;
         }
 
         return false;
@@ -79,14 +82,10 @@ class RoomPolicy
 
     /**
      * delete : supprimer une salle.
-     * Admin Centre : uniquement dans son propre centre.
+     * Super Admin uniquement.
      */
     public function delete(User $authUser, Room $room): bool
     {
-        if ($authUser->isCenterAdmin()) {
-            return $authUser->center_id === $room->center_id;
-        }
-
         return false;
     }
 }

@@ -1,15 +1,29 @@
 <?php
+
 namespace App\Policies;
+
 use App\Models\Enrollment;
 use App\Models\Evaluation;
 use App\Models\User;
-class EvaluationPolicy {
-    public function before(User $user, string $ability): ?bool {
-        if ($user->isSuperAdmin()) return true;
+
+class EvaluationPolicy
+{
+    public function before(User $user, string $ability): ?bool
+    {
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
         return null;
     }
-    public function viewAny(User $user): bool { return $user->isCenterAdmin() || $user->isTeacher() || $user->isStudent(); }
-    public function view(User $user, Evaluation $evaluation): bool {
+
+    public function viewAny(User $user): bool
+    {
+        return $user->isCenterAdmin() || $user->isSecretary() || $user->isTeacher() || $user->isStudent();
+    }
+
+    public function view(User $user, Evaluation $evaluation): bool
+    {
         if ($user->isStudent()) {
             if ((int) $user->center_id !== (int) $evaluation->center_id) {
                 return false;
@@ -28,22 +42,30 @@ class EvaluationPolicy {
                     ->exists();
         }
 
-        if ($user->isCenterAdmin()) {
+        if ($user->isCenterAdmin() || $user->isSecretary()) {
             return (int) $user->center_id === (int) $evaluation->center_id;
         }
 
         return $this->teacherOwnsEvaluation($user, $evaluation);
     }
-    public function create(User $user): bool { return $user->isCenterAdmin() || $user->isTeacher(); }
-    public function update(User $user, Evaluation $evaluation): bool {
-        if ($user->isCenterAdmin()) {
+
+    public function create(User $user): bool
+    {
+        return $user->isSecretary() || $user->isTeacher();
+    }
+
+    public function update(User $user, Evaluation $evaluation): bool
+    {
+        if ($user->isSecretary()) {
             return (int) $user->center_id === (int) $evaluation->center_id;
         }
 
         return $this->teacherOwnsEvaluation($user, $evaluation);
     }
-    public function delete(User $user, Evaluation $evaluation): bool {
-        return $user->isCenterAdmin() && (int) $user->center_id === (int) $evaluation->center_id;
+
+    public function delete(User $user, Evaluation $evaluation): bool
+    {
+        return $user->isSecretary() && (int) $user->center_id === (int) $evaluation->center_id;
     }
 
     /**

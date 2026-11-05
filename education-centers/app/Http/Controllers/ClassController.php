@@ -34,7 +34,7 @@ class ClassController extends Controller
         $query = ClassRoom::with(['center', 'formation']);
 
         // Isolation multi-centres stricte
-        if ($authUser->isCenterAdmin()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $query->where('center_id', $authUser->center_id);
         }
 
@@ -111,7 +111,7 @@ class ClassController extends Controller
         $authUser = $request->user();
 
         // Détermination stricte du center_id côté serveur (jamais faire confiance au client)
-        $centerId = $authUser->isCenterAdmin() ? $authUser->center_id : (int) $request->input('center_id');
+        $centerId = ($authUser->isCenterAdmin() || $authUser->isSecretary()) ? $authUser->center_id : (int) $request->input('center_id');
 
         $data = $request->validated();
         $data['center_id'] = $centerId;

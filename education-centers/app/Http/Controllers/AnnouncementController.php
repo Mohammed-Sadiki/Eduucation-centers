@@ -16,7 +16,7 @@ class AnnouncementController extends Controller
         Gate::authorize('viewAny', Announcement::class);
         $user = $request->user();
         $query = Announcement::query()->with('author');
-        if ($user->isCenterAdmin()) {
+        if ($user->isCenterAdmin() || $user->isSecretary()) {
             $query->where(fn ($q) => $q->where('center_id', $user->center_id)->orWhereNull('center_id'));
         }
         if ($status = $request->input('status')) {
@@ -47,7 +47,7 @@ class AnnouncementController extends Controller
             'status' => ['required', 'in:draft,published,archived'],
             'center_id' => ['nullable', 'integer', 'exists:centers,id'],
         ]);
-        if ($user->isCenterAdmin()) {
+        if ($user->isCenterAdmin() || $user->isSecretary()) {
             $data['center_id'] = $user->center_id;
         }
         $data['author_id'] = $user->id;

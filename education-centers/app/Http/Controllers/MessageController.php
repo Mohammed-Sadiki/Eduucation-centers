@@ -23,8 +23,8 @@ class MessageController extends Controller
     {
         $user = $request->user();
 
-        // Seuls le Super Admin et les Admins de Centre accèdent à cette interface
-        if (! $user->isSuperAdmin() && ! $user->isCenterAdmin()) {
+        // Seuls le Super Admin, les Admins de Centre et les Secrétaires accèdent à cette interface
+        if (! $user->isSuperAdmin() && ! $user->isCenterAdmin() && ! $user->isSecretary()) {
             abort(403, __('Accès non autorisé au module de messagerie.'));
         }
 
@@ -60,14 +60,14 @@ class MessageController extends Controller
     {
         $user = $request->user();
 
-        if (! in_array($user->role, [User::ROLE_SUPER_ADMIN, User::ROLE_CENTER_ADMIN, User::ROLE_TEACHER], true)) {
+        if (! in_array($user->role, [User::ROLE_SUPER_ADMIN, User::ROLE_CENTER_ADMIN, User::ROLE_SECRETARY, User::ROLE_TEACHER], true)) {
             abort(403, __('Accès non autorisé.'));
         }
 
         $conversations = Conversation::whereHas('participants', function ($q) use ($user) {
             $q->where('user_id', $user->id);
         })
-            ->when($user->isCenterAdmin(), function ($q) use ($user) {
+            ->when($user->isCenterAdmin() || $user->isSecretary(), function ($q) use ($user) {
                 $q->where(function ($sub) use ($user) {
                     $sub->whereNull('center_id')->orWhere('center_id', $user->center_id);
                 });
@@ -160,8 +160,8 @@ class MessageController extends Controller
             abort(403, __('Accès interdit à cette conversation.'));
         }
 
-        // Isolation pour l'admin de centre : ne peut pas voir les conversations privées d'un autre centre
-        if ($user->isCenterAdmin() && $conversation->center_id && $conversation->center_id !== $user->center_id) {
+        // Isolation pour l'admin de centre ou secrétaire : ne peut pas voir les conversations privées d'un autre centre
+        if (($user->isCenterAdmin() || $user->isSecretary()) && $conversation->center_id && $conversation->center_id !== $user->center_id) {
             abort(403, __('Accès interdit aux conversations d\'un autre centre.'));
         }
 
@@ -255,8 +255,8 @@ class MessageController extends Controller
             abort(403, __('Communication non autorisée avec ce destinataire.'));
         }
 
-        // 4. Isolation pour Admin de Centre
-        if ($user->isCenterAdmin() && $conversation->center_id && $conversation->center_id !== $user->center_id) {
+        // 4. Isolation pour Admin de Centre / Secrétaire
+        if (($user->isCenterAdmin() || $user->isSecretary()) && $conversation->center_id && $conversation->center_id !== $user->center_id) {
             abort(403, __('Accès interdit aux conversations d\'un autre centre.'));
         }
 
@@ -360,7 +360,7 @@ class MessageController extends Controller
             abort(403, __('Vous n\'êtes pas autorisé à accéder à cette pièce jointe.'));
         }
 
-        if ($user->isCenterAdmin() && $conversation->center_id && $conversation->center_id !== $user->center_id) {
+        if (($user->isCenterAdmin() || $user->isSecretary()) && $conversation->center_id && $conversation->center_id !== $user->center_id) {
             abort(403, __('Accès non autorisé.'));
         }
 
@@ -390,7 +390,7 @@ class MessageController extends Controller
                 return true;
             }
 
-            if ($target->isCenterAdmin()) {
+            if ($target->isCenterAdmin() || $target->isSecretary()) {
                 return in_array((int) $target->center_id, $sender->centerIds(), true);
             }
 
@@ -404,21 +404,22 @@ class MessageController extends Controller
 
         // Règle 3 : Super Admin peut envoyer à :
         // - Tous les Admins Centre
+        // - Toutes les Secrétaires
         // - Tous les Professeurs
         if ($sender->isSuperAdmin()) {
-            return $target->isCenterAdmin() || $target->isTeacher();
+            return $target->isCenterAdmin() || $target->isSecretary() || $target->isTeacher();
         }
 
-        // Règle 4 : Admin de Centre peut envoyer à :
+        // Règle 4 : Admin de Centre / Secrétaire peut envoyer à :
         // - Le Super Admin
         // - Les Professeurs rattachés à son propre centre (centre direct ou via classes affectées)
-        if ($sender->isCenterAdmin()) {
+        if ($sender->isCenterAdmin() || $sender->isSecretary()) {
             if ($target->isSuperAdmin()) {
                 return true;
             }
 
-            // Interdiction formelle de communiquer avec un autre Admin de Centre
-            if ($target->isCenterAdmin()) {
+            // Interdiction formelle de communiquer avec un autre centre
+            if (($target->isCenterAdmin() || $target->isSecretary()) && (int) $target->center_id !== (int) $sender->center_id) {
                 return false;
             }
 
@@ -428,7 +429,7 @@ class MessageController extends Controller
                 return in_array((int) $sender->center_id, $targetCenterIds, true);
             }
 
-            return false;
+            return (int) $target->center_id === (int) $sender->center_id;
         }
 
         return false;
@@ -440,8 +441,8 @@ class MessageController extends Controller
     private function getAllowedContacts(User $user)
     {
         if ($user->isSuperAdmin()) {
-            // Super Admin : tous les admins de centre + tous les professeurs actifs
-            return User::whereIn('role', [User::ROLE_CENTER_ADMIN, User::ROLE_TEACHER])
+            // Super Admin : tous les admins de centre, secrétaires + tous les professeurs actifs
+            return User::whereIn('role', [User::ROLE_CENTER_ADMIN, User::ROLE_SECRETARY, User::ROLE_TEACHER])
                 ->where('status', User::STATUS_ACTIVE)
                 ->with(['center', 'teacher.classes'])
                 ->orderBy('role')
@@ -449,8 +450,8 @@ class MessageController extends Controller
                 ->get();
         }
 
-        if ($user->isCenterAdmin()) {
-            // Admin de centre : Super Admin + Professeurs affectés à son centre
+        if ($user->isCenterAdmin() || $user->isSecretary()) {
+            // Admin de centre / Secrétaire : Super Admin + Professeurs affectés à son centre
             $superAdmins = User::where('role', User::ROLE_SUPER_ADMIN)
                 ->where('status', User::STATUS_ACTIVE)
                 ->get();

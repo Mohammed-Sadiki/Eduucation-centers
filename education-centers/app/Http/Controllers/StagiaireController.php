@@ -40,9 +40,9 @@ class StagiaireController extends Controller
 
         $authUser = $request->user();
 
-        // Périmètre : Admin Centre → son centre uniquement ; Super Admin → tous les centres.
+        // Périmètre : Admin Centre / Secrétaire → son centre uniquement ; Super Admin → tous les centres.
         $scopeQuery = Stagiaire::query();
-        if ($authUser->isCenterAdmin()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $scopeQuery->where('center_id', $authUser->center_id);
         }
 
@@ -54,7 +54,7 @@ class StagiaireController extends Controller
         // `center` est la seule relation affichée par le tableau : pas de chargement inutile.
         $query = Stagiaire::with('center');
 
-        if ($authUser->isCenterAdmin()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $query->where('center_id', $authUser->center_id);
         }
 
@@ -99,7 +99,7 @@ class StagiaireController extends Controller
 
         // Récupérer les documents administratifs
         $docsQuery = StagiaireDocument::with('stagiaire');
-        if ($authUser->isCenterAdmin()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $docsQuery->whereHas('stagiaire', function ($q) use ($authUser) {
                 $q->where('center_id', $authUser->center_id);
             });
@@ -119,7 +119,7 @@ class StagiaireController extends Controller
 
         // Récupérer les diplômes
         $diplomasQuery = StagiaireDiploma::with('stagiaire')->whereNotNull('file_path');
-        if ($authUser->isCenterAdmin()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $diplomasQuery->whereHas('stagiaire', function ($q) use ($authUser) {
                 $q->where('center_id', $authUser->center_id);
             });
@@ -139,7 +139,7 @@ class StagiaireController extends Controller
         $cinQuery = Stagiaire::query()->where(function ($q) {
             $q->whereNotNull('cin_recto_path')->orWhereNotNull('cin_verso_path');
         });
-        if ($authUser->isCenterAdmin()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $cinQuery->where('center_id', $authUser->center_id);
         }
         if ($search) {
@@ -195,8 +195,8 @@ class StagiaireController extends Controller
             'cin_recto', 'cin_verso', 'profile_photo', 'other_files', 'diplomas', 'other_documents',
         ]);
 
-        // Le centre d'un Admin Centre est imposé par le serveur, jamais par la requête.
-        if ($request->user()->isCenterAdmin()) {
+        // Le centre d'un Admin Centre ou Secrétaire est imposé par le serveur, jamais par la requête.
+        if ($request->user()->isCenterAdmin() || $request->user()->isSecretary()) {
             $data['center_id'] = $request->user()->center_id;
         }
 
@@ -300,8 +300,8 @@ class StagiaireController extends Controller
             'cin_recto', 'cin_verso', 'profile_photo', 'other_files', 'diplomas', 'other_documents',
         ]);
 
-        // Le centre d'un Admin Centre est imposé par le serveur.
-        if ($request->user()->isCenterAdmin()) {
+        // Le centre d'un Admin Centre ou Secrétaire est imposé par le serveur.
+        if ($request->user()->isCenterAdmin() || $request->user()->isSecretary()) {
             $data['center_id'] = $request->user()->center_id;
         }
 

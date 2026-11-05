@@ -26,7 +26,7 @@ class AttendanceController extends Controller
         $perimeter = $this->perimeter($user);
         $query = Attendance::query()->with(['student', 'classRoom', 'schedule']);
         $teacher = null;
-        if ($user->isCenterAdmin()) {
+        if ($user->isCenterAdmin() || $user->isSecretary()) {
             $query->where('center_id', $user->center_id);
         } elseif ($user->isTeacher()) {
             // Le professeur ne voit que les présences de ses classes réellement

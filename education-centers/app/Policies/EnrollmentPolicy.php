@@ -24,7 +24,7 @@ class EnrollmentPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->isCenterAdmin();
+        return $user->isCenterAdmin() || $user->isSecretary();
     }
 
     /**
@@ -32,38 +32,42 @@ class EnrollmentPolicy
      */
     public function view(User $user, Enrollment $enrollment): bool
     {
-        return $user->isCenterAdmin() && $user->center_id === $enrollment->center_id;
+        return ($user->isCenterAdmin() || $user->isSecretary()) && (int) $user->center_id === (int) $enrollment->center_id;
     }
 
     /**
      * Créer une inscription.
+     * Super Admin et Secrétaire uniquement.
      */
     public function create(User $user): bool
     {
-        return $user->isCenterAdmin();
+        return $user->isSecretary();
     }
 
     /**
      * Mettre à jour une inscription.
+     * Super Admin et Secrétaire uniquement.
      */
     public function update(User $user, Enrollment $enrollment): bool
     {
-        return $user->isCenterAdmin() && $user->center_id === $enrollment->center_id;
+        return $user->isSecretary() && (int) $user->center_id === (int) $enrollment->center_id;
     }
 
     /**
      * Supprimer une inscription.
+     * Super Admin uniquement.
      */
     public function delete(User $user, Enrollment $enrollment): bool
     {
-        return $user->isCenterAdmin() && $user->center_id === $enrollment->center_id;
+        return false;
     }
 
     /**
      * Modifier le statut d'une inscription (workflow).
+     * Super Admin et Secrétaire uniquement.
      */
     public function changeStatus(User $user, Enrollment $enrollment): bool
     {
-        return $user->isCenterAdmin() && $user->center_id === $enrollment->center_id;
+        return $user->isSecretary() && (int) $user->center_id === (int) $enrollment->center_id;
     }
 }

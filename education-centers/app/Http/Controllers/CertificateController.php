@@ -24,7 +24,7 @@ class CertificateController extends Controller
         Gate::authorize('viewAny', Certificate::class);
         $user = $request->user();
         $query = Certificate::query()->with(['student', 'formation']);
-        if ($user->isCenterAdmin()) {
+        if ($user->isCenterAdmin() || $user->isSecretary()) {
             $query->where('center_id', $user->center_id);
         } elseif ($user->isStudent()) {
             $query->where('student_id', $user->student?->id)->where('center_id', $user->center_id);

@@ -21,7 +21,7 @@ class UpdateUserRequest extends FormRequest
 
         // Rôles autorisés selon le rôle de l'éditeur (aucun rôle élève)
         $allowedRoles = $isSuperAdmin
-            ? [User::ROLE_SUPER_ADMIN, User::ROLE_CENTER_ADMIN, User::ROLE_TEACHER]
+            ? [User::ROLE_SUPER_ADMIN, User::ROLE_CENTER_ADMIN, User::ROLE_SECRETARY, User::ROLE_TEACHER]
             : [User::ROLE_TEACHER];
 
         $rules = [

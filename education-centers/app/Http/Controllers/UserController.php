@@ -25,7 +25,7 @@ class UserController extends Controller
         Gate::authorize('viewAny', User::class);
 
         $authUser = $request->user();
-        $allowedRoles = [User::ROLE_SUPER_ADMIN, User::ROLE_CENTER_ADMIN, User::ROLE_TEACHER];
+        $allowedRoles = [User::ROLE_SUPER_ADMIN, User::ROLE_CENTER_ADMIN, User::ROLE_SECRETARY, User::ROLE_TEACHER];
 
         $query = User::with('center')->whereIn('role', $allowedRoles);
 
@@ -127,8 +127,12 @@ class UserController extends Controller
             }
         }
 
-        // Règle stricte : seul le rôle Professeur peut être créé via ce formulaire
-        $data['role'] = User::ROLE_TEACHER;
+        // Rôle : le Super Admin peut créer un professeur, une secrétaire ou un responsable de centre
+        if ($authUser->isSuperAdmin()) {
+            $data['role'] = $request->input('role', User::ROLE_TEACHER);
+        } else {
+            $data['role'] = User::ROLE_TEACHER;
+        }
 
         // Hasher le mot de passe
         $data['password'] = Hash::make($data['password']);
@@ -137,9 +141,9 @@ class UserController extends Controller
         if ($authUser->isCenterAdmin()) {
             $data['center_id'] = $authUser->center_id;
         } else {
-            // Super Admin : pour un professeur, un center_id est requis
-            if (empty($data['center_id'])) {
-                return back()->withErrors(['center_id' => __('Le centre de rattachement du professeur est obligatoire.')])->withInput();
+            // Super Admin : pour tout rôle autre que super_admin, un center_id est requis
+            if ($data['role'] !== User::ROLE_SUPER_ADMIN && empty($data['center_id'])) {
+                return back()->withErrors(['center_id' => __('Le centre de rattachement est obligatoire.')])->withInput();
             }
         }
 
@@ -157,7 +161,7 @@ class UserController extends Controller
 
         return redirect()
             ->route('users.index')
-            ->with('success', __('Le compte professeur « :name » a été créé avec succès.', ['name' => $user->name]));
+            ->with('success', __('Le compte utilisateur « :name » a été créé avec succès.', ['name' => $user->name]));
     }
 
     /**
@@ -302,7 +306,8 @@ class UserController extends Controller
         if ($authUser->isSuperAdmin()) {
             return [
                 User::ROLE_SUPER_ADMIN => __('Super Admin'),
-                User::ROLE_CENTER_ADMIN => __('Admin Centre'),
+                User::ROLE_CENTER_ADMIN => __('Responsable Centre'),
+                User::ROLE_SECRETARY => __('Secrétaire'),
                 User::ROLE_TEACHER => __('Professeur'),
             ];
         }

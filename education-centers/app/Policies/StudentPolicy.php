@@ -22,22 +22,22 @@ class StudentPolicy
 
     /**
      * viewAny : voir la liste des dossiers étudiants.
-     * Seuls Super Admin et Admin Centre y ont accès.
+     * Accessible au Super Admin, au Responsable Centre (lecture seule) et à la Secrétaire.
      * Professeur et Élève : 403.
      */
     public function viewAny(User $authUser): bool
     {
-        return $authUser->isCenterAdmin();
+        return $authUser->isCenterAdmin() || $authUser->isSecretary();
     }
 
     /**
      * view : consulter un dossier étudiant.
-     * Admin Centre : uniquement les étudiants de son propre centre.
+     * Responsable Centre & Secrétaire : uniquement les étudiants de leur propre centre.
      */
     public function view(User $authUser, Student $student): bool
     {
-        if ($authUser->isCenterAdmin()) {
-            return $authUser->center_id === $student->center_id;
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
+            return (int) $authUser->center_id === (int) $student->center_id;
         }
 
         return false;
@@ -45,21 +45,23 @@ class StudentPolicy
 
     /**
      * create : créer un dossier étudiant.
-     * Super Admin (handled by before) et Admin Centre.
+     * Super Admin et Secrétaire uniquement.
+     * Le Responsable Centre est strictement en lecture seule.
      */
     public function create(User $authUser): bool
     {
-        return $authUser->isCenterAdmin();
+        return $authUser->isSecretary();
     }
 
     /**
      * update : modifier un dossier étudiant.
-     * Admin Centre : uniquement les étudiants de son propre centre.
+     * Super Admin et Secrétaire (de son propre centre).
+     * Le Responsable Centre est strictement en lecture seule.
      */
     public function update(User $authUser, Student $student): bool
     {
-        if ($authUser->isCenterAdmin()) {
-            return $authUser->center_id === $student->center_id;
+        if ($authUser->isSecretary()) {
+            return (int) $authUser->center_id === (int) $student->center_id;
         }
 
         return false;
@@ -67,11 +69,12 @@ class StudentPolicy
 
     /**
      * toggleStatus : activer / désactiver un dossier étudiant.
+     * Super Admin et Secrétaire (de son propre centre).
      */
     public function toggleStatus(User $authUser, Student $student): bool
     {
-        if ($authUser->isCenterAdmin()) {
-            return $authUser->center_id === $student->center_id;
+        if ($authUser->isSecretary()) {
+            return (int) $authUser->center_id === (int) $student->center_id;
         }
 
         return false;
@@ -79,13 +82,10 @@ class StudentPolicy
 
     /**
      * delete : supprimer un dossier étudiant.
+     * Super Admin uniquement.
      */
     public function delete(User $authUser, Student $student): bool
     {
-        if ($authUser->isCenterAdmin()) {
-            return $authUser->center_id === $student->center_id;
-        }
-
         return false;
     }
 }

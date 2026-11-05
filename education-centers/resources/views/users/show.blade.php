@@ -76,7 +76,12 @@
                                                 @break
                                             @case('center_admin')
                                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle fs-6 px-3 py-2">
-                                                    <i class="bi bi-briefcase me-1"></i>{{ __('Admin Centre') }}
+                                                    <i class="bi bi-briefcase me-1"></i>{{ __('Responsable Centre') }}
+                                                </span>
+                                                @break
+                                            @case('secretary')
+                                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle fs-6 px-3 py-2">
+                                                    <i class="bi bi-person-badge me-1"></i>{{ __('Secrétaire') }}
                                                 </span>
                                                 @break
                                             @case('teacher')

@@ -125,7 +125,8 @@
                     @if($isSuperAdmin)
                         <option value="super_admin" @selected(request('role') === 'super_admin')>{{ __('Super Admin') }}</option>
                     @endif
-                    <option value="center_admin" @selected(request('role') === 'center_admin')>{{ __('Admin Centre') }}</option>
+                    <option value="center_admin" @selected(request('role') === 'center_admin')>{{ __('Responsable Centre') }}</option>
+                    <option value="secretary" @selected(request('role') === 'secretary')>{{ __('Secrétaire') }}</option>
                     <option value="teacher" @selected(request('role') === 'teacher')>{{ __('Professeur') }}</option>
                 </select>
             </div>
@@ -195,7 +196,12 @@
                                 @elseif($u->isCenterAdmin())
                                     <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-3 py-1 text-sm font-bold text-brand-700 dark:bg-brand-900/30 dark:text-brand-300">
                                         <span class="h-2 w-2 rounded-full bg-brand-500"></span>
-                                        {{ __('Admin Centre') }}
+                                        {{ __('Responsable Centre') }}
+                                    </span>
+                                @elseif($u->isSecretary())
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-sm font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                                        <span class="h-2 w-2 rounded-full bg-amber-500"></span>
+                                        {{ __('Secrétaire') }}
                                     </span>
                                 @elseif($u->isTeacher())
                                     <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-sm font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">

@@ -91,7 +91,8 @@
                         <p class="truncate text-xs text-slate-500">
                             {{ match($contact->role) {
                                 'super_admin' => __('Super Admin'),
-                                'center_admin' => __('Admin Centre') . ($contact->center ? ' · ' . $contact->center->name : ''),
+                                'center_admin' => __('Responsable Centre') . ($contact->center ? ' · ' . $contact->center->name : ''),
+                                'secretary' => __('Secrétaire') . ($contact->center ? ' · ' . $contact->center->name : ''),
                                 'teacher' => __('Professeur') . ($contact->center ? ' · ' . $contact->center->name : ''),
                                 default => $contact->role,
                             } }}
@@ -429,7 +430,7 @@ function messagingApp() {
 
         // Filtres pertinents (cette page est réservée aux administrateurs)
         get filters() {
-            const admins = this.conversations.filter(c => ['super_admin', 'center_admin'].includes(c.other_user.role_code)).length;
+            const admins = this.conversations.filter(c => ['super_admin', 'center_admin', 'secretary'].includes(c.other_user.role_code)).length;
             const teachers = this.conversations.filter(c => c.other_user.role_code === 'teacher').length;
             const unread = this.conversations.filter(c => c.unread_count > 0).length;
             const list = [
@@ -445,7 +446,7 @@ function messagingApp() {
         get filteredConversations() {
             let list = this.conversations;
             if (this.activeFilter === 'unread') list = list.filter(c => c.unread_count > 0);
-            if (this.activeFilter === 'admins') list = list.filter(c => ['super_admin', 'center_admin'].includes(c.other_user.role_code));
+            if (this.activeFilter === 'admins') list = list.filter(c => ['super_admin', 'center_admin', 'secretary'].includes(c.other_user.role_code));
             if (this.activeFilter === 'teachers') list = list.filter(c => c.other_user.role_code === 'teacher');
             const q = (this.$store.comm.search || '').trim().toLowerCase();
             if (q) {

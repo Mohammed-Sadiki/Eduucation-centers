@@ -14,13 +14,14 @@
     $user = auth()->user();
     $roleLabel = match ($user?->role) {
         'super_admin' => __('Super Admin'),
-        'center_admin' => __('Admin Centre'),
+        'center_admin' => __('Responsable Centre'),
+        'secretary' => __('Secrétaire'),
         'teacher' => __('Professeur'),
         default => $user?->role ?? __('Utilisateur'),
     };
     $centerLabel = $user?->isSuperAdmin() ? __('Tous les centres') : ($user?->center?->name ?? __('Direction Générale'));
     // Retour aux domaines : cible par rôle (jamais un URL fourni par le navigateur).
-    $defaultBackUrl = $user?->isSuperAdmin() ? route('super-admin.domaines') : route('center-admin.domaines');
+    $defaultBackUrl = $user?->isSuperAdmin() ? route('super-admin.domaines') : ($user?->isCenterAdmin() ? route('center-admin.domaines') : route('formations-generales.index'));
     $homeUrl = ($user && !$user->isTeacher()) ? route('admin.home') : route('dashboard');
     // Le contenu de la page peut surcharger la cible / le libellé via @section.
     $backUrlSection = trim($__env->yieldContent('standalone_back_url'));

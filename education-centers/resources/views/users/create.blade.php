@@ -22,6 +22,7 @@
          forcedCenterId: @js($isCenterAdmin ? (int) $authUser->center_id : null),
          initialCenterId: @js(old('center_id', $isCenterAdmin ? $authUser->center_id : '')),
          initialFormationId: @js(old('formation_id', '')),
+         initialRole: @js(old('role', \App\Models\User::ROLE_TEACHER)),
      })">
 
     {{-- Titre de page --}}
@@ -44,8 +45,10 @@
         <x-ui.form-grid>
         @csrf
 
-        {{-- Rôle imposé automatiquement : Professeur (vérifié et sécurisé serveur) --}}
-        <input type="hidden" name="role" value="{{ \App\Models\User::ROLE_TEACHER }}">
+        @if(! $authUser->isSuperAdmin())
+            {{-- Rôle imposé automatiquement : Professeur (vérifié et sécurisé serveur) --}}
+            <input type="hidden" name="role" value="{{ \App\Models\User::ROLE_TEACHER }}">
+        @endif
 
         {{-- ══════════════════════════════════════════════════════════════
              SECTION 1 — IDENTITÉ & INFORMATIONS DU COMPTE
@@ -145,21 +148,36 @@
                     @error('status') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                 </div>
 
-                {{-- LIGNE 2 : Formation enseignée (sélection directe, sans domaine) --}}
-                <div class="sm:col-span-2">
+                @if($authUser->isSuperAdmin())
+                    {{-- Rôle de l'utilisateur (Super Admin) --}}
+                    <div class="sm:col-span-2">
+                        <label for="role" class="ec-label text-base font-semibold">{{ __('Rôle du compte') }} <span class="text-red-500">*</span></label>
+                        <select id="role" name="role" class="ec-select text-base @error('role') is-invalid @enderror"
+                                x-model="role" x-on:change="onRoleChange()" required>
+                            <option value="{{ \App\Models\User::ROLE_TEACHER }}">{{ __('Professeur') }}</option>
+                            <option value="{{ \App\Models\User::ROLE_SECRETARY }}">{{ __('Secrétaire') }}</option>
+                            <option value="{{ \App\Models\User::ROLE_CENTER_ADMIN }}">{{ __('Responsable Centre') }}</option>
+                        </select>
+                        @error('role') <p class="ec-error text-sm">{{ $message }}</p> @enderror
+                    </div>
+                @endif
+
+                {{-- LIGNE 2 : Formation enseignée (sélection directe, uniquement pour Professeur) --}}
+                <div class="sm:col-span-2" x-show="role === '{{ \App\Models\User::ROLE_TEACHER }}'">
                     <label for="formation_id" class="ec-label text-base font-semibold">{{ __('Formation') }} <span class="text-red-500">*</span></label>
                     <select id="formation_id" name="formation_id" class="ec-select text-base @error('formation_id') is-invalid @enderror"
-                            x-model="formationId" required>
+                            x-model="formationId" :required="role === '{{ \App\Models\User::ROLE_TEACHER }}'">
                         <option value="">{{ __('— Sélectionner la formation —') }}</option>
                         @foreach($formationsData as $formation)
                             <option value="{{ $formation['id'] }}"
                                     data-center-id="{{ $formation['center_id'] }}"
                                     @selected(old('formation_id') == $formation['id'])>
-                                {{ $formation['name'] }} ({{ $formation['code'] }})
+                                 {{ $formation['name'] }} ({{ $formation['code'] }})
                             </option>
                         @endforeach
                     </select>
                     @error('formation_id') <p class="ec-error text-sm">{{ $message }}</p> @enderror
+                </div>
 
                     <p class="ec-help mt-1 text-sm">
                         {{ __('Le professeur est rattaché à une des six formations générales officielles du centre. Les sous-formations legacy ne sont plus proposées.') }}
@@ -214,7 +232,14 @@ function userTeacherFormApp(config) {
         forcedCenterId: config.forcedCenterId,
         centerId: config.initialCenterId ? String(config.initialCenterId) : '',
         formationId: config.initialFormationId ? String(config.initialFormationId) : '',
+        role: config.initialRole || 'teacher',
         visibleCount: 0,
+
+        onRoleChange() {
+            if (this.role !== 'teacher') {
+                this.formationId = '';
+            }
+        },
 
         get effectiveCenterId() {
             return this.isCenterAdmin ? String(this.forcedCenterId) : String(this.centerId || '');
