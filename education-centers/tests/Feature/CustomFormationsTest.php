@@ -110,7 +110,7 @@ class CustomFormationsTest extends TestCase
     {
         $response = $this->actingAs($this->adminBerlin)->post(route('formations-generales.store'), $this->payload());
 
-        $response->assertRedirect(route('formations-generales.picker', ['center_id' => $this->centerBerlin->id]));
+        $response->assertRedirect(route('formations-generales.index', ['center_id' => $this->centerBerlin->id]));
         $response->assertSessionHas('success');
 
         $formation = Formation::query()->customGeneral()->sole();
@@ -201,7 +201,7 @@ class CustomFormationsTest extends TestCase
         // Sans center_id → redirection avec erreur, aucune création.
         $this->actingAs($this->superAdmin)
             ->post(route('formations-generales.store'), $this->payload())
-            ->assertRedirect(route('formations-generales.picker'))
+            ->assertRedirect(route('formations-generales.index'))
             ->assertSessionHas('error');
 
         // Center_id inexistant → même comportement.
@@ -324,7 +324,7 @@ class CustomFormationsTest extends TestCase
 
         $response = $this->actingAs($this->adminBerlin)->delete(route('formations-generales.destroy-custom', $custom));
 
-        $response->assertRedirect(route('formations-generales.picker', ['center_id' => $this->centerBerlin->id]));
+        $response->assertRedirect(route('formations-generales.index', ['center_id' => $this->centerBerlin->id]));
         $response->assertSessionHas('success');
         $this->assertDatabaseMissing('formations', ['id' => $custom->id]);
     }

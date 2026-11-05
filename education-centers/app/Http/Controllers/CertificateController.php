@@ -32,6 +32,9 @@ class CertificateController extends Controller
         // Filtrage par domaine actif (contexte domaine) — cohérent avec le
         // compte « Certificats délivrés » du tableau de bord de domaine.
         $query = $this->applyDomainScope($query);
+        if ($formationId = $request->input('formation_id')) {
+            $query->where('formation_id', $formationId);
+        }
         if ($type = $request->input('type')) {
             $query->where('type', $type);
         }

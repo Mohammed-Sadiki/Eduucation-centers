@@ -40,6 +40,11 @@ class AttendanceController extends Controller
         // Périmètre pédagogique unique : formations générales actives du centre
         // autorisé + domaine actif. Le tableau suit donc exactement le filtre.
         $query = $perimeter->applyTo($query);
+        if ($formationId = $request->input('formation_id')) {
+            $query->whereHas('classRoom', function ($q) use ($formationId) {
+                $q->where('formation_id', $formationId);
+            });
+        }
         if ($classId = $request->input('class_id')) {
             $query->where('class_id', $classId);
         }

@@ -45,22 +45,20 @@ class FormationPolicy
 
     /**
      * create : créer une formation.
-     * Super Admin et Secrétaire uniquement.
-     * Responsable Centre : lecture seule.
+     * Super Admin, Responsable Centre et Secrétaire.
      */
     public function create(User $authUser): bool
     {
-        return $authUser->isSecretary();
+        return $authUser->isCenterAdmin() || $authUser->isSecretary();
     }
 
     /**
      * update : modifier une formation.
-     * Super Admin et Secrétaire uniquement (sur les formations de son centre).
-     * Responsable Centre : lecture seule.
+     * Super Admin, Responsable Centre et Secrétaire (sur les formations de son centre).
      */
     public function update(User $authUser, Formation $formation): bool
     {
-        if ($authUser->isSecretary()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             return (int) $authUser->center_id === (int) $formation->center_id;
         }
 
@@ -69,11 +67,11 @@ class FormationPolicy
 
     /**
      * toggleStatus : activer / désactiver une formation.
-     * Super Admin et Secrétaire uniquement.
+     * Super Admin, Responsable Centre et Secrétaire.
      */
     public function toggleStatus(User $authUser, Formation $formation): bool
     {
-        if ($authUser->isSecretary()) {
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             return (int) $authUser->center_id === (int) $formation->center_id;
         }
 
@@ -82,10 +80,14 @@ class FormationPolicy
 
     /**
      * delete : supprimer une formation.
-     * Super Admin uniquement.
+     * Super Admin et Responsable Centre (sur son centre).
      */
     public function delete(User $authUser, Formation $formation): bool
     {
+        if ($authUser->isCenterAdmin()) {
+            return (int) $authUser->center_id === (int) $formation->center_id;
+        }
+
         return false;
     }
 }

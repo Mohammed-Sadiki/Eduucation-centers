@@ -27,22 +27,53 @@
         </a>
     </div>
 
-    {{-- KPIs --}}
-    <div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+    {{-- KPIs du tableau de bord : Étudiants, Certificats, Présences du jour, Revenus (payés) --}}
+    <div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 {{ $showFinancialKpi ? 'xl:grid-cols-4' : 'xl:grid-cols-3' }}">
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('Classes') }}</p>
-            <p class="mt-1 text-3xl font-extrabold text-slate-900 dark:text-white">{{ $classesCount }}<span class="text-lg font-semibold text-slate-400">/{{ $maxClasses }}</span></p>
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('Étudiants') }}</p>
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
+                    <x-icon name="users" class="h-5 w-5" stroke-width="1.8" />
+                </span>
+            </div>
+            <p class="mt-2 text-3xl font-extrabold text-slate-900 dark:text-white">{{ format_number($studentsCount ?? 0) }}</p>
+            <p class="mt-1 text-xs text-slate-400">{{ __('inscrits dans cette formation') }}</p>
         </div>
+
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('Professeur responsable') }}</p>
-            <p class="mt-1 truncate text-xl font-extrabold text-slate-900 dark:text-white">
-                {{ $formation->teacher?->full_name ?? __('Non assigné') }}
-            </p>
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('Certificats') }}</p>
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+                    <x-icon name="certificate" class="h-5 w-5" stroke-width="1.8" />
+                </span>
+            </div>
+            <p class="mt-2 text-3xl font-extrabold text-slate-900 dark:text-white">{{ format_number($certificatesIssued ?? 0) }}</p>
+            <p class="mt-1 text-xs text-slate-400">{{ __('délivrés') }}</p>
         </div>
+
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('Inscriptions') }}</p>
-            <p class="mt-1 text-3xl font-extrabold text-slate-900 dark:text-white">{{ $studentsCount }}</p>
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('Présences du jour') }}</p>
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400">
+                    <x-icon name="clock" class="h-5 w-5" stroke-width="1.8" />
+                </span>
+            </div>
+            <p class="mt-2 text-3xl font-extrabold text-slate-900 dark:text-white">{{ format_number($attendancesToday ?? 0) }}</p>
+            <p class="mt-1 text-xs text-slate-400">{{ __('aujourd\'hui') }}</p>
         </div>
+
+        @if($showFinancialKpi)
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ __('Revenus (payés)') }}</p>
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
+                        <x-icon name="banknotes" class="h-5 w-5" stroke-width="1.8" />
+                    </span>
+                </div>
+                <p class="mt-2 text-3xl font-extrabold text-slate-900 dark:text-white">{{ format_price($paymentsTotal ?? 0) }}</p>
+                <p class="mt-1 text-xs text-slate-400">{{ __('encaissés') }}</p>
+            </div>
+        @endif
     </div>
 
     @if (session('success'))
@@ -158,10 +189,12 @@
                     </li>
                 @endforeach
             </ul>
+            @if ($domainDashboardRoute)
             <a href="{{ $domainDashboardRoute }}" class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand-700 hover:text-brand-800 dark:text-brand-400">
                 {{ __('Accéder à l\'espace historique de la formation générale') }}
                 <x-icon name="arrow-right" class="h-4 w-4 rtl:rotate-180" stroke-width="2" />
             </a>
+            @endif
         </div>
     @endif
 

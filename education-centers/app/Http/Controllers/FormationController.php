@@ -36,6 +36,10 @@ class FormationController extends Controller
         // devenues alias techniques d'une formation générale. Autorité unique.
         $query = $this->perimeter($authUser)->applyTo($query);
 
+        if ($formationId = $request->input('formation_id')) {
+            $query->where('id', $formationId);
+        }
+
         // Filtre : recherche par nom
         if ($search = $request->input('search')) {
             $query->where('name', 'like', "%{$search}%");

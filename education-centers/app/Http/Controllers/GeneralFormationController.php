@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Center;
 use App\Models\Formation;
 use App\Models\Teacher;
+use App\Services\DomainDashboardData;
 use App\Services\OfficialFormationService;
 use App\Support\DomainRegistry;
 use Illuminate\Http\RedirectResponse;
@@ -182,7 +183,7 @@ class GeneralFormationController extends Controller
             $centerId = (int) $request->input('center_id', 0);
             if ($centerId <= 0 || ! Center::query()->whereKey($centerId)->exists()) {
                 return redirect()
-                    ->route('formations-generales.picker')
+                    ->route('formations-generales.index')
                     ->with('error', __('Centre invalide pour la création de la formation.'));
             }
         }
@@ -236,7 +237,7 @@ class GeneralFormationController extends Controller
         ]);
 
         return redirect()
-            ->route('formations-generales.picker', ['center_id' => $centerId])
+            ->route('formations-generales.index', ['center_id' => $centerId])
             ->with('success', __('La formation « :name » a été ajoutée au catalogue du centre.', ['name' => $formation->name]));
     }
 
@@ -320,7 +321,7 @@ class GeneralFormationController extends Controller
         ])->save();
 
         return redirect()
-            ->route('formations-generales.picker', ['center_id' => $formation->center_id])
+            ->route('formations-generales.index', ['center_id' => $formation->center_id])
             ->with('success', __('La formation « :name » a été mise à jour.', ['name' => $formation->name]));
     }
 
@@ -347,7 +348,7 @@ class GeneralFormationController extends Controller
         $formation->delete();
 
         return redirect()
-            ->route('formations-generales.picker', ['center_id' => $centerId])
+            ->route('formations-generales.index', ['center_id' => $centerId])
             ->with('success', __('La formation « :name » a été supprimée.', ['name' => $name]));
     }
 
@@ -380,7 +381,7 @@ class GeneralFormationController extends Controller
 
         if ($centerId <= 0 || ! DomainRegistry::isValid($data['official_code'])) {
             return redirect()
-                ->route('formations-generales.picker', ['center_id' => $centerId ?: null])
+                ->route('formations-generales.index', ['center_id' => $centerId ?: null])
                 ->with('error', __('Emplacement de formation officielle invalide.'));
         }
 
@@ -491,51 +492,38 @@ class GeneralFormationController extends Controller
     }
 
     /**
-     * Espace d'une formation générale officielle : responsable, classes (0/2),
-     * indicateurs, et accès aux données héritées non encore migrées.
+     * Dashboard d'une formation générale (officielle ou personnalisée).
+     * Ouvre directement le tableau de bord avec indicateurs réels, étudiants, classes, présences, certificats.
      */
-    public function show(Request $request, Formation $formation): View
+    public function show(Request $request, Formation $formation, DomainDashboardData $dashboardService): View
     {
         $this->authorizeOfficial($request, $formation, 'view');
 
         $formation->load(['center', 'teacher']);
 
-        // Classes et élèves du périmètre (alias historiques inclus) : sans cela,
-        // une formation générale officielle dont les classes sont encore rattachées
-        // à une ancienne sous-formation afficherait un espace vide.
+        $data = $dashboardService->buildForFormation($formation);
+
+        $centers = Center::orderBy('name')->get();
+        $domain = $formation->official_code ?? ('formation-' . $formation->id);
+        $domainLabel = $formation->translated('name') ?? $formation->name;
+
+        // Classes de la formation pour gestion éventuelle
         $classes = $formation->perimeterClasses()->orderBy('code')->get();
-
-        $studentsCount = $formation->perimeterEnrollments()
-            ->whereIn('status', ['accepted', 'pending', 'under_review'])
-            ->distinct('student_id')
-            ->count('student_id');
-
-        // Formations héritées (spécialités) du même centre/domaine : non migrées.
-        $legacyFormations = Formation::query()
-            ->where('center_id', $formation->center_id)
-            ->where('domain', $formation->official_code)
-            ->where('is_official', false)
-            ->withCount(['classes', 'enrollments'])
-            ->orderBy('name')
-            ->get();
-
-        // Professeurs du centre, proposés pour la responsabilité (aucune auto-assignation).
         $centerTeachers = Teacher::query()
             ->where('center_id', $formation->center_id)
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->get();
 
-        return view('formations-generales.show', [
-            'formation' => $formation,
-            'domain' => DomainRegistry::find($formation->official_code),
-            'classes' => $classes,
-            'studentsCount' => $studentsCount,
-            'legacyFormations' => $legacyFormations,
+        return view('super-admin.domain.dashboard', array_merge($data, [
+            'formation'   => $formation,
+            'domain'      => $domain,
+            'domainLabel' => $domainLabel,
+            'classes'     => $classes,
             'centerTeachers' => $centerTeachers,
-            'domainDashboardRoute' => $this->domainDashboardRoute($request, (string) $formation->official_code),
-            'maxClasses' => Formation::MAX_CLASSES,
-        ]);
+            'centers'     => $centers,
+            'centerId'    => $formation->center_id,
+        ]));
     }
 
     /**
@@ -615,10 +603,14 @@ class GeneralFormationController extends Controller
     }
 
     /**
-     * Route du dashboard domaine historique selon le rôle (accès préservé).
+     * Route du dashboard domaine historique selon le rôle (accès préservé si valide).
      */
-    private function domainDashboardRoute(Request $request, string $slug): string
+    private function domainDashboardRoute(Request $request, ?string $slug): ?string
     {
+        if (empty($slug) || ! DomainRegistry::isValid($slug)) {
+            return null;
+        }
+
         $isSuper = $request->user()->isSuperAdmin();
 
         return $isSuper

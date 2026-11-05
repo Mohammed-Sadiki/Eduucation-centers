@@ -10,16 +10,18 @@
         'design-interieur' => ['label' => __('Design intérieur'), 'color' => 'violet',  'dot' => 'bg-violet-500',  'text' => 'text-violet-700 dark:text-violet-300'],
         'design-graphique' => ['label' => __('Design graphique'), 'color' => 'pink',    'dot' => 'bg-pink-500',    'text' => 'text-pink-700 dark:text-pink-300'],
     ];
-    $cfg = $domainConfig[$domain] ?? $domainConfig['sante'];
-    // Libellé issu de la source de vérité (table domains) avec repli canonique.
-    $domainLabel = \App\Support\DomainRegistry::labels()[$domain] ?? $cfg['label'];
+    $cfg = $domainConfig[$domain] ?? [
+        'label' => $domainLabel ?? ($domain ?? __('Formation')),
+        'color' => 'violet',
+        'dot'   => 'bg-violet-500',
+        'text'  => 'text-violet-700 dark:text-violet-300',
+    ];
+    // Libellé issu de la variable passée ou de la table domains avec repli canonique.
+    $domainLabel = $domainLabel ?? (\App\Support\DomainRegistry::labels()[$domain] ?? $cfg['label']);
     $user = auth()->user();
 
-    // Vue partagée Super Admin / Admin Centre. La version simplifiée affichée
-    // à l'Admin Centre (4 KPI, sans graphiques ni tableau des inscriptions)
-    // est obtenue par condition de rôle : aucune donnée, route ou calcul
-    // n'est retiré — seul l'affichage change.
-    $isCenterAdmin = $user->isCenterAdmin();
+    // Vue partagée Super Admin / Admin Centre / Secrétaire.
+    $isCenterAdmin = $user->isCenterAdmin() || $user->isSecretary();
 
     // Séries prêtes pour Chart.js (à partir des collections du contrôleur)
     $monthLabels = collect(range(1, 12))
@@ -59,7 +61,7 @@
         </div>
         <div class="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
             {{-- Bouton changer de domaine (retour au portail) --}}
-            <a href="{{ $user->isSuperAdmin() ? route('super-admin.domaines') : route('center-admin.domaines') }}"
+            <a href="{{ isset($formation) && $formation ? route('formations-generales.index', ['center_id' => $formation->center_id]) : ($user->isSuperAdmin() ? route('super-admin.domaines') : route('center-admin.domaines')) }}"
                id="btn-retour-domaines"
                class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-2xs transition hover:-translate-y-px hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                title="{{ __('Retourner au portail de sélection des formations générales') }}">
@@ -93,7 +95,9 @@
          côté serveur (session active_domain + isolation propre au rôle).
          Le paramètre ?domain rend en plus les URL explicites et partageables. --}}
     @php
-        $domainQuery = ['domain' => $domain];
+        $domainQuery = isset($formation) && $formation
+            ? ($formation->official_code ? ['domain' => $formation->official_code] : ['formation_id' => $formation->id])
+            : ['domain' => $domain];
         $cardUrls = [
             'students'    => route('students.index', $domainQuery),
             'teachers'    => route('teachers.index', $domainQuery),

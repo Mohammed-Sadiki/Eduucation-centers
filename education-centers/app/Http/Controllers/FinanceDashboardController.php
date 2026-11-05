@@ -760,9 +760,26 @@ class FinanceDashboardController extends Controller
             ->orderBy('last_name')->get();
         $monthsNames = FinanceService::monthNames();
 
+        // ── Historique simplifié des dépenses réelles (pour la section dépliable) ──
+        $historyQuery = Expense::with('center')
+            ->when($centerId, fn ($q) => $q->where('center_id', $centerId));
+
+        if ($historyMonth = $request->query('history_month')) {
+            $historyQuery->whereMonth('expense_date', (int) $historyMonth);
+        }
+        if ($historyYear = $request->query('history_year')) {
+            $historyQuery->whereYear('expense_date', (int) $historyYear);
+        }
+
+        $expenseHistory = $historyQuery->orderBy('expense_date', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate(20, ['*'], 'history_page')
+            ->withQueryString();
+
         return view('super-admin.finance.expenses', compact(
             'chargeRows',
             'groupedExpenses',
+            'expenseHistory',
             'annualBudget',
             'totalExpenses',
             'realizedTotal',
@@ -889,6 +906,45 @@ class FinanceDashboardController extends Controller
      */
     public function storeExpense(Request $request): RedirectResponse
     {
+        if (! $request->user()->isSuperAdmin()) {
+            abort(403, __('Action non autorisée. Seul le Super Admin peut enregistrer une dépense.'));
+        }
+
+        // ── Formulaire simplifié : title (nom/motif) + amount (prix DH) ──
+        if ($request->has('title') && $request->has('amount') && ! $request->has('payment_method')) {
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'amount' => 'required|numeric|min:0.01',
+                'center_id' => 'nullable|exists:centers,id',
+            ]);
+
+            $centerId = $this->resolveCenterScope($request) ?? $validated['center_id'] ?? Center::first()?->id;
+
+            $expense = Expense::create([
+                'center_id' => $centerId,
+                'category_id' => null,
+                'title' => $validated['title'],
+                'amount' => (float) $validated['amount'],
+                'currency' => 'MAD',
+                'expense_date' => now()->toDateString(),
+                'payment_method' => 'cash',
+                'supplier' => null,
+                'reference' => 'DEP-'.strtoupper(uniqid()),
+                'receipt_path' => null,
+                'description' => null,
+                'school_year' => '2026/2027',
+                'status' => 'paid',
+                'recorded_by' => $request->user()->id,
+            ]);
+
+            return redirect()
+                ->route('super-admin.finance.expenses')
+                ->with('success', __('La dépense « :title » d\'un montant de :amount DH a été enregistrée avec succès.', [
+                    'title' => $expense->title,
+                    'amount' => number_format($expense->amount, 2, ',', ' '),
+                ]));
+        }
+
         // ── Catégorie « Salaires des professeurs » ⇒ workflow salaire intégré ──
         // On réutilise la table TeacherSalary (source unique) : AUCUNE ligne
         // Expense n'est créée pour un salaire → zéro doublon comptable.

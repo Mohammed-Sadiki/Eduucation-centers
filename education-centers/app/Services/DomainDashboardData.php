@@ -82,6 +82,104 @@ class DomainDashboardData
     }
 
     /**
+     * Calcule les indicateurs d'un tableau de bord pour une formation spécifique (officielle ou personnalisée).
+     *
+     * @return array<string, mixed>
+     */
+    public function buildForFormation(Formation $formation): array
+    {
+        $centerId = $formation->center_id;
+        $equivalentIds = AcademicPerimeter::equivalentIds($formation);
+
+        // Classes de la formation (alias inclus)
+        $classes = $formation->perimeterClasses()->get();
+        $classIds = $classes->pluck('id')->all();
+
+        // Professeurs associés : responsable + intervenants sur les classes
+        $teacherIds = collect([$formation->teacher_id])
+            ->filter()
+            ->concat(
+                ! empty($classIds)
+                    ? \Illuminate\Support\Facades\DB::table('class_teacher')
+                        ->whereIn('class_room_id', $classIds)
+                        ->pluck('teacher_id')
+                    : collect()
+            )
+            ->unique()
+            ->values();
+
+        $stats = [
+            'students' => $formation->perimeterEnrollments()
+                ->whereIn('status', ['accepted', 'pending', 'under_review'])
+                ->distinct('student_id')
+                ->count('student_id'),
+            'teachers' => $teacherIds->count(),
+            'formations' => 1,
+            'classes' => $classes->count(),
+            'enrollments' => $formation->perimeterEnrollments()->count(),
+            'pending_enrollments' => $formation->perimeterEnrollments()
+                ->where('status', Enrollment::STATUS_PENDING)
+                ->count(),
+            'attendances_today' => ! empty($classIds)
+                ? Attendance::query()
+                    ->where('center_id', $centerId)
+                    ->whereIn('class_id', $classIds)
+                    ->whereDate('date', now()->toDateString())
+                    ->count()
+                : 0,
+            'payments_total' => (float) Payment::query()
+                ->where('center_id', $centerId)
+                ->whereIn('formation_id', $equivalentIds)
+                ->where('status', 'paid')
+                ->sum('amount'),
+            'certificates_issued' => Certificate::query()
+                ->where('center_id', $centerId)
+                ->whereIn('formation_id', $equivalentIds)
+                ->where('status', 'issued')
+                ->count(),
+        ];
+
+        $recentEnrollments = $formation->perimeterEnrollments()
+            ->with(['student', 'formation', 'center'])
+            ->latest()
+            ->take(8)
+            ->get();
+
+        $upcomingSchedules = ! empty($classIds)
+            ? Schedule::query()
+                ->whereIn('class_id', $classIds)
+                ->where('date', '>=', now()->toDateString())
+                ->where('status', 'scheduled')
+                ->with(['classRoom', 'teacher.user', 'room'])
+                ->orderBy('date')
+                ->orderBy('start_time')
+                ->take(5)
+                ->get()
+            : collect();
+
+        $year = (int) now()->year;
+        $yearEnrollments = $formation->perimeterEnrollments()
+            ->whereYear('created_at', $year)
+            ->get(['created_at']);
+        $enrollmentTrend = collect(range(1, 12))->mapWithKeys(fn (int $m) => [
+            $m => $yearEnrollments->filter(fn ($e) => (int) $e->created_at->format('n') === $m)->count(),
+        ]);
+
+        $studentsByCenter = collect([
+            ($formation->center?->translated('name') ?? $formation->center?->name ?? __('Centre')) => $stats['students'],
+        ]);
+
+        return [
+            'stats' => $stats,
+            'recentEnrollments' => $recentEnrollments,
+            'upcomingSchedules' => $upcomingSchedules,
+            'year' => $year,
+            'enrollmentTrend' => $enrollmentTrend,
+            'studentsByCenter' => $studentsByCenter,
+        ];
+    }
+
+    /**
      * Applique l'espace de formation + le centre (si fourni) à une requête.
      *
      * Passe par l'autorité unique du périmètre

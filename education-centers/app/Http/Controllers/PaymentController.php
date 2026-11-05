@@ -24,6 +24,9 @@ class PaymentController extends Controller
         // Filtrage par domaine actif (contexte domaine) — cohérent avec le
         // compte « Revenus (payés) » du tableau de bord de domaine.
         $query = $this->applyDomainScope($query);
+        if ($formationId = $request->input('formation_id')) {
+            $query->where('formation_id', $formationId);
+        }
         if ($status = $request->input('status')) {
             $query->where('status', $status);
         }

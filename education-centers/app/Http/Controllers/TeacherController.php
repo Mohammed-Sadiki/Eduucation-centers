@@ -33,6 +33,13 @@ class TeacherController extends Controller
         // Filtrage par domaine actif
         $query = $this->applyDomainScope($query);
 
+        if ($formationId = $request->input('formation_id')) {
+            $query->where(function ($q) use ($formationId) {
+                $q->whereHas('responsibleFormations', fn ($rf) => $rf->where('id', $formationId))
+                    ->orWhereHas('classRooms', fn ($cr) => $cr->where('formation_id', $formationId));
+            });
+        }
+
         // Filtre : recherche par numéro professeur
         if ($teacherNumber = $request->input('teacher_number')) {
             $query->where('teacher_number', 'like', "%{$teacherNumber}%");

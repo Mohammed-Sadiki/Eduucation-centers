@@ -46,6 +46,13 @@ class StudentController extends Controller
         // Filtrage par domaine actif (Super Admin / Admin Centre en contexte domaine)
         $query = $this->applyDomainScope($query);
 
+        // Filtre : formation spécifique
+        if ($formationId = $request->input('formation_id')) {
+            $query->whereHas('enrollments', function ($q) use ($formationId) {
+                $q->where('formation_id', $formationId);
+            });
+        }
+
         // Filtre : recherche par numéro étudiant
         if ($studentNumber = $request->input('student_number')) {
             $query->where('student_number', 'like', "%{$studentNumber}%");
