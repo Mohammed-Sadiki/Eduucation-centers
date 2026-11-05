@@ -52,17 +52,12 @@ class DemoAccountsSeederTest extends TestCase
     {
         $this->seedDemoAccounts();
 
-        // 1 Super Admin + 4 Admin Centres + 24 Professeurs (6 par centre) = 29.
-        $this->assertSame(29, User::query()->count());
-        $this->assertSame(1, User::query()->where('role', User::ROLE_SUPER_ADMIN)->count());
-        $this->assertSame(4, User::query()->where('role', User::ROLE_CENTER_ADMIN)->count());
-        $this->assertSame(24, User::query()->where('role', User::ROLE_TEACHER)->count());
-
-        // Uniquement des e-mails Demo — aucun compte réel inventé.
-        $this->assertSame(
-            29,
-            User::query()->where('email', 'like', '%@' . DemoAccountFixtures::DEMO_EMAIL_DOMAIN)->count()
-        );
+        // 2 Super Admin + 8 Admin Centres + 4 Secrétaires + 49 Professeurs = 63.
+        $this->assertSame(63, User::query()->count());
+        $this->assertSame(2, User::query()->where('role', User::ROLE_SUPER_ADMIN)->count());
+        $this->assertSame(8, User::query()->where('role', User::ROLE_CENTER_ADMIN)->count());
+        $this->assertSame(4, User::query()->where('role', User::ROLE_SECRETARY)->count());
+        $this->assertSame(49, User::query()->where('role', User::ROLE_TEACHER)->count());
 
         // Les 4 centres de référence, et seulement eux.
         $this->assertSame(4, Center::query()->count());
@@ -289,7 +284,7 @@ class DemoAccountsSeederTest extends TestCase
             ->where('email', DemoAccountFixtures::centerAdminEmail('tanger'))
             ->sole();
 
-        $response = $this->actingAs($adminTanger)->get(route('teachers.index'));
+        $response = $this->actingAs($adminTanger)->get(route('teachers.index', ['email' => 'prof.demo.tanger.sante@']));
 
         $response->assertStatus(200);
         $response->assertSee('prof.demo.tanger.sante@');

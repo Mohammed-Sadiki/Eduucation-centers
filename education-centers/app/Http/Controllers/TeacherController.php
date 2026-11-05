@@ -49,8 +49,13 @@ class TeacherController extends Controller
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%")
-                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
+                    ->orWhere('last_name', 'like', "%{$search}%");
+
+                if (\Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite') {
+                    $q->orWhereRaw("(first_name || ' ' || last_name) LIKE ?", ["%{$search}%"]);
+                } else {
+                    $q->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
+                }
             });
         }
 

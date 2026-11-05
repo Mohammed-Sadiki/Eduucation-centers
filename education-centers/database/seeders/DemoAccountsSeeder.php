@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\Center;
 use Database\Seeders\Demo\DemoAccountFixtures;
 use Database\Seeders\Demo\DemoAdminAccountsSeeder;
+use Database\Seeders\Demo\DemoSecretaryAccountsSeeder;
+use Database\Seeders\Demo\DemoSynchronizedAccountsSeeder;
 use Database\Seeders\Demo\DemoTeacherAccountsSeeder;
 use Illuminate\Database\Seeder;
 
@@ -60,11 +62,14 @@ class DemoAccountsSeeder extends Seeder
             $this->command?->line('  · Les 4 centres de référence existent déjà — aucun centre modifié.');
         }
 
-        // 3. Comptes Demo : Super Admin + Admin Centres, puis Professeurs.
+        // 3. Comptes Demo complets : Super Admin, Admins Centres, Secrétaires, Professeurs
+        //    et synchronisation intégrale de tous les comptes de référence.
         //    Chaque seeder appelé rejoue sa propre garde (bloqué en production)
         //    et reste strictement idempotent.
         $this->call(DemoAdminAccountsSeeder::class);
+        $this->call(DemoSecretaryAccountsSeeder::class);
         $this->call(DemoTeacherAccountsSeeder::class);
+        $this->call(DemoSynchronizedAccountsSeeder::class);
 
         $this->command?->newLine();
         $this->command?->info(

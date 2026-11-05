@@ -29,6 +29,7 @@ trait DemoAccountSupport
         string $name,
         string $role,
         ?int $centerId,
+        array $extraAttributes = [],
     ): array {
         $existing = User::query()->where('email', $email)->first();
 
@@ -53,7 +54,7 @@ trait DemoAccountSupport
             return ['user' => $existing, 'created' => false];
         }
 
-        $user = User::query()->create([
+        $user = User::query()->create(array_merge([
             'name' => $name,
             'email' => $email,
             'role' => $role,
@@ -61,7 +62,7 @@ trait DemoAccountSupport
             'status' => User::STATUS_ACTIVE,
             'locale' => 'fr',
             'password' => Hash::make(DemoAccountFixtures::password()),
-        ]);
+        ], $extraAttributes));
 
         return ['user' => $user, 'created' => true];
     }
