@@ -390,8 +390,8 @@ class ArchitectureHarmonizationTest extends TestCase
 
     public function test_legacy_sub_formations_are_never_selectable_in_finance_forms(): void
     {
-        $response = $this->actingAs($this->adminCasablanca)
-            ->get(route('payments.create'))
+        $response = $this->actingAs($this->superAdmin)
+            ->get(route('payments.create', ['center_id' => $this->casablanca->id]))
             ->assertOk();
 
         $names = collect($response->viewData('formations'))->pluck('name')->all();
@@ -427,8 +427,9 @@ class ArchitectureHarmonizationTest extends TestCase
     public function test_server_rejects_a_class_outside_the_active_formation_space(): void
     {
         $this->withSession(['active_domain' => 'informatique'])
-            ->actingAs($this->adminCasablanca)
+            ->actingAs($this->superAdmin)
             ->post(route('evaluations.store'), [
+                'center_id' => $this->casablanca->id,
                 'class_id' => $this->classNurse->id,
                 'title' => 'Evaluation hors perimetre',
                 'type' => 'exam',
@@ -462,8 +463,9 @@ class ArchitectureHarmonizationTest extends TestCase
     public function test_new_evaluation_is_attached_to_the_general_formation_not_the_alias(): void
     {
         $this->withSession(['active_domain' => 'informatique'])
-            ->actingAs($this->adminCasablanca)
+            ->actingAs($this->superAdmin)
             ->post(route('evaluations.store'), [
+                'center_id' => $this->casablanca->id,
                 'class_id' => $this->classWebA->id,
                 'title' => 'Nouvelle evaluation',
                 'type' => 'control',

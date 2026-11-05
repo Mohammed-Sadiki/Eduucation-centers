@@ -13,6 +13,10 @@ class Evaluation extends Model
     use \App\Concerns\HasDomainScope;
     use \App\Models\Concerns\HasContextScope;
 
+    public const MODALITY_IN_PERSON = 'in_person';
+    public const MODALITY_ONLINE = 'online';
+    public const MODALITIES = [self::MODALITY_IN_PERSON, self::MODALITY_ONLINE];
+
     /**
      * Le domaine d'une évaluation est hérité de sa formation.
      */
@@ -23,7 +27,7 @@ class Evaluation extends Model
 
     protected $fillable = [
         'center_id', 'class_id', 'formation_id', 'teacher_id', 'schedule_id',
-        'title', 'type', 'evaluation_date', 'max_grade', 'coefficient', 'description', 'status',
+        'title', 'type', 'modality', 'evaluation_date', 'max_grade', 'coefficient', 'description', 'status',
     ];
 
     protected function casts(): array
@@ -71,6 +75,14 @@ class Evaluation extends Model
             'exam' => __('Examen'), 'control' => __('Contrôle'), 'homework' => __('Devoir'),
             'oral' => __('Oral'), 'project' => __('Projet'), 'participation' => __('Participation'),
             default => ucfirst($this->type),
+        };
+    }
+
+    public function getModalityLabelAttribute(): string
+    {
+        return match ($this->modality) {
+            self::MODALITY_ONLINE, 'distance' => __('À distance'),
+            default => __('Présentiel'),
         };
     }
 

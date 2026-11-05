@@ -50,6 +50,9 @@ class EvaluationController extends Controller
         if ($type = $request->input('type')) {
             $query->where('type', $type);
         }
+        if ($modality = $request->input('modality')) {
+            $query->where('modality', $modality);
+        }
         $evaluations = $query->latest('evaluation_date')->paginate(15)->withQueryString();
         if ($user->isTeacher()) {
             // Un professeur ne voit que ses classes affectées, rattachées à une
@@ -84,18 +87,20 @@ class EvaluationController extends Controller
     {
         Gate::authorize('create', Evaluation::class);
         $user = $request->user();
-        $perimeter = $this->perimeter($user);
         $centerId = $user->isSuperAdmin() ? (int) $request->input('center_id') : $user->center_id;
+        $perimeter = $this->perimeter($user, $centerId);
         $data = $request->validate([
             'class_id' => ['required', 'integer', 'exists:classes,id'],
             'title' => ['required', 'string', 'max:255'],
             'type' => ['required', 'in:exam,control,homework,oral,project,participation'],
+            'modality' => ['nullable', 'in:in_person,online'],
             'evaluation_date' => ['required', 'date'],
             'max_grade' => ['required', 'numeric', 'min:1', 'max:100'],
             'coefficient' => ['required', 'numeric', 'min:0.1', 'max:10'],
             'description' => ['nullable', 'string', 'max:2000'],
             'status' => ['required', 'in:draft,published,closed'],
         ]);
+        $data['modality'] = $data['modality'] ?? Evaluation::MODALITY_IN_PERSON;
         $class = ClassRoom::findOrFail($data['class_id']);
         if ($class->center_id !== $centerId) {
             abort(403);
@@ -157,12 +162,16 @@ class EvaluationController extends Controller
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'type' => ['required', 'in:exam,control,homework,oral,project,participation'],
+            'modality' => ['nullable', 'in:in_person,online'],
             'evaluation_date' => ['required', 'date'],
             'max_grade' => ['required', 'numeric', 'min:1', 'max:100'],
             'coefficient' => ['required', 'numeric', 'min:0.1', 'max:10'],
             'description' => ['nullable', 'string', 'max:2000'],
             'status' => ['required', 'in:draft,published,closed'],
         ]);
+        if (array_key_exists('modality', $data) && empty($data['modality'])) {
+            $data['modality'] = Evaluation::MODALITY_IN_PERSON;
+        }
         $evaluation->update($data);
 
         return redirect()->route('evaluations.show', $evaluation)->with('success', __('Évaluation mise à jour.'));
@@ -186,13 +195,26 @@ class EvaluationController extends Controller
             'grades.*.is_absent' => ['nullable', 'boolean'],
             'grades.*.comment' => ['nullable', 'string', 'max:500'],
         ]);
+
+        $validEnrollments = Enrollment::where('class_id', $evaluation->class_id)
+            ->where('status', Enrollment::STATUS_ACCEPTED)
+            ->where('center_id', $evaluation->center_id)
+            ->get()
+            ->keyBy('student_id');
+
         $count = 0;
         foreach ($request->input('grades', []) as $g) {
+            $studentId = (int) $g['student_id'];
+            $enrollment = $validEnrollments->get($studentId);
+            if (! $enrollment) {
+                abort(403, __('Cet étudiant n’est pas inscrit dans cette classe.'));
+            }
+
             Grade::updateOrCreate(
-                ['evaluation_id' => $evaluation->id, 'student_id' => $g['student_id']],
+                ['evaluation_id' => $evaluation->id, 'student_id' => $studentId],
                 [
                     'center_id' => $evaluation->center_id,
-                    'enrollment_id' => Enrollment::where('student_id', $g['student_id'])->where('class_id', $evaluation->class_id)->where('status', 'accepted')->first()?->id,
+                    'enrollment_id' => $enrollment->id,
                     'grade' => isset($g['is_absent']) && $g['is_absent'] ? null : ($g['grade'] ?? null),
                     'is_absent' => isset($g['is_absent']) && $g['is_absent'],
                     'comment' => $g['comment'] ?? null,

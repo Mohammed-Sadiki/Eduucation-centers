@@ -40,6 +40,14 @@
             </select>
         </div>
         <div>
+            <label class="ec-label">{{ __('Modalité') }}</label>
+            <select name="modality" class="ec-select" required>
+                <option value="in_person" @selected(old('modality', 'in_person')==='in_person')>{{ __('Présentiel') }}</option>
+                <option value="online" @selected(old('modality')==='online')>{{ __('À distance') }}</option>
+            </select>
+            @error('modality')<p class="ec-error">{{ $message }}</p>@enderror
+        </div>
+        <div>
             <label class="ec-label">{{ __('Date') }}</label>
             <input type="date" name="evaluation_date" class="ec-input" value="{{ old('evaluation_date', now()->toDateString()) }}" required>
         </div>

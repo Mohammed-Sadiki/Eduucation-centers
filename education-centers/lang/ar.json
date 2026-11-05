@@ -2766,5 +2766,9 @@
     "🧑‍💼 Dossier Stagiaire Indépendant": "🧑‍💼 ملف المتدرب المستقل",
     "🧑‍💼 Dossier administratif de stage": "🧑‍💼 الملف الإداري للتدريب",
     "🧑‍💼 Dossiers Stagiaires": "🧑‍💼 ملفات المتدربين",
-    "🧾 Reçu PDF": "🧾 إيصال PDF"
+    "🧾 Reçu PDF": "🧾 إيصال PDF",
+    "Modalité": "النمط",
+    "Présentiel": "حضوري",
+    "À distance": "عن بعد",
+    "Toutes les modalités": "جميع الأنماط"
 }

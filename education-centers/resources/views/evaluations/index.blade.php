@@ -8,7 +8,7 @@
     @endcan
 </x-ui.page-header>
 <x-ui.card class="mb-4">
-    <form method="GET" class="grid gap-3 md:grid-cols-3">
+    <form method="GET" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {{-- Filtre de classe masqué quand une seule classe est attribuable. --}}
         @if($classes->count() > 1)
             <select name="class_id" class="ec-select">
@@ -24,18 +24,24 @@
                 <option value="{{ $k }}" @selected(request('type')===$k)>{{ __($v) }}</option>
             @endforeach
         </select>
+        <select name="modality" class="ec-select">
+            <option value="">{{ __('Toutes les modalités') }}</option>
+            <option value="in_person" @selected(request('modality')==='in_person')>{{ __('Présentiel') }}</option>
+            <option value="online" @selected(request('modality')==='online')>{{ __('À distance') }}</option>
+        </select>
         <button class="ec-btn-secondary">{{ __('Filtrer') }}</button>
     </form>
 </x-ui.card>
 <div class="ec-table-wrap">
     <table class="ec-table">
-        <thead><tr><th>{{ __('Titre') }}</th><th>{{ __('Classe') }}</th><th>{{ __('Type') }}</th><th>{{ __('Date') }}</th><th>{{ __('Statut') }}</th><th></th></tr></thead>
+        <thead><tr><th>{{ __('Titre') }}</th><th>{{ __('Classe') }}</th><th>{{ __('Type') }}</th><th>{{ __('Modalité') }}</th><th>{{ __('Date') }}</th><th>{{ __('Statut') }}</th><th></th></tr></thead>
         <tbody>
             @forelse($evaluations as $evaluation)
                 <tr>
                     <td class="font-medium">{{ $evaluation->title }}</td>
                     <td>{{ $evaluation->classRoom?->perimeter_label }}</td>
                     <td>{{ $evaluation->type_label }}</td>
+                    <td>{{ $evaluation->modality_label }}</td>
                     <td>{{ format_date($evaluation->evaluation_date, 'd/m/Y') }}</td>
                     <td><x-status-badge type="evaluation" :status="$evaluation->status" /></td>
                     <td class="text-end">
@@ -45,7 +51,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="6"><x-ui.empty :title="__('Aucune évaluation')" /></td></tr>
+                <tr><td colspan="7"><x-ui.empty :title="__('Aucune évaluation')" /></td></tr>
             @endforelse
         </tbody>
     </table>

@@ -51,21 +51,17 @@ class EvaluationPolicy
 
     public function create(User $user): bool
     {
-        return $user->isSecretary() || $user->isTeacher();
+        return $user->isTeacher();
     }
 
     public function update(User $user, Evaluation $evaluation): bool
     {
-        if ($user->isSecretary()) {
-            return (int) $user->center_id === (int) $evaluation->center_id;
-        }
-
         return $this->teacherOwnsEvaluation($user, $evaluation);
     }
 
     public function delete(User $user, Evaluation $evaluation): bool
     {
-        return $user->isSecretary() && (int) $user->center_id === (int) $evaluation->center_id;
+        return $this->teacherOwnsEvaluation($user, $evaluation);
     }
 
     /**

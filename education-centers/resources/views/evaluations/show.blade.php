@@ -2,10 +2,19 @@
 @section('title', $evaluation->title)
 
 @section('content')
-<x-ui.page-header title="{{ $evaluation->title }}" :description="$evaluation->classRoom?->perimeter_label.' · '.$evaluation->type_label">
-    @can('update', $evaluation)
-        <a href="{{ route('evaluations.edit', $evaluation) }}" class="ec-btn-secondary">{{ __('Modifier') }}</a>
-    @endcan
+<x-ui.page-header title="{{ $evaluation->title }}" :description="$evaluation->classRoom?->perimeter_label.' · '.$evaluation->type_label.' · '.$evaluation->modality_label">
+    <div class="flex items-center gap-2">
+        @can('update', $evaluation)
+            <a href="{{ route('evaluations.edit', $evaluation) }}" class="ec-btn-secondary">{{ __('Modifier') }}</a>
+        @endcan
+        @can('delete', $evaluation)
+            <form method="POST" action="{{ route('evaluations.destroy', $evaluation) }}" onsubmit="return confirm('{{ __('Êtes-vous sûr de vouloir supprimer cette évaluation ?') }}');" class="inline">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="ec-btn-danger">{{ __('Supprimer') }}</button>
+            </form>
+        @endcan
+    </div>
 </x-ui.page-header>
 
 <div class="mb-6 grid gap-4 sm:grid-cols-3">
