@@ -16,21 +16,21 @@
 
             {{-- En-tête --}}
             <div class="d-flex align-items-center justify-content-between mb-4">
-                <div>
-                    <h1 class="h3 fw-bold mb-0">
-                        <i class="bi bi-diagram-3-fill text-primary me-2"></i>{{ __('Nouvelle Classe') }}
-                    </h1>
-                    <p class="text-muted small mb-0 mt-1">
-                        @if(auth()->user()->isCenterAdmin())
-                            {{ __('Centre :') }} <strong>{{ auth()->user()->center?->name }}</strong>
-                        @else
-                            {{ __('Rattacher un groupe classe à une formation et un centre.') }}
-                        @endif
-                    </p>
+                <div class="d-flex align-items-center gap-3 [direction:ltr]" dir="ltr">
+                    <x-ui.back-button fallback="{{ route('classes.index') }}" />
+                    <div class="{{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                        <h1 class="h3 fw-bold mb-0">
+                            <i class="bi bi-diagram-3-fill text-primary me-2"></i>{{ __('Nouvelle Classe') }}
+                        </h1>
+                        <p class="text-muted small mb-0 mt-1">
+                            @if(auth()->user()->isCenterAdmin())
+                                {{ __('Centre :') }} <strong>{{ auth()->user()->center?->name }}</strong>
+                            @else
+                                {{ __('Rattacher un groupe classe à une formation et un centre.') }}
+                            @endif
+                        </p>
+                    </div>
                 </div>
-                <a href="{{ route('classes.index') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-1"></i>{{ __('Retour') }}
-                </a>
             </div>
 
             <form method="POST" action="{{ route('classes.store') }}" id="form-create-class">

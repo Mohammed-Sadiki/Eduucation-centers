@@ -15,11 +15,9 @@
         <div class="col-12">
 
             {{-- En-tête --}}
-            <div class="d-flex align-items-center gap-3 mb-4">
-                <a href="{{ route('centers.index') }}" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-arrow-left"></i>
-                </a>
-                <div>
+            <div class="d-flex align-items-center gap-3 mb-4 [direction:ltr]" dir="ltr">
+                <x-ui.back-button fallback="{{ route('centers.index') }}" />
+                <div class="{{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
                     <h1 class="h3 fw-bold mb-0">
                         <i class="bi bi-plus-circle me-2 text-primary"></i>{{ __('Nouveau centre') }}
                     </h1>

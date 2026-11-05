@@ -22,20 +22,18 @@
 <div class="space-y-6">
     {{-- En-tête --}}
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-                <span>{{ __('📁 Espace Documents — Stagiaires') }}</span>
-            </h1>
-            <p class="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                {{ __('Répertoire centralisé de tous les justificatifs (CIN, diplômes scannés, conventions et attestations).') }}
-            </p>
+        <div class="flex items-center gap-3.5 [direction:ltr]" dir="ltr">
+            <x-ui.back-button :fallback="route('stagiaires.index')" />
+            <div class="{{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>{{ __('📁 Espace Documents — Stagiaires') }}</span>
+                </h1>
+                <p class="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                    {{ __('Répertoire centralisé de tous les justificatifs (CIN, diplômes scannés, conventions et attestations).') }}
+                </p>
+            </div>
         </div>
         <div class="flex items-center gap-2">
-            <a href="{{ route('stagiaires.index') }}"
-               class="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition">
-                <x-icon name="users" class="h-4 w-4" />
-                <span>{{ __('Tous les stagiaires') }}</span>
-            </a>
             <a href="{{ route('stagiaires.create') }}"
                class="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-purple-700 transition">
                 <x-icon name="plus" class="h-4 w-4" />

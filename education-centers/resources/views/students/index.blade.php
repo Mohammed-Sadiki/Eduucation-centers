@@ -2,7 +2,6 @@
 @section('title', __('Élèves') . ' — ' . config('app.name'))
 
 @section('content')
-<x-domain-back />
 <x-ui.page-header :title="__('Élèves')" :description="auth()->user()->isSuperAdmin() ? __('Tous les centres') : __('Centre :') . ' ' . auth()->user()->center?->name" />
 
 <x-ui.card class="mb-4">

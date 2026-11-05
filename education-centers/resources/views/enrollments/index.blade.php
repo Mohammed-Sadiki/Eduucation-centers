@@ -2,7 +2,6 @@
 @section('title', __('Gestion des inscriptions'))
 
 @section('content')
-<x-domain-back />
 <x-ui.page-header :title="__('Inscriptions des élèves')" :description="__('Cycle de candidature et affectation aux classes.')">
     <a href="{{ route('enrollments.create') }}" class="ec-btn-primary"><x-icon name="plus" class="h-4 w-4" /> {{ __('Nouvelle inscription') }}</a>
 </x-ui.page-header>

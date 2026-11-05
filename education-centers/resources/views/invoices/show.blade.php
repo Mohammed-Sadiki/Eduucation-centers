@@ -9,7 +9,6 @@
 <x-ui.page-header title="Facture {{ $invoice->invoice_number }}" :description="$invoice->student?->full_name">
     <a href="{{ route('invoices.pdf', ['invoice' => $invoice, 'mode' => 'attachment']) }}" class="ec-btn-primary"><x-icon name="download" class="h-4 w-4" /> {{ __('Télécharger') }}</a>
     <a href="{{ route('invoices.pdf', ['invoice' => $invoice, 'mode' => 'inline']) }}" target="_blank" rel="noopener" class="ec-btn-secondary"><x-icon name="printer" class="h-4 w-4" /> {{ __('Imprimer') }}</a>
-    <a href="{{ route('invoices.index') }}" class="ec-btn-ghost">{{ __('Retour') }}</a>
 </x-ui.page-header>
 <div class="mb-6 grid gap-4 sm:grid-cols-3">
     <x-ui.stat :label="__('Total')" :value="format_price((float) $invoice->total_amount, $invoice->currency)" icon="document" />

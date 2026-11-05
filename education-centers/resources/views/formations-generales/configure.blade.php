@@ -11,29 +11,26 @@
 @section('content')
 
     <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div class="flex items-start gap-3">
-            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white shadow-lg shadow-violet-600/30">
-                <x-icon name="pencil" class="h-6 w-6 text-white" stroke-width="2" />
-            </span>
-            <div>
-                <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('Configuration de la formation générale officielle') }}</p>
-                <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
-                    {{ __($domain->name ?? $formation->name) }}
-                    <span class="ms-2 text-base font-normal text-slate-500 dark:text-slate-400">· {{ $formation->center?->name }}</span>
-                </h1>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    {{ __('Aucune nouvelle formation ne sera créée : cette page modifie uniquement les paramètres de l’emplacement officiel déjà en place.') }}
-                </p>
+        <div class="flex items-center gap-3.5 [direction:ltr]" dir="ltr">
+            <x-ui.back-button :fallback="route('formations-generales.show', $formation)" />
+            <div class="flex items-start gap-3 {{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white shadow-lg shadow-violet-600/30">
+                    <x-icon name="pencil" class="h-6 w-6 text-white" stroke-width="2" />
+                </span>
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('Configuration de la formation générale officielle') }}</p>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
+                        {{ __($domain->name ?? $formation->name) }}
+                        <span class="ms-2 text-base font-normal text-slate-500 dark:text-slate-400">· {{ $formation->center?->name }}</span>
+                    </h1>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        {{ __('Aucune nouvelle formation ne sera créée : cette page modifie uniquement les paramètres de l’emplacement officiel déjà en place.') }}
+                    </p>
+                </div>
             </div>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
-            <a href="{{ route('formations-generales.picker', $isSuperAdmin ? ['center_id' => $formation->center_id] : []) }}"
-               id="configure-back-picker"
-               class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:border-slate-300 hover:bg-slate-50 hover:text-brand-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:text-brand-400 transition">
-                <x-icon name="arrow-left" class="h-4 w-4 rtl:rotate-180" stroke-width="2" />
-                {{ __('Choisir une autre formation') }}
-            </a>
             <a href="{{ route('formations-generales.show', $formation) }}"
                id="configure-back-show"
                class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:border-slate-300 hover:bg-slate-50 hover:text-brand-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:text-brand-400 transition">

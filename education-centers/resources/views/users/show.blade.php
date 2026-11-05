@@ -14,9 +14,12 @@
 
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <h4 class="fw-bold mb-0">
-                        <i class="bi bi-person-badge text-primary me-2"></i>{{ $user->name }}
-                    </h4>
+                    <div class="d-flex align-items-center gap-3 [direction:ltr]" dir="ltr">
+                        <x-ui.back-button :fallback="route('users.index')" />
+                        <h4 class="fw-bold mb-0 {{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                            <i class="bi bi-person-badge text-primary me-2"></i>{{ $user->name }}
+                        </h4>
+                    </div>
                     <div class="d-flex gap-2 flex-wrap">
                         @can('update', $user)
                             <a href="{{ route('users.edit', $user) }}" class="btn btn-sm btn-outline-primary">
@@ -180,10 +183,7 @@
                     </div>
                 </div>
 
-                <div class="card-footer bg-white border-top py-3 d-flex justify-content-between align-items-center">
-                    <a href="{{ route('users.index') }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="bi bi-arrow-left me-1"></i>{{ __('Retour à la liste') }}
-                    </a>
+                <div class="card-footer bg-white border-top py-3 d-flex justify-content-end align-items-center">
                     @can('update', $user)
                         <a href="{{ route('users.edit', $user) }}" class="btn btn-primary btn-sm shadow-sm">
                             <i class="bi bi-pencil me-1"></i>{{ __('Modifier cet utilisateur') }}

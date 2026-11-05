@@ -2,7 +2,6 @@
 @section('title', __('Paiements'))
 
 @section('content')
-<x-domain-back />
 <x-ui.page-header :title="__('Paiements')" :description="__('Suivi financier des élèves.')">
     @can('create', \App\Models\Payment::class)
         <a href="{{ route('payments.create') }}" class="ec-btn-primary"><x-icon name="plus" class="h-4 w-4" /> {{ __('Enregistrer') }}</a>

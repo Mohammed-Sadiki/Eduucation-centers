@@ -15,14 +15,19 @@
 
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white border-bottom py-3">
-                    <h4 class="fw-bold mb-0">
-                        <i class="bi bi-person-gear text-primary me-2"></i>{{ __('Modifier') }} {{ $user->name }}
-                    </h4>
-                    @if(auth()->user()->isCenterAdmin())
-                        <p class="text-muted small mb-0 mt-1">
-                            {{ __('Centre :') }} <strong>{{ auth()->user()->center?->name }}</strong>
-                        </p>
-                    @endif
+                    <div class="d-flex align-items-center gap-3 [direction:ltr]" dir="ltr">
+                        <x-ui.back-button :fallback="route('users.show', $user)" />
+                        <div class="{{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                            <h4 class="fw-bold mb-0">
+                                <i class="bi bi-person-gear text-primary me-2"></i>{{ __('Modifier') }} {{ $user->name }}
+                            </h4>
+                            @if(auth()->user()->isCenterAdmin())
+                                <p class="text-muted small mb-0 mt-1">
+                                    {{ __('Centre :') }} <strong>{{ auth()->user()->center?->name }}</strong>
+                                </p>
+                            @endif
+                        </div>
+                    </div>
                 </div>
 
                 <div class="card-body p-4">

@@ -10,21 +10,22 @@
 @section('content')
 <div class="container-fluid px-4 py-4">
 
-    <x-domain-back />
-
     {{-- En-tête --}}
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-        <div>
-            <h1 class="h3 fw-bold mb-0">
-                <i class="bi bi-journal-bookmark-fill text-primary me-2"></i>{{ __('Gestion des Formations') }}
-            </h1>
-            <p class="text-muted small mb-0 mt-1">
-                @if(auth()->user()->isSuperAdmin())
-                    {{ __('Tous les centres —') }} {{ $formations->total() }} {{ __('programme(s) de formation trouvé(s)') }}
-                @else
-                    {{ __('Centre :') }} <strong>{{ auth()->user()->center?->name }}</strong> — {{ $formations->total() }} {{ __('programme(s) de formation trouvé(s)') }}
-                @endif
-            </p>
+        <div class="d-flex align-items-center gap-3 [direction:ltr]" dir="ltr">
+            <x-ui.back-button />
+            <div class="{{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                <h1 class="h3 fw-bold mb-0">
+                    <i class="bi bi-journal-bookmark-fill text-primary me-2"></i>{{ __('Gestion des Formations') }}
+                </h1>
+                <p class="text-muted small mb-0 mt-1">
+                    @if(auth()->user()->isSuperAdmin())
+                        {{ __('Tous les centres —') }} {{ $formations->total() }} {{ __('programme(s) de formation trouvé(s)') }}
+                    @else
+                        {{ __('Centre :') }} <strong>{{ auth()->user()->center?->name }}</strong> — {{ $formations->total() }} {{ __('programme(s) de formation trouvé(s)') }}
+                    @endif
+                </p>
+            </div>
         </div>
     </div>
 

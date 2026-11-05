@@ -17,20 +17,18 @@
 
             {{-- En-tête --}}
             <div class="d-flex align-items-center justify-content-between mb-4">
-                <div>
-                    <h1 class="h3 fw-bold mb-0">
-                        <i class="bi bi-pencil-square text-primary me-2"></i>{{ __('Modifier le Dossier Professeur') }}
-                    </h1>
-                    <p class="text-muted small mb-0 mt-1">
-                        {{ __('N° Professeur :') }} <strong class="font-monospace">{{ $teacher->teacher_number }}</strong>
-                        &bull; Centre : <strong>{{ $teacher->center?->name }}</strong>
-                        &bull; Compte : <strong>{{ $teacher->user?->email }}</strong>
-                    </p>
-                </div>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('teachers.show', $teacher) }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-1"></i>{{ __('Retour') }}
-                    </a>
+                <div class="d-flex align-items-center gap-3 [direction:ltr]" dir="ltr">
+                    <x-ui.back-button :fallback="route('teachers.show', $teacher)" />
+                    <div class="{{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                        <h1 class="h3 fw-bold mb-0">
+                            <i class="bi bi-pencil-square text-primary me-2"></i>{{ __('Modifier le Dossier Professeur') }}
+                        </h1>
+                        <p class="text-muted small mb-0 mt-1">
+                            {{ __('N° Professeur :') }} <strong class="font-monospace">{{ $teacher->teacher_number }}</strong>
+                            &bull; {{ __('Centre :') }} <strong>{{ $teacher->center?->name }}</strong>
+                            &bull; {{ __('Compte :') }} <strong>{{ $teacher->user?->email }}</strong>
+                        </p>
+                    </div>
                 </div>
             </div>
 

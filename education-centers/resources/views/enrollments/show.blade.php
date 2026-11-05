@@ -15,13 +15,16 @@
                     <li class="breadcrumb-item active" aria-current="page">{{ $enrollment->registration_number }}</li>
                 </ol>
             </nav>
-            <div class="d-flex align-items-center gap-3">
-                <h1 class="h3 fw-bold mb-0 text-gray-800 font-monospace">
-                    <i class="bi bi-card-checklist text-primary me-2"></i>{{ $enrollment->registration_number }}
-                </h1>
-                <span class="badge {{ $enrollment->status_badge_class }} px-3 py-2 fs-6">
-                    {{ $enrollment->status_label }}
-                </span>
+            <div class="d-flex align-items-center gap-3 [direction:ltr]" dir="ltr">
+                <x-ui.back-button fallback="{{ route('enrollments.index') }}" />
+                <div class="d-flex align-items-center gap-3 {{ current_dir() === 'rtl' ? '[direction:rtl]' : '' }}">
+                    <h1 class="h3 fw-bold mb-0 text-gray-800 font-monospace">
+                        <i class="bi bi-card-checklist text-primary me-2"></i>{{ $enrollment->registration_number }}
+                    </h1>
+                    <span class="badge {{ $enrollment->status_badge_class }} px-3 py-2 fs-6">
+                        {{ $enrollment->status_label }}
+                    </span>
+                </div>
             </div>
         </div>
 
@@ -33,10 +36,6 @@
             <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteEnrollmentModal">
                 <i class="bi bi-trash me-1"></i>{{ __('Supprimer') }}
             </button>
-
-            <a href="{{ route('enrollments.index') }}" class="btn btn-secondary">
-                <i class="bi bi-arrow-left me-1"></i>{{ __('Retour') }}
-            </a>
         </div>
     </div>
 

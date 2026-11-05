@@ -3,7 +3,6 @@
 
 @section('content')
 <x-ui.page-header title="Paiement {{ $payment->reference }}" :description="$payment->student?->full_name">
-    <a href="{{ route('payments.index') }}" class="ec-btn-secondary">{{ __('Retour') }}</a>
     @can('update', $payment)
         <a href="{{ route('payments.edit', $payment) }}" class="ec-btn-primary">{{ __('Modifier') }}</a>
     @endcan

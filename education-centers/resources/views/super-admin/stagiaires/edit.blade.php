@@ -19,34 +19,29 @@
      x-data="stagiaireEditFormApp(@js($photoUrl))">
 
     {{-- Fil d'Ariane & En-tête --}}
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <nav class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-2">
-                <a href="{{ route('stagiaires.index') }}" class="hover:text-slate-800 dark:hover:text-slate-200">{{ __('Stagiaires') }}</a>
-                <span>/</span>
-                <a href="{{ route('stagiaires.show', $stagiaire) }}" class="hover:text-slate-800 dark:hover:text-slate-200">{{ $stagiaire->first_name }} {{ $stagiaire->last_name }}</a>
-                <span>/</span>
-                <span class="text-slate-700 font-semibold dark:text-slate-300">{{ __('Modifier') }}</span>
-            </nav>
-            <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                {{ __('Modifier le dossier :') }} {{ $stagiaire->first_name }} {{ $stagiaire->last_name }}
-            </h1>
-            <p class="mt-2 text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                {{ __('Mise à jour des informations personnelles, du stage et de l\'entreprise.') }}
-            </p>
-            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                <span class="text-rose-500 font-bold">*</span> {{ __('Les champs marqués d\'un astérisque sont obligatoires.') }}
-                <span class="ms-2 inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">{{ __('Facultatif') }}</span>
-                {{ __('désigne la section « Autres fichiers », qui peut rester vide.') }}
-            </p>
-        </div>
-
-        <div class="flex items-center gap-2">
-            <a href="{{ route('stagiaires.show', $stagiaire) }}"
-               class="ec-btn-secondary text-base">
-                <x-icon name="chevron-left" class="h-4 w-4" />
-                <span>{{ __('Voir le dossier') }}</span>
-            </a>
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="flex items-center gap-3.5 [direction:ltr]" dir="ltr">
+            <x-ui.back-button :fallback="route('stagiaires.show', $stagiaire)" />
+            <div class="{{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                <nav class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-2">
+                    <a href="{{ route('stagiaires.index') }}" class="hover:text-slate-800 dark:hover:text-slate-200">{{ __('Stagiaires') }}</a>
+                    <span>/</span>
+                    <a href="{{ route('stagiaires.show', $stagiaire) }}" class="hover:text-slate-800 dark:hover:text-slate-200">{{ $stagiaire->first_name }} {{ $stagiaire->last_name }}</a>
+                    <span>/</span>
+                    <span class="text-slate-700 font-semibold dark:text-slate-300">{{ __('Modifier') }}</span>
+                </nav>
+                <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                    {{ __('Modifier le dossier :') }} {{ $stagiaire->first_name }} {{ $stagiaire->last_name }}
+                </h1>
+                <p class="mt-2 text-base leading-relaxed text-slate-600 dark:text-slate-300">
+                    {{ __('Mise à jour des informations personnelles, du stage et de l\'entreprise.') }}
+                </p>
+                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                    <span class="text-rose-500 font-bold">*</span> {{ __('Les champs marqués d\'un astérisque sont obligatoires.') }}
+                    <span class="ms-2 inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">{{ __('Facultatif') }}</span>
+                    {{ __('désigne la section « Autres fichiers », qui peut rester vide.') }}
+                </p>
+            </div>
         </div>
     </div>
 

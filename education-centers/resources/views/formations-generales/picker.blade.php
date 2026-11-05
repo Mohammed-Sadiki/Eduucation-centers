@@ -13,26 +13,27 @@
 @section('content')
 
     <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div class="flex items-center gap-3">
-            {{-- Le carré « + » est un véritable bouton : ouvre la création d'une
-                 formation générale personnalisée pour le centre actif. --}}
-            <a href="{{ route('formations-generales.create', $user->isSuperAdmin() ? ['center_id' => $centerId] : []) }}"
-               id="picker-open-create"
-               aria-label="{{ __('Ajouter une formation personnalisée') }}"
-               title="{{ __('Ajouter une formation personnalisée') }}"
-               class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white shadow-lg shadow-violet-600/30 transition hover:from-violet-600 hover:to-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:ring-offset-2">
-                <x-icon name="plus" class="h-6 w-6 text-white" stroke-width="2" />
-            </a>
-            <div>
-                <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
-                    {{ __('Ajouter une formation officielle') }}
-                    @if($centerName)
-                        <span class="ms-2 text-base font-normal text-slate-500 dark:text-slate-400">· {{ $centerName }}</span>
-                    @endif
-                </h1>
-                <p class="text-sm text-slate-500 dark:text-slate-400">
-                    {{ __('Sélectionnez l’une des six formations générales pour la configurer (prix, durée, description, statut, professeur responsable). Le bouton + permet d’ajouter une formation générale supplémentaire au catalogue du centre.') }}
-                </p>
+        <div class="flex items-center gap-3.5 [direction:ltr]" dir="ltr">
+            <x-ui.back-button id="picker-back-home" :fallback="route('admin.home')" />
+            <div class="flex items-center gap-3 {{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                <a href="{{ route('formations-generales.create', $user->isSuperAdmin() ? ['center_id' => $centerId] : []) }}"
+                   id="picker-open-create"
+                   aria-label="{{ __('Ajouter une formation personnalisée') }}"
+                   title="{{ __('Ajouter une formation personnalisée') }}"
+                   class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white shadow-lg shadow-violet-600/30 transition hover:from-violet-600 hover:to-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:ring-offset-2">
+                    <x-icon name="plus" class="h-6 w-6 text-white" stroke-width="2" />
+                </a>
+                <div>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
+                        {{ __('Ajouter une formation officielle') }}
+                        @if($centerName)
+                            <span class="ms-2 text-base font-normal text-slate-500 dark:text-slate-400">· {{ $centerName }}</span>
+                        @endif
+                    </h1>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">
+                        {{ __('Sélectionnez l’une des six formations générales pour la configurer (prix, durée, description, statut, professeur responsable). Le bouton + permet d’ajouter une formation générale supplémentaire au catalogue du centre.') }}
+                    </p>
+                </div>
             </div>
         </div>
 
@@ -48,13 +49,6 @@
                     </select>
                 </form>
             @endif
-            <a href="{{ route('admin.home') }}"
-               id="picker-back-home"
-               class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:border-slate-300 hover:bg-slate-50 hover:text-brand-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:text-brand-400 transition"
-               title="{{ __('Retour à l\'accueil') }}">
-                <x-icon name="arrow-left" class="h-4 w-4 rtl:rotate-180" stroke-width="2" />
-                {{ __('Retour à l\'accueil') }}
-            </a>
         </div>
     </div>
 

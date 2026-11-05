@@ -3,7 +3,6 @@
 
 @section('content')
 <x-ui.page-header :title="__('Détail de présence')" :description="$attendance->student?->full_name">
-    <a href="{{ route('attendances.index') }}" class="ec-btn-secondary">{{ __('Retour') }}</a>
     @can('update', $attendance)
         <a href="{{ route('attendances.edit', $attendance) }}" class="ec-btn-primary">{{ __('Modifier') }}</a>
     @endcan

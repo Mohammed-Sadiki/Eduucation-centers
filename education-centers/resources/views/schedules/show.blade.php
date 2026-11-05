@@ -15,8 +15,9 @@
                     <li class="breadcrumb-item active" aria-current="page">{{ __('Séance du') }} {{ $schedule->formatted_date }}</li>
                 </ol>
             </nav>
-            <div class="d-flex align-items-center gap-3">
-                <h1 class="h3 fw-bold mb-0 text-gray-800">
+            <div class="d-flex align-items-center gap-3 [direction:ltr]" dir="ltr">
+                <x-ui.back-button fallback="{{ route('schedules.index') }}" />
+                <h1 class="h3 fw-bold mb-0 text-gray-800 {{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
                     <i class="bi bi-calendar-event text-primary me-2"></i>{{ __('Séance :') }} {{ $schedule->classRoom->perimeter_label }}
                 </h1>
                 @if($schedule->status === 'scheduled')
@@ -73,10 +74,6 @@
             <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteScheduleModal">
                 <i class="bi bi-trash me-1"></i>{{ __('Supprimer') }}
             </button>
-
-            <a href="{{ route('schedules.index') }}" class="btn btn-secondary">
-                <i class="bi bi-arrow-left me-1"></i>{{ __('Retour') }}
-            </a>
         </div>
     </div>
 

@@ -11,8 +11,9 @@
 @section('content')
 
     <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div class="flex items-center gap-3">
-            <div>
+        <div class="flex items-center gap-3.5 [direction:ltr]" dir="ltr">
+            <x-ui.back-button fallback="{{ route('formations-generales.index', ['center_id' => $formation->center_id]) }}" />
+            <div class="{{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
                 <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ __('Formation générale officielle') }}</p>
                 <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
                     {{ __($domain->name ?? $formation->name) }}
@@ -20,11 +21,6 @@
                 </h1>
             </div>
         </div>
-        <a href="{{ route('formations-generales.index', ['center_id' => $formation->center_id]) }}"
-           class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 transition">
-            <x-icon name="arrow-left" class="h-4 w-4 rtl:rotate-180" stroke-width="2" />
-            {{ __('Toutes les formations') }}
-        </a>
     </div>
 
     {{-- KPIs du tableau de bord : Étudiants, Certificats, Présences du jour, Revenus (payés) --}}

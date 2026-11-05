@@ -13,36 +13,36 @@
 
     {{-- En-tête de la fiche --}}
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-        <div class="d-flex align-items-center gap-3">
-            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 58px; height: 58px; font-size: 1.5rem;">
-                <i class="bi bi-journal-bookmark-fill"></i>
-            </div>
-            <div>
-                <div class="d-flex align-items-center gap-2">
-                    <h1 class="h3 fw-bold mb-0">{{ $formation->translated('name') }}</h1>
-                    @if($formation->isActive())
-                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                            <i class="bi bi-check-circle-fill me-1"></i>{{ __('Actif') }}
-                        </span>
-                    @else
-                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">
-                            <i class="bi bi-pause-circle-fill me-1"></i>{{ __('Inactif') }}
-                        </span>
-                    @endif
+        <div class="d-flex align-items-center gap-3 [direction:ltr]" dir="ltr">
+            <x-ui.back-button fallback="{{ route('formations.index') }}" />
+            <div class="d-flex align-items-center gap-3 {{ current_dir() === 'rtl' ? '[direction:rtl]' : '' }}">
+                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm shrink-0" style="width: 58px; height: 58px; font-size: 1.5rem;">
+                    <i class="bi bi-journal-bookmark-fill"></i>
                 </div>
-                <div class="text-muted small mt-1 font-monospace">
-                    {{ __('Code :') }} <strong class="text-primary">{{ $formation->code }}</strong>
-                    @if($formation->center)
-                        &bull; Centre : <strong>{{ $formation->center->name }} ({{ $formation->center->code }})</strong>
-                    @endif
+                <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <h1 class="h3 fw-bold mb-0">{{ $formation->translated('name') }}</h1>
+                        @if($formation->isActive())
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                <i class="bi bi-check-circle-fill me-1"></i>{{ __('Actif') }}
+                            </span>
+                        @else
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">
+                                <i class="bi bi-pause-circle-fill me-1"></i>{{ __('Inactif') }}
+                            </span>
+                        @endif
+                    </div>
+                    <div class="text-muted small mt-1 font-monospace">
+                        {{ __('Code :') }} <strong class="text-primary">{{ $formation->code }}</strong>
+                        @if($formation->center)
+                            &bull; Centre : <strong>{{ $formation->center->name }} ({{ $formation->center->code }})</strong>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="d-flex gap-2">
-            <a href="{{ route('formations.index') }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>{{ __('Retour') }}
-            </a>
             @can('update', $formation)
                 <a href="{{ route('formations.edit', $formation) }}" class="btn btn-primary" id="btn-edit-formation">
                     <i class="bi bi-pencil me-1"></i>{{ __('Modifier') }}

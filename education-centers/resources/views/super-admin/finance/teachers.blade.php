@@ -25,17 +25,20 @@
          EN-TÊTE DE LA PAGE (STYLE CAD SYNDIC)
     ──────────────────────────────────────────────────────────── --}}
     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-slate-200/90 pb-5 dark:border-slate-800">
-        <div>
-            <div class="inline-flex items-center gap-1.5 rounded-full bg-[#ECFDF5] px-2.5 py-0.5 text-xs font-semibold text-[#0DAD98] border border-[#0DAD98]/20 dark:bg-[#0DAD98]/15 dark:text-[#0DAD98] mb-1.5 shadow-2xs">
-                <span>🧑‍🏫</span>
-                <span>{{ __('Gestion financière · Équipe pédagogique & Masse salariale') }}</span>
+        <div class="flex items-center gap-3.5 [direction:ltr]" dir="ltr">
+            <x-ui.back-button :fallback="route('super-admin.finance.dashboard')" />
+            <div class="{{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                <div class="inline-flex items-center gap-1.5 rounded-full bg-[#ECFDF5] px-2.5 py-0.5 text-xs font-semibold text-[#0DAD98] border border-[#0DAD98]/20 dark:bg-[#0DAD98]/15 dark:text-[#0DAD98] mb-1.5 shadow-2xs">
+                    <span>🧑‍🏫</span>
+                    <span>{{ __('Gestion financière · Équipe pédagogique & Masse salariale') }}</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                    {{ __('Salaires professeurs') }}
+                </h1>
+                <p class="mt-0.5 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                    {{ __('Période active :') }} <strong class="text-slate-800 dark:text-slate-200">{{ $monthsNames[$month] ?? $month }} {{ $year }}</strong> · {{ $teacherRows->count() }} {{ __('enseignant(s)') }}
+                </p>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                {{ __('Salaires professeurs') }}
-            </h1>
-            <p class="mt-0.5 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                {{ __('Période active :') }} <strong class="text-slate-800 dark:text-slate-200">{{ $monthsNames[$month] ?? $month }} {{ $year }}</strong> · {{ $teacherRows->count() }} {{ __('enseignant(s)') }}
-            </p>
         </div>
 
         <div class="flex items-center gap-2.5">
@@ -45,11 +48,6 @@
                 <x-icon name="plus" class="h-4 w-4" />
                 <span>{{ __('Régler un salaire') }}</span>
             </button>
-            <a href="{{ route('super-admin.finance.dashboard') }}"
-               class="finance-btn-secondary">
-                <x-icon name="arrow-left" class="h-4 w-4 text-slate-500" />
-                <span>{{ __('Dashboard') }}</span>
-            </a>
         </div>
     </div>
 

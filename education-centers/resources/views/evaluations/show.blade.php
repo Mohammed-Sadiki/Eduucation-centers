@@ -6,7 +6,6 @@
     @can('update', $evaluation)
         <a href="{{ route('evaluations.edit', $evaluation) }}" class="ec-btn-secondary">{{ __('Modifier') }}</a>
     @endcan
-    <a href="{{ route('evaluations.index') }}" class="ec-btn-ghost">{{ __('Retour') }}</a>
 </x-ui.page-header>
 
 <div class="mb-6 grid gap-4 sm:grid-cols-3">

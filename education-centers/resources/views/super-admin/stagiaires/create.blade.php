@@ -35,26 +35,26 @@
      x-data="stagiaireFormApp()">
 
     {{-- En-tête de page --}}
-    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <div class="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 border border-indigo-200/70 px-3 py-1 text-sm font-semibold text-indigo-700 dark:bg-indigo-950/50 dark:border-indigo-800/70 dark:text-indigo-300 mb-3">
-                {{ __('🧑‍💼 Dossier administratif de stage') }}
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div class="flex items-center gap-3.5 [direction:ltr]" dir="ltr">
+            <x-ui.back-button :fallback="route('stagiaires.index')" />
+            <div class="{{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                <div class="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 border border-indigo-200/70 px-3 py-1 text-sm font-semibold text-indigo-700 dark:bg-indigo-950/50 dark:border-indigo-800/70 dark:text-indigo-300 mb-3">
+                    {{ __('🧑‍💼 Dossier administratif de stage') }}
+                </div>
+                <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                    {{ __('Ajouter un stagiaire') }}
+                </h1>
+                <p class="mt-2 text-base leading-relaxed text-slate-600 dark:text-slate-300">
+                    {{ __('Renseignez les informations personnelles du stagiaire, les informations de son stage et l\'entreprise où il effectuera son stage.') }}
+                </p>
+                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400" id="legende-champs-obligatoires">
+                    <span class="text-rose-500 font-bold">*</span> {{ __('Les champs marqués d\'un astérisque sont obligatoires.') }}
+                    <span class="ms-2 inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">{{ __('Facultatif') }}</span>
+                    {{ __('désigne la section « Autres fichiers », qui peut rester vide.') }}
+                </p>
             </div>
-            <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                {{ __('Ajouter un stagiaire') }}
-            </h1>
-            <p class="mt-2 text-base leading-relaxed text-slate-600 dark:text-slate-300">
-                {{ __('Renseignez les informations personnelles du stagiaire, les informations de son stage et l\'entreprise où il effectuera son stage.') }}
-            </p>
-            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400" id="legende-champs-obligatoires">
-                <span class="text-rose-500 font-bold">*</span> {{ __('Les champs marqués d\'un astérisque sont obligatoires.') }}
-                <span class="ms-2 inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">{{ __('Facultatif') }}</span>
-                {{ __('désigne la section « Autres fichiers », qui peut rester vide.') }}
-            </p>
         </div>
-        <a href="{{ route('stagiaires.index') }}" class="ec-btn-secondary text-base shrink-0">
-            {{ __('← Annuler et retour') }}
-        </a>
     </div>
 
     {{-- Bandeau centre automatique (Admin Centre) : le centre n'est pas modifiable --}}

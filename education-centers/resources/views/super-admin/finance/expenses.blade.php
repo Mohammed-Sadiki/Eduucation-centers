@@ -25,24 +25,20 @@
 
     {{-- En-tête de la page --}}
     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-slate-200/90 pb-5 dark:border-slate-800">
-        <div>
-            <div class="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-600 border border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 mb-1.5 shadow-2xs">
-                <span>🧾</span>
-                <span>{{ __('Gestion financière · Dépenses & Charges') }}</span>
+        <div class="flex items-center gap-3.5 [direction:ltr]" dir="ltr">
+            <x-ui.back-button :fallback="route('super-admin.finance.dashboard')" />
+            <div class="{{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                <div class="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-600 border border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 mb-1.5 shadow-2xs">
+                    <span>🧾</span>
+                    <span>{{ __('Gestion financière · Dépenses & Charges') }}</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                    {{ __('Dépenses & Charges') }}
+                </h1>
+                <p class="mt-0.5 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                    {{ __('Suivi budgétaire du centre, enregistrement des dépenses et historique des charges réelles.') }}
+                </p>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                {{ __('Dépenses & Charges') }}
-            </h1>
-            <p class="mt-0.5 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                {{ __('Suivi budgétaire du centre, enregistrement des dépenses et historique des charges réelles.') }}
-            </p>
-        </div>
-
-        <div class="flex items-center gap-2.5">
-            <a href="{{ route('super-admin.finance.dashboard') }}" class="finance-btn-secondary">
-                <x-icon name="arrow-left" class="h-4 w-4 text-slate-500" />
-                <span>{{ __('Dashboard') }}</span>
-            </a>
         </div>
     </div>
 

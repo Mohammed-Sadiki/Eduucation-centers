@@ -2,9 +2,7 @@
 @section('title', __('Saisie des présences'))
 
 @section('content')
-<x-ui.page-header :title="__('Saisie des présences')" :description="__('Choisissez une séance, puis marquez Présent / Absent / Retard.')">
-    <a href="{{ route('attendances.index') }}" class="ec-btn-secondary">{{ __('Retour') }}</a>
-</x-ui.page-header>
+<x-ui.page-header :title="__('Saisie des présences')" :description="__('Choisissez une séance, puis marquez Présent / Absent / Retard.')" />
 
 @php
     $studentsUrl = route('attendances.students-for-schedule');

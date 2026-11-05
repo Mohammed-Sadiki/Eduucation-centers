@@ -2,7 +2,6 @@
 @section('title', __('Certificats'))
 
 @section('content')
-<x-domain-back />
 <x-ui.page-header :title="__('Certificats')" :description="__('Attestations et documents officiels.')">
     @can('create', \App\Models\Certificate::class)
         <a href="{{ route('certificates.create') }}" class="ec-btn-primary"><x-icon name="plus" class="h-4 w-4" /> {{ __('Générer') }}</a>

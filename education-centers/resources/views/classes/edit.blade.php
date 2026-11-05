@@ -17,19 +17,17 @@
 
             {{-- En-tête --}}
             <div class="d-flex align-items-center justify-content-between mb-4">
-                <div>
-                    <h1 class="h3 fw-bold mb-0">
-                        <i class="bi bi-pencil-square text-primary me-2"></i>{{ __('Modifier la Classe') }}
-                    </h1>
-                    <p class="text-muted small mb-0 mt-1">
-                        {{ __('Code :') }} <strong class="font-monospace text-primary">{{ $class->code }}</strong>
-                        &bull; Centre : <strong>{{ $class->center?->name }}</strong>
-                    </p>
-                </div>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('classes.show', $class) }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-1"></i>{{ __('Retour') }}
-                    </a>
+                <div class="d-flex align-items-center gap-3 [direction:ltr]" dir="ltr">
+                    <x-ui.back-button :fallback="route('classes.show', $class)" />
+                    <div class="{{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                        <h1 class="h3 fw-bold mb-0">
+                            <i class="bi bi-pencil-square text-primary me-2"></i>{{ __('Modifier la Classe') }}
+                        </h1>
+                        <p class="text-muted small mb-0 mt-1">
+                            {{ __('Code :') }} <strong class="font-monospace text-primary">{{ $class->code }}</strong>
+                            &bull; {{ __('Centre :') }} <strong>{{ $class->center?->name }}</strong>
+                        </p>
+                    </div>
                 </div>
             </div>
 

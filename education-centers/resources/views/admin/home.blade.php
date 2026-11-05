@@ -2,6 +2,7 @@
 
 @section('title', __('Accueil Administration') . ' — ' . config('app.name'))
 @section('description', __("Tableau de bord principal de l'administration Education Centers."))
+@section('portal_width', 'max-w-[1750px] 2xl:max-w-[1900px]')
 
 @php
     $user = auth()->user();
@@ -26,7 +27,7 @@
 
 @section('content')
 {{-- HERO --}}
-<section class="relative mb-10 overflow-hidden rounded-3xl border border-slate-200/70 bg-gradient-to-br from-brand-50 via-white to-indigo-50 px-6 py-10 sm:px-10 sm:py-12 dark:border-slate-800 dark:from-brand-950/30 dark:via-slate-900 dark:to-indigo-950/30" id="admin-home-hero">
+<section class="relative mb-6 sm:mb-8 overflow-hidden rounded-3xl border border-slate-200/70 bg-gradient-to-br from-brand-50 via-white to-indigo-50 px-6 py-7 sm:px-8 sm:py-8 dark:border-slate-800 dark:from-brand-950/30 dark:via-slate-900 dark:to-indigo-950/30" id="admin-home-hero">
     <div class="pointer-events-none absolute -top-24 -end-16 h-80 w-80 rounded-full bg-brand-300/25 blur-3xl dark:bg-brand-500/10" aria-hidden="true"></div>
     <div class="pointer-events-none absolute -bottom-20 -start-12 h-72 w-72 rounded-full bg-indigo-300/20 blur-3xl dark:bg-indigo-500/10" aria-hidden="true"></div>
 
@@ -82,84 +83,85 @@
     </div>
 </section>
 
-{{-- GRILLE 4 CARTES
-     Ligne 1 : carte « Formations » pleine largeur intégrant les trois actions
-                 rapides (Ajouter un élève / Ajouter une formation / Plan de
-                 classe) et le bouton d'accès « Accéder aux formations ».
-     Ligne 2 : trois cartes de largeur égales (Gestion des stagiaires,
-               Communication, Gestion financière). --}}
-<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" id="admin-home-cards" role="list">
+{{-- NOUVELLE DISPOSITION EN 2 COLONNES (~52% gauche / ~48% droite)
+     Colonne gauche  : grande carte « Formations » occupant toute la hauteur des 3 cartes de droite
+     Colonne droite  : 3 cartes empilées verticalement de haut en bas :
+                       1. Gestion financière (orange)
+                       2. Gestion des stagiaires (vert)
+                       3. Communication (bleu) --}}
+<div class="grid grid-cols-1 lg:grid-cols-[52fr_48fr] gap-6 items-stretch" id="admin-home-cards" role="list">
 
-    {{-- CARTE 1 : FORMATIONS (pleine largeur, ligne 1) --}}
-    <div class="sm:col-span-2 lg:col-span-3"
+    {{-- COLONNE GAUCHE — CARTE 1 : FORMATIONS --}}
+    <div class="h-full flex flex-col"
          id="card-home-formations"
          role="listitem"
          aria-label="{{ __('Accéder au module Formations') }}">
-        <div class="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-violet-200/70 bg-gradient-to-br from-violet-50/60 to-indigo-50/40 p-6 shadow-sm transition-all duration-200 ease-out hover:shadow-xl hover:border-violet-300 focus-within:ring-2 focus-within:ring-violet-500/40 focus-within:ring-offset-2 dark:border-violet-400/20 dark:bg-violet-400/[0.06] dark:hover:border-violet-400/40">
-            <div class="pointer-events-none absolute -top-10 -end-10 h-40 w-40 rounded-full bg-violet-300/20 blur-2xl dark:bg-violet-500/10" aria-hidden="true"></div>
+        <div class="group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-violet-200/70 bg-gradient-to-br from-violet-50/60 to-indigo-50/40 p-7 sm:p-8 lg:p-10 shadow-sm transition-all duration-200 ease-out hover:shadow-xl hover:border-violet-300 focus-within:ring-2 focus-within:ring-violet-500/40 focus-within:ring-offset-2 dark:border-violet-400/20 dark:bg-violet-400/[0.06] dark:hover:border-violet-400/40">
+            <div class="pointer-events-none absolute -top-10 -end-10 h-48 w-48 rounded-full bg-violet-300/20 blur-2xl dark:bg-violet-500/10" aria-hidden="true"></div>
 
-            {{-- 1. Icône + badge « 6 formations » --}}
-            <div class="relative mb-5 flex items-start justify-between">
-                <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-400 to-violet-600 text-white shadow-lg shadow-violet-500/30">
-                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 0 0-.491 6.347A48.627 48.627 0 0 1 12 20.904a48.627 48.627 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.57 50.57 0 0 0-2.658-.813A59.905 59.905 0 0 1 12 3.493a59.902 59.902 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
-                    </svg>
-                </span>
-                <span class="inline-flex items-center gap-1.5 rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-700 dark:bg-violet-500/15 dark:text-violet-300">
-                    <span class="h-1.5 w-1.5 rounded-full bg-violet-500"></span>
-                    {{ __('6 formations') }}
-                </span>
+            {{-- Partie supérieure : Icône, Badge, Titre, Description, Actions --}}
+            <div>
+                {{-- 1. Icône + badge « 6 formations » --}}
+                <div class="relative mb-6 flex items-start justify-between">
+                    <span class="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl sm:rounded-3xl bg-gradient-to-br from-violet-400 to-violet-600 text-white shadow-lg shadow-violet-500/30">
+                        <svg class="h-8 w-8 sm:h-10 sm:w-10" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 0 0-.491 6.347A48.627 48.627 0 0 1 12 20.904a48.627 48.627 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.57 50.57 0 0 0-2.658-.813A59.905 59.905 0 0 1 12 3.493a59.902 59.902 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
+                        </svg>
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-violet-100 px-3.5 py-1.5 text-xs font-semibold text-violet-700 dark:bg-violet-500/15 dark:text-violet-300">
+                        <span class="h-1.5 w-1.5 rounded-full bg-violet-500"></span>
+                        {{ __('6 formations') }}
+                    </span>
+                </div>
+
+                {{-- 2-3. Titre + description --}}
+                <div class="relative">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">{{ __('Formations') }}</h2>
+                    <p class="mt-3 text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-300 max-w-xl">
+                        {{ __('Gérez les six formations générales du centre (Santé, Informatique, Hôtellerie, Maçonnerie, Design intérieur, Design graphique), les étudiants, les professeurs et les activités pédagogiques.') }}
+                    </p>
+                </div>
+
+                {{-- 4. Actions rapides organisées --}}
+                <div class="relative mt-8 sm:mt-10">
+                    <div class="flex flex-wrap items-center gap-3">
+                        @can('create', \App\Models\Student::class)
+                            <a href="{{ route('students.create') }}"
+                               id="{{ $isSuperAdmin ? 'btn-add-student-domaines' : 'btn-add-student-ca-domaines' }}"
+                               class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:ring-offset-2 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+                               title="{{ __('Ajouter un élève') }}">
+                                <x-icon name="plus" class="h-4 w-4" stroke-width="2" />
+                                {{ __('Ajouter un élève') }}
+                            </a>
+                        @endcan
+                        @can('create', \App\Models\Formation::class)
+                            <a href="{{ route('formations-generales.create') }}"
+                               id="{{ $isSuperAdmin ? 'btn-add-formation-domaines' : 'btn-add-formation-ca-domaines' }}"
+                               class="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:ring-offset-2 dark:bg-violet-500 dark:hover:bg-violet-600"
+                               title="{{ __('Ajouter une formation') }}">
+                                <x-icon name="plus" class="h-4 w-4" stroke-width="2" />
+                                {{ __('Ajouter une formation') }}
+                            </a>
+                        @endcan
+                        <a href="{{ route('class-plan.index') }}"
+                           id="{{ $isSuperAdmin ? 'btn-class-plan-domaines' : 'btn-class-plan-ca-domaines' }}"
+                           class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:ring-offset-2 dark:bg-emerald-500 dark:hover:bg-emerald-600"
+                           title="{{ __('Plan de classe') }}">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                            </svg>
+                            {{ __('Plan de classe') }}
+                        </a>
+                    </div>
+                </div>
             </div>
 
-            {{-- 2-3. Titre + description des six formations générales --}}
-            <div class="relative">
-                <h2 class="text-xl font-bold text-slate-900 dark:text-white">{{ __('Formations') }}</h2>
-                <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ __('Gérez les six formations générales du centre (Santé, Informatique, Hôtellerie, Maçonnerie, Design intérieur, Design graphique), les étudiants, les professeurs et les activités pédagogiques.') }}</p>
-            </div>
-
-            {{-- 4. Ligne des trois actions rapides --}}
-            <div class="relative mt-6 flex flex-wrap items-center gap-3">
-                @can('create', \App\Models\Student::class)
-                    <a href="{{ route('students.create') }}"
-                       id="{{ $isSuperAdmin ? 'btn-add-student-domaines' : 'btn-add-student-ca-domaines' }}"
-                       class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:ring-offset-2 dark:bg-indigo-500 dark:hover:bg-indigo-600"
-                       title="{{ __('Ajouter un élève') }}">
-                        <x-icon name="plus" class="h-4 w-4" stroke-width="2" />
-                        {{ __('Ajouter un élève') }}
-                    </a>
-                @endcan
-                @can('create', \App\Models\Formation::class)
-                    {{-- Le bouton mène directement au formulaire existant
-                         « Nouvelle formation générale » (identité, tarif et
-                         durée, professeur responsable et image). La page de
-                         sélection des six formations officielles avec leurs
-                         boutons « Configurer » reste inchangée et accessible
-                         depuis « Accéder aux formations ». --}}
-                    <a href="{{ route('formations-generales.create') }}"
-                       id="{{ $isSuperAdmin ? 'btn-add-formation-domaines' : 'btn-add-formation-ca-domaines' }}"
-                       class="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:ring-offset-2 dark:bg-violet-500 dark:hover:bg-violet-600"
-                       title="{{ __('Ajouter une formation') }}">
-                        <x-icon name="plus" class="h-4 w-4" stroke-width="2" />
-                        {{ __('Ajouter une formation') }}
-                    </a>
-                @endcan
-                <a href="{{ route('class-plan.index') }}"
-                   id="{{ $isSuperAdmin ? 'btn-class-plan-domaines' : 'btn-class-plan-ca-domaines' }}"
-                   class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:ring-offset-2 dark:bg-emerald-500 dark:hover:bg-emerald-600"
-                   title="{{ __('Plan de classe') }}">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                    </svg>
-                    {{ __('Plan de classe') }}
-                </a>
-            </div>
-
-            {{-- 5. Bouton pleine largeur « Accéder aux formations » --}}
-            <div class="relative mt-6 pt-1 flex-1 flex flex-col justify-end">
+            {{-- 5. Bouton pleine largeur « Accéder aux formations » (en bas de la carte) --}}
+            <div class="relative mt-8 sm:mt-10 pt-4">
                 <a href="{{ $formationsRoute }}"
-                   class="group/link relative flex items-center justify-between rounded-xl bg-violet-100/70 px-4 py-3 text-sm font-semibold text-violet-700 transition-colors hover:bg-violet-200/60 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:ring-offset-2 dark:bg-violet-500/10 dark:text-violet-300 dark:hover:bg-violet-500/20">
+                   class="group/link relative flex items-center justify-between rounded-2xl bg-violet-100/70 px-5 py-4 text-sm font-bold text-violet-700 transition-colors hover:bg-violet-200/60 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:ring-offset-2 dark:bg-violet-500/10 dark:text-violet-300 dark:hover:bg-violet-500/20">
                     <span>{{ __('Accéder aux formations') }}</span>
-                    <span class="flex h-7 w-7 items-center justify-center rounded-full bg-violet-600 text-white shadow-sm transition-transform group-hover/link:translate-x-1 rtl:rotate-180">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-violet-600 text-white shadow-sm transition-transform group-hover/link:translate-x-1 rtl:rotate-180">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
                     </span>
                 </a>
@@ -167,103 +169,116 @@
         </div>
     </div>
 
-    {{-- CARTE 2 : STAGIAIRES --}}
-    <a href="{{ $stagiairesRoute }}"
-       id="card-home-stagiaires"
-       role="listitem"
-       class="group relative flex flex-col overflow-hidden rounded-3xl border border-teal-200/70 bg-gradient-to-br from-teal-50/60 to-emerald-50/40 p-6 shadow-sm transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-xl hover:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-500/40 focus:ring-offset-2 cursor-pointer dark:border-teal-400/20 dark:bg-teal-400/[0.06] dark:hover:border-teal-400/40"
-       aria-label="{{ __('Accéder au module Gestion des stagiaires') }}">
-        <div class="pointer-events-none absolute -top-10 -end-10 h-40 w-40 rounded-full bg-teal-300/20 blur-2xl dark:bg-teal-500/10" aria-hidden="true"></div>
-        <div class="relative mb-5 flex items-start justify-between">
-            <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-400 to-emerald-600 text-white shadow-lg shadow-teal-500/30">
-                <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
-                </svg>
-            </span>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold text-teal-700 dark:bg-teal-500/15 dark:text-teal-300">
-                <span class="h-1.5 w-1.5 rounded-full bg-teal-500"></span>
-                {{ __('Dossiers de stage') }}
-            </span>
-        </div>
-        <div class="relative flex-1">
-            <h2 class="text-xl font-bold text-slate-900 transition-colors group-hover:text-teal-700 dark:text-white dark:group-hover:text-teal-300">{{ __('Gestion des stagiaires') }}</h2>
-            <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ __('Consultez, organisez et suivez les stagiaires de votre établissement.') }}</p>
-        </div>
-        <div class="relative mt-6 flex items-center justify-between rounded-xl bg-teal-100/70 px-4 py-2.5 text-sm font-semibold text-teal-700 transition-colors group-hover:bg-teal-200/60 dark:bg-teal-500/10 dark:text-teal-300 dark:group-hover:bg-teal-500/20">
-            <span>{{ ($isCenterAdmin || $isSecretary) ? __('Ajouter un stagiaire') : __('Accéder aux stagiaires') }}</span>
-            <span class="flex h-7 w-7 items-center justify-center rounded-full bg-teal-600 text-white shadow-sm transition-transform group-hover:translate-x-1 rtl:rotate-180">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
-            </span>
-        </div>
-    </a>
+    {{-- COLONNE DROITE — TROIS CARTES EMPILÉES VERTICALEMENT
+         1. Gestion financière (orange), en haut
+         2. Gestion des stagiaires (vert), au milieu
+         3. Communication (bleu), en bas --}}
+    <div class="flex flex-col gap-6 h-full justify-between" id="admin-home-right-cards">
 
-    {{-- CARTE : FINANCES (Super Admin = vue globale ; Responsable Centre = vue centrée,
-         périmètre forcé sur son centre côté serveur. Masquée pour Secrétaire). --}}
-    @if($isSuperAdmin || $isCenterAdmin)
-    <a href="{{ $financeRoute }}"
-       id="card-home-finance"
-       role="listitem"
-       class="group relative flex flex-col overflow-hidden rounded-3xl border border-amber-200/70 bg-gradient-to-br from-amber-50/60 to-orange-50/40 p-6 shadow-sm transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-xl hover:border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:ring-offset-2 cursor-pointer dark:border-amber-400/20 dark:bg-amber-400/[0.06] dark:hover:border-amber-400/40{{ $isCenterAdmin ? ' order-4' : '' }}"
-       aria-label="{{ __('Accéder au module Gestion financière') }}">
-        <div class="pointer-events-none absolute -top-10 -end-10 h-40 w-40 rounded-full bg-amber-300/20 blur-2xl dark:bg-amber-500/10" aria-hidden="true"></div>
-        <div class="relative mb-5 flex items-start justify-between">
-            <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-600 text-white shadow-lg shadow-amber-500/30">
-                <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
-                </svg>
-            </span>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800 dark:bg-amber-500/15 dark:text-amber-300">
-                <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
-                @if($isSuperAdmin) {{ __('Vue globale') }} @else {{ __('Vue centre') }} @endif
-            </span>
-        </div>
-        <div class="relative flex-1">
-            <h2 class="text-xl font-bold text-slate-900 transition-colors group-hover:text-amber-700 dark:text-white dark:group-hover:text-amber-300">{{ __('Gestion financière') }}</h2>
-            <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ __('Suivez les factures, paiements, salaires, dépenses et statistiques financières.') }}</p>
-        </div>
-        <div class="relative mt-6 flex items-center justify-between rounded-xl bg-amber-100/70 px-4 py-2.5 text-sm font-semibold text-amber-800 transition-colors group-hover:bg-amber-200/60 dark:bg-amber-500/10 dark:text-amber-300 dark:group-hover:bg-amber-500/20">
-            <span>{{ $isSuperAdmin ? __('Accéder aux finances') : __('Accéder à la gestion financière') }}</span>
-            <span class="flex h-7 w-7 items-center justify-center rounded-full bg-amber-600 text-white shadow-sm transition-transform group-hover:translate-x-1 rtl:rotate-180">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
-            </span>
-        </div>
-    </a>
-    @endif
+        {{-- 1. CARTE : GESTION FINANCIÈRE (orange, en haut) --}}
+        @if($isSuperAdmin || $isCenterAdmin)
+        <a href="{{ $financeRoute }}"
+           id="card-home-finance"
+           role="listitem"
+           class="group relative flex flex-1 flex-col justify-between overflow-hidden rounded-3xl border border-amber-200/70 bg-gradient-to-br from-amber-50/60 to-orange-50/40 p-6 sm:p-7 shadow-sm transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-xl hover:border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:ring-offset-2 cursor-pointer dark:border-amber-400/20 dark:bg-amber-400/[0.06] dark:hover:border-amber-400/40{{ $isCenterAdmin ? ' order-4' : '' }}"
+           aria-label="{{ __('Accéder au module Gestion financière') }}">
+            <div class="pointer-events-none absolute -top-10 -end-10 h-36 w-36 rounded-full bg-amber-300/20 blur-2xl dark:bg-amber-500/10" aria-hidden="true"></div>
+            <div>
+                <div class="relative mb-3 flex items-start justify-between">
+                    <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-600 text-white shadow-lg shadow-amber-500/30">
+                        <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
+                        </svg>
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800 dark:bg-amber-500/15 dark:text-amber-300">
+                        <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                        @if($isSuperAdmin) {{ __('Vue globale') }} @else {{ __('Vue centre') }} @endif
+                    </span>
+                </div>
+                <div class="relative">
+                    <h2 class="text-xl font-bold text-slate-900 transition-colors group-hover:text-amber-700 dark:text-white dark:group-hover:text-amber-300">{{ __('Gestion financière') }}</h2>
+                    <p class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ __('Suivez les factures, paiements, salaires, dépenses et statistiques financières.') }}</p>
+                </div>
+            </div>
+            <div class="relative mt-4 flex items-center justify-between rounded-xl bg-amber-100/70 px-4 py-2.5 text-sm font-semibold text-amber-800 transition-colors group-hover:bg-amber-200/60 dark:bg-amber-500/10 dark:text-amber-300 dark:group-hover:bg-amber-500/20">
+                <span>{{ $isSuperAdmin ? __('Accéder aux finances') : __('Accéder à la gestion financière') }}</span>
+                <span class="flex h-7 w-7 items-center justify-center rounded-full bg-amber-600 text-white shadow-sm transition-transform group-hover:translate-x-1 rtl:rotate-180">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
+                </span>
+            </div>
+        </a>
+        @endif
 
-    {{-- CARTE : COMMUNICATION --}}
-    <a href="{{ $communicationRoute }}"
-       id="card-home-communication"
-       role="listitem"
-       class="group relative flex flex-col overflow-hidden rounded-3xl border border-cyan-200/70 bg-gradient-to-br from-cyan-50/60 to-sky-50/40 p-6 shadow-sm transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-xl hover:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:ring-offset-2 cursor-pointer dark:border-cyan-400/20 dark:bg-cyan-400/[0.06] dark:hover:border-cyan-400/40{{ $isCenterAdmin ? ' order-3' : '' }}"
-       aria-label="{{ __('Accéder au module Communication') }}">
-        <div class="pointer-events-none absolute -top-10 -end-10 h-40 w-40 rounded-full bg-cyan-300/20 blur-2xl dark:bg-cyan-500/10" aria-hidden="true"></div>
-        <div class="relative mb-5 flex items-start justify-between">
-            <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 to-sky-600 text-white shadow-lg shadow-cyan-500/30">
-                <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
-                </svg>
-            </span>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300">
-                <span class="h-1.5 w-1.5 rounded-full bg-cyan-500"></span>
-                {{ __('Messagerie') }}
-            </span>
-        </div>
-        <div class="relative flex-1">
-            <h2 class="text-xl font-bold text-slate-900 transition-colors group-hover:text-cyan-700 dark:text-white dark:group-hover:text-cyan-300">{{ __('Communication') }}</h2>
-            <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ __('Centralisez les échanges et les communications entre les responsables des centres.') }}</p>
-        </div>
-        <div class="relative mt-6 flex items-center justify-between rounded-xl bg-cyan-100/70 px-4 py-2.5 text-sm font-semibold text-cyan-700 transition-colors group-hover:bg-cyan-200/60 dark:bg-cyan-500/10 dark:text-cyan-300 dark:group-hover:bg-cyan-500/20">
-            <span>{{ __('Accéder à la communication') }}</span>
-            <span class="flex h-7 w-7 items-center justify-center rounded-full bg-cyan-600 text-white shadow-sm transition-transform group-hover:translate-x-1 rtl:rotate-180">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
-            </span>
-        </div>
-    </a>
+        {{-- 2. CARTE : GESTION DES STAGIAIRES (vert, au milieu) --}}
+        <a href="{{ $stagiairesRoute }}"
+           id="card-home-stagiaires"
+           role="listitem"
+           class="group relative flex flex-1 flex-col justify-between overflow-hidden rounded-3xl border border-teal-200/70 bg-gradient-to-br from-teal-50/60 to-emerald-50/40 p-6 sm:p-7 shadow-sm transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-xl hover:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-500/40 focus:ring-offset-2 cursor-pointer dark:border-teal-400/20 dark:bg-teal-400/[0.06] dark:hover:border-teal-400/40"
+           aria-label="{{ __('Accéder au module Gestion des stagiaires') }}">
+            <div class="pointer-events-none absolute -top-10 -end-10 h-36 w-36 rounded-full bg-teal-300/20 blur-2xl dark:bg-teal-500/10" aria-hidden="true"></div>
+            <div>
+                <div class="relative mb-3 flex items-start justify-between">
+                    <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-400 to-emerald-600 text-white shadow-lg shadow-teal-500/30">
+                        <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                        </svg>
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold text-teal-700 dark:bg-teal-500/15 dark:text-teal-300">
+                        <span class="h-1.5 w-1.5 rounded-full bg-teal-500"></span>
+                        {{ __('Dossiers de stage') }}
+                    </span>
+                </div>
+                <div class="relative">
+                    <h2 class="text-xl font-bold text-slate-900 transition-colors group-hover:text-teal-700 dark:text-white dark:group-hover:text-teal-300">{{ __('Gestion des stagiaires') }}</h2>
+                    <p class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ __('Consultez, organisez et suivez les stagiaires de votre établissement.') }}</p>
+                </div>
+            </div>
+            <div class="relative mt-4 flex items-center justify-between rounded-xl bg-teal-100/70 px-4 py-2.5 text-sm font-semibold text-teal-700 transition-colors group-hover:bg-teal-200/60 dark:bg-teal-500/10 dark:text-teal-300 dark:group-hover:bg-teal-500/20">
+                <span>{{ ($isCenterAdmin || $isSecretary) ? __('Ajouter un stagiaire') : __('Accéder aux stagiaires') }}</span>
+                <span class="flex h-7 w-7 items-center justify-center rounded-full bg-teal-600 text-white shadow-sm transition-transform group-hover:translate-x-1 rtl:rotate-180">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
+                </span>
+            </div>
+        </a>
+
+        {{-- 3. CARTE : COMMUNICATION (bleu, en bas) --}}
+        <a href="{{ $communicationRoute }}"
+           id="card-home-communication"
+           role="listitem"
+           class="group relative flex flex-1 flex-col justify-between overflow-hidden rounded-3xl border border-cyan-200/70 bg-gradient-to-br from-cyan-50/60 to-sky-50/40 p-6 sm:p-7 shadow-sm transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-xl hover:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:ring-offset-2 cursor-pointer dark:border-cyan-400/20 dark:bg-cyan-400/[0.06] dark:hover:border-cyan-400/40{{ $isCenterAdmin ? ' order-3' : '' }}"
+           aria-label="{{ __('Accéder au module Communication') }}">
+            <div class="pointer-events-none absolute -top-10 -end-10 h-36 w-36 rounded-full bg-cyan-300/20 blur-2xl dark:bg-cyan-500/10" aria-hidden="true"></div>
+            <div>
+                <div class="relative mb-3 flex items-start justify-between">
+                    <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 to-sky-600 text-white shadow-lg shadow-cyan-500/30">
+                        <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+                        </svg>
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300">
+                        <span class="h-1.5 w-1.5 rounded-full bg-cyan-500"></span>
+                        {{ __('Messagerie') }}
+                    </span>
+                </div>
+                <div class="relative">
+                    <h2 class="text-xl font-bold text-slate-900 transition-colors group-hover:text-cyan-700 dark:text-white dark:group-hover:text-cyan-300">{{ __('Communication') }}</h2>
+                    <p class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ __('Centralisez les échanges et les communications entre les responsables des centres.') }}</p>
+                </div>
+            </div>
+            <div class="relative mt-4 flex items-center justify-between rounded-xl bg-cyan-100/70 px-4 py-2.5 text-sm font-semibold text-cyan-700 transition-colors group-hover:bg-cyan-200/60 dark:bg-cyan-500/10 dark:text-cyan-300 dark:group-hover:bg-cyan-500/20">
+                <span>{{ __('Accéder à la communication') }}</span>
+                <span class="flex h-7 w-7 items-center justify-center rounded-full bg-cyan-600 text-white shadow-sm transition-transform group-hover:translate-x-1 rtl:rotate-180">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
+                </span>
+            </div>
+        </a>
+
+    </div>
 
 </div>
 
 {{-- PIED --}}
-<div class="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white/60 px-5 py-4 text-xs text-slate-500 shadow-2xs backdrop-blur dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-400" id="admin-home-footer">
+<div class="mt-6 sm:mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white/60 px-5 py-4 text-xs text-slate-500 shadow-2xs backdrop-blur dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-400" id="admin-home-footer">
     <span class="flex items-center gap-1.5">
         <svg class="h-3.5 w-3.5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 0 0-.491 6.347A48.627 48.627 0 0 1 12 20.904a48.627 48.627 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.57 50.57 0 0 0-2.658-.813A59.905 59.905 0 0 1 12 3.493a59.902 59.902 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" /></svg>
         {{ __('Education Centers') }} &mdash; {{ __('Plateforme de gestion des centres de formation') }}

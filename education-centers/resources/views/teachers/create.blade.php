@@ -16,17 +16,17 @@
 
             {{-- En-tête --}}
             <div class="d-flex align-items-center justify-content-between mb-4">
-                <div>
-                    <h1 class="h3 fw-bold mb-0">
-                        <i class="bi bi-person-plus-fill text-primary me-2"></i>{{ __('Nouveau Dossier Professeur') }}
-                    </h1>
-                    <p class="text-muted small mb-0 mt-1">
-                        {{ __('Associez un compte utilisateur enseignant à un dossier administratif.') }}
-                    </p>
+                <div class="d-flex align-items-center gap-3 [direction:ltr]" dir="ltr">
+                    <x-ui.back-button fallback="{{ route('teachers.index') }}" />
+                    <div class="{{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                        <h1 class="h3 fw-bold mb-0">
+                            <i class="bi bi-person-plus-fill text-primary me-2"></i>{{ __('Nouveau Dossier Professeur') }}
+                        </h1>
+                        <p class="text-muted small mb-0 mt-1">
+                            {{ __('Associez un compte utilisateur enseignant à un dossier administratif.') }}
+                        </p>
+                    </div>
                 </div>
-                <a href="{{ route('teachers.index') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-1"></i>{{ __('Retour') }}
-                </a>
             </div>
 
             @if($availableUsers->isEmpty())

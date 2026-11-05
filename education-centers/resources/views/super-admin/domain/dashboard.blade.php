@@ -42,32 +42,27 @@
 
     {{-- ── EN-TÊTE ────────────────────────────────────────────────────── --}}
     <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-            {{-- Badge "Domaine actif" + titre de l'espace domaine --}}
-            <span class="mb-2 inline-flex items-center gap-1.5 rounded-full {{ $cfg['dot'] }}/15 px-2.5 py-0.5 text-xs font-semibold {{ $cfg['text'] }}">
-                <span class="h-1.5 w-1.5 rounded-full {{ $cfg['dot'] }}"></span>
-                {{ __('Formation générale active') }}
-            </span>
-            <h1 class="ec-page-title text-slate-900 dark:text-white">
-                {{ __('Espace') }} {{ $domainLabel }}
-            </h1>
-            <p class="mt-1.5 text-base text-slate-500 dark:text-slate-400">
-                @if($user->isSuperAdmin())
-                    {{ __('Bonjour') }} {{ $user->name }} — {{ __('voici un aperçu de la filière') }} {{ $domainLabel }} {{ __('pour tous les centres.') }}
-                @else
-                    {{ __('Bonjour') }} {{ $user->name }} — {{ __('voici un aperçu de la filière') }} {{ $domainLabel }} {{ __('pour votre centre') }} · {{ $user->center?->name ?? '' }}.
-                @endif
-            </p>
+        <div class="flex items-center gap-3.5 [direction:ltr]" dir="ltr">
+            <x-ui.back-button id="btn-retour-domaines" :fallback="isset($formation) && $formation ? route('formations-generales.index', ['center_id' => $formation->center_id]) : ($user->isSuperAdmin() ? route('super-admin.domaines') : route('center-admin.domaines'))" />
+            <div class="{{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                {{-- Badge "Domaine actif" + titre de l'espace domaine --}}
+                <span class="mb-2 inline-flex items-center gap-1.5 rounded-full {{ $cfg['dot'] }}/15 px-2.5 py-0.5 text-xs font-semibold {{ $cfg['text'] }}">
+                    <span class="h-1.5 w-1.5 rounded-full {{ $cfg['dot'] }}"></span>
+                    {{ __('Formation générale active') }}
+                </span>
+                <h1 class="ec-page-title text-slate-900 dark:text-white">
+                    {{ __('Espace') }} {{ $domainLabel }}
+                </h1>
+                <p class="mt-1.5 text-base text-slate-500 dark:text-slate-400">
+                    @if($user->isSuperAdmin())
+                        {{ __('Bonjour') }} {{ $user->name }} — {{ __('voici un aperçu de la filière') }} {{ $domainLabel }} {{ __('pour tous les centres.') }}
+                    @else
+                        {{ __('Bonjour') }} {{ $user->name }} — {{ __('voici un aperçu de la filière') }} {{ $domainLabel }} {{ __('pour votre centre') }} · {{ $user->center?->name ?? '' }}.
+                    @endif
+                </p>
+            </div>
         </div>
         <div class="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
-            {{-- Bouton changer de domaine (retour au portail) --}}
-            <a href="{{ isset($formation) && $formation ? route('formations-generales.index', ['center_id' => $formation->center_id]) : ($user->isSuperAdmin() ? route('super-admin.domaines') : route('center-admin.domaines')) }}"
-               id="btn-retour-domaines"
-               class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-2xs transition hover:-translate-y-px hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-               title="{{ __('Retourner au portail de sélection des formations générales') }}">
-                <x-icon name="arrow-uturn-left" class="h-4 w-4 text-slate-500 dark:text-slate-400" />
-                <span>{{ __('Changer de formation générale') }}</span>
-            </a>
             <div class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
                 <x-icon name="calendar" class="h-4 w-4 text-brand-600 dark:text-brand-400" />
                 {{ now()->translatedFormat('d F Y') }}

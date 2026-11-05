@@ -52,25 +52,28 @@
          EN-TÊTE DE LA PAGE (STYLE CAD SYNDIC)
     ──────────────────────────────────────────────────────────── --}}
     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-slate-200/90 pb-5 dark:border-slate-800">
-        <div>
-            <div class="inline-flex items-center gap-1.5 rounded-full bg-[#ECFDF5] px-2.5 py-0.5 text-xs font-semibold text-[#0DAD98] border border-[#0DAD98]/20 dark:bg-[#0DAD98]/15 dark:text-[#0DAD98] mb-1.5 shadow-2xs">
-                <span>📊</span>
-                @if(user_context()->isCenterAdmin())
-                    <span>{{ __('Gestion financière · Vue centre') }}</span>
-                @else
-                    <span>{{ __('Gestion financière · Vue globale') }}</span>
-                @endif
+        <div class="flex items-center gap-3.5 [direction:ltr]" dir="ltr">
+            <x-ui.back-button :fallback="route('admin.home')" />
+            <div class="{{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                <div class="inline-flex items-center gap-1.5 rounded-full bg-[#ECFDF5] px-2.5 py-0.5 text-xs font-semibold text-[#0DAD98] border border-[#0DAD98]/20 dark:bg-[#0DAD98]/15 dark:text-[#0DAD98] mb-1.5 shadow-2xs">
+                    <span>📊</span>
+                    @if(user_context()->isCenterAdmin())
+                        <span>{{ __('Gestion financière · Vue centre') }}</span>
+                    @else
+                        <span>{{ __('Gestion financière · Vue globale') }}</span>
+                    @endif
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                    {{ __('Gestion financière') }}
+                </h1>
+                <p class="mt-0.5 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                    @if(user_context()->isCenterAdmin())
+                        {{ __('Vue d\'ensemble des finances de votre centre.') }}
+                    @else
+                        {{ __('Vue d\'ensemble des finances des centres de formation.') }}
+                    @endif
+                </p>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                {{ __('Gestion financière') }}
-            </h1>
-            <p class="mt-0.5 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                @if(user_context()->isCenterAdmin())
-                    {{ __('Vue d\'ensemble des finances de votre centre.') }}
-                @else
-                    {{ __('Vue d\'ensemble des finances des centres de formation.') }}
-                @endif
-            </p>
         </div>
 
         {{-- Actions rapides --}}

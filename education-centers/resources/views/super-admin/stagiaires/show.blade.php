@@ -16,33 +16,31 @@
                 <span>/</span>
                 <span class="text-slate-700 font-semibold dark:text-slate-300">{{ __('Dossier') }}</span>
             </nav>
-            <div class="flex items-center gap-3">
-                @if($stagiaire->profile_photo_path)
-                    <img src="{{ route('stagiaires.profile-photo', $stagiaire) }}"
-                         alt="{{ __('Photo de profil') }}"
-                         class="h-14 w-14 shrink-0 rounded-full border-2 border-slate-200 object-cover dark:border-slate-700">
-                @endif
-                <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-                    {{ $stagiaire->first_name }} {{ $stagiaire->last_name }}
-                </h1>
-                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold
-                    @if($stagiaire->status === 'en_cours') bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300
-                    @elseif($stagiaire->status === 'termine') bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300
-                    @elseif($stagiaire->status === 'nouveau') bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300
-                    @elseif($stagiaire->status === 'annule') bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300
-                    @else bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300
-                    @endif">
-                    {{ $stagiaire->status_label }}
-                </span>
+            <div class="flex items-center gap-3.5 [direction:ltr]" dir="ltr">
+                <x-ui.back-button :fallback="route('stagiaires.index')" />
+                <div class="flex items-center gap-3 {{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                    @if($stagiaire->profile_photo_path)
+                        <img src="{{ route('stagiaires.profile-photo', $stagiaire) }}"
+                             alt="{{ __('Photo de profil') }}"
+                             class="h-14 w-14 shrink-0 rounded-full border-2 border-slate-200 object-cover dark:border-slate-700">
+                    @endif
+                    <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+                        {{ $stagiaire->first_name }} {{ $stagiaire->last_name }}
+                    </h1>
+                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold
+                        @if($stagiaire->status === 'en_cours') bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300
+                        @elseif($stagiaire->status === 'termine') bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300
+                        @elseif($stagiaire->status === 'nouveau') bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300
+                        @elseif($stagiaire->status === 'annule') bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300
+                        @else bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300
+                        @endif">
+                        {{ $stagiaire->status_label }}
+                    </span>
+                </div>
             </div>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
-            <a href="{{ route('stagiaires.index') }}"
-               class="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 transition">
-                <x-icon name="chevron-left" class="h-4 w-4" />
-                <span>{{ __('Retour à la liste') }}</span>
-            </a>
             <a href="{{ route('stagiaires.edit', $stagiaire) }}"
                class="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-purple-700 transition">
                 <x-icon name="pencil" class="h-4 w-4" />

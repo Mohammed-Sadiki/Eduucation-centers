@@ -132,7 +132,7 @@
     {{-- ────────────────────────────────────────────────────────────
          CONTENU PRINCIPAL DU PORTAIL
     ──────────────────────────────────────────────────────────── --}}
-    <main class="ec-page-in flex-1 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+    <main class="ec-page-in flex-1 py-6 sm:py-8 px-4 sm:px-6 lg:px-8 @yield('portal_width', 'max-w-7xl') mx-auto w-full">
         @yield('content')
     </main>
 

@@ -14,10 +14,8 @@
 
     {{-- En-tête --}}
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-        <div class="d-flex align-items-center gap-3">
-            <a href="{{ route('centers.index') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left"></i>
-            </a>
+        <div class="d-flex align-items-center gap-3 [direction:ltr]" dir="ltr">
+            <x-ui.back-button fallback="{{ route('centers.index') }}" />
             @if($center->logo_url)
                 <img src="{{ $center->logo_url }}" alt="{{ $center->translated('name') }}" class="avatar-center shadow-sm" style="width: 56px; height: 56px;">
             @else

@@ -33,19 +33,13 @@
 
     {{-- BARRE DE NAVIGATION SUPÉRIEURE --}}
     <div class="flex flex-wrap items-center justify-between gap-4">
-        <div>
-            <a href="{{ $backToClassPlanUrl }}"
-               class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-xs transition hover:border-brand-500 hover:bg-slate-50 hover:text-brand-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-brand-400 dark:hover:text-brand-400">
-                <svg class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
-                </svg>
-                <span>{{ __('Retour au Plan de classe') }}</span>
-                @if($hasReturnContext)
-                    <span class="ms-1 rounded-md bg-brand-50 px-2 py-0.5 text-xs font-bold text-brand-600 dark:bg-brand-900/40 dark:text-brand-300">
-                        {{ __('Filtres conservés') }}
-                    </span>
-                @endif
-            </a>
+        <div class="flex items-center gap-3.5 [direction:ltr]" dir="ltr">
+            <x-ui.back-button :fallback="$hasReturnContext ? $backToClassPlanUrl : route('students.index')" />
+            @if($hasReturnContext)
+                <span class="rounded-md bg-brand-50 px-2.5 py-1 text-xs font-bold text-brand-600 dark:bg-brand-900/40 dark:text-brand-300">
+                    {{ __('Filtres conservés') }}
+                </span>
+            @endif
         </div>
 
         <div class="flex items-center gap-3">

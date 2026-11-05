@@ -14,9 +14,12 @@
                 <li class="breadcrumb-item active" aria-current="page">{{ __('Nouvelle séance') }}</li>
             </ol>
         </nav>
-        <h1 class="h3 fw-bold mb-0 text-gray-800">
-            <i class="bi bi-calendar-plus text-primary me-2"></i>{{ __('Programmer une séance de formation') }}
-        </h1>
+        <div class="d-flex align-items-center gap-3 [direction:ltr]" dir="ltr">
+            <x-ui.back-button fallback="{{ route('schedules.index') }}" />
+            <h1 class="h3 fw-bold mb-0 text-gray-800 {{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                <i class="bi bi-calendar-plus text-primary me-2"></i>{{ __('Programmer une séance de formation') }}
+            </h1>
+        </div>
     </div>
 
     {{-- Alertes erreurs globales --}}
@@ -229,9 +232,9 @@
                         </div>
 
                         {{-- Boutons d'action --}}
-                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-                            <a href="{{ route('schedules.index') }}" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-left me-1"></i>{{ __('Retour à la liste') }}
+                        <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+                            <a href="{{ route('schedules.index') }}" class="btn btn-outline-secondary px-4">
+                                {{ __('Annuler') }}
                             </a>
                             <button type="submit" class="btn btn-primary px-4">
                                 <i class="bi bi-check-lg me-1"></i>{{ __('Enregistrer la séance') }}

@@ -14,10 +14,15 @@
                 <li class="breadcrumb-item active" aria-current="page">{{ __('Création') }}</li>
             </ol>
         </nav>
-        <h1 class="h3 fw-bold mb-0 text-gray-800">
-            <i class="bi bi-card-plus text-primary me-2"></i>{{ __('Enregistrer une nouvelle inscription') }}
-        </h1>
-        <p class="text-muted small mb-0">{{ __('L\'inscription sera automatiquement initialisée avec le statut') }} <strong>{{ __('En attente') }}</strong>.</p>
+        <div class="d-flex align-items-center gap-3 [direction:ltr]" dir="ltr">
+            <x-ui.back-button fallback="{{ route('enrollments.index') }}" />
+            <div>
+                <h1 class="h3 fw-bold mb-0 text-gray-800 {{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                    <i class="bi bi-card-plus text-primary me-2"></i>{{ __('Enregistrer une nouvelle inscription') }}
+                </h1>
+                <p class="text-muted small mb-0 {{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">{{ __('L\'inscription sera automatiquement initialisée avec le statut') }} <strong>{{ __('En attente') }}</strong>.</p>
+            </div>
+        </div>
     </div>
 
     {{-- Alertes erreurs globales --}}
@@ -165,9 +170,9 @@
                         </div>
 
                         {{-- Boutons d'action --}}
-                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-                            <a href="{{ route('enrollments.index') }}" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-left me-1"></i>{{ __('Retour') }}
+                        <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+                            <a href="{{ route('enrollments.index') }}" class="btn btn-outline-secondary px-4">
+                                {{ __('Annuler') }}
                             </a>
                             <button type="submit" class="btn btn-primary px-4">
                                 <i class="bi bi-check-lg me-1"></i>{{ __('Enregistrer la candidature') }}

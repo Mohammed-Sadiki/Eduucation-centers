@@ -13,7 +13,8 @@
 
     {{-- En-tête de la fiche --}}
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3 [direction:ltr]" dir="ltr">
+            <x-ui.back-button :fallback="route('teachers.index')" />
             <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 58px; height: 58px; font-size: 1.5rem;">
                 <i class="bi bi-person-workspace"></i>
             </div>
@@ -40,9 +41,6 @@
         </div>
 
         <div class="d-flex gap-2">
-            <a href="{{ route('teachers.index') }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>{{ __('Retour') }}
-            </a>
             @can('update', $teacher)
                 <a href="{{ route('teachers.edit', $teacher) }}" class="btn btn-primary" id="btn-edit-teacher">
                     <i class="bi bi-pencil me-1"></i>{{ __('Modifier') }}

@@ -11,9 +11,6 @@
         :title="$class->perimeter_label"
         :description="($class->formation?->general_formation_name ?? __('Formation')) . ' · ' . ($domainLabel ?? '—') . ' · ' . ($centerName ?? '')"
     >
-        <a href="{{ route('teacher.classes') }}" class="ec-btn-secondary">
-            <x-icon name="arrow-uturn-left" class="h-4 w-4 rtl:rotate-180" /> {{ __('Retour') }}
-        </a>
         <a href="{{ route('teacher.schedule', ['class_id' => $class->id]) }}" class="ec-btn-primary">
             <x-icon name="calendar" class="h-4 w-4" /> {{ __('Emploi du temps') }}
         </a>

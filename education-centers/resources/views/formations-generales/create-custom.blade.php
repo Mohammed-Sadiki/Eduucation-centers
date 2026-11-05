@@ -13,27 +13,23 @@
 @section('content')
 
     <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div class="flex items-center gap-3">
-            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-lg shadow-brand-600/30">
-                <x-icon name="{{ $editing ? 'pencil' : 'plus' }}" class="h-6 w-6 text-white" stroke-width="2" />
-            </span>
-            <div>
-                <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
-                    {{ $pageTitle }}
-                    <span class="ms-2 text-base font-normal text-slate-500 dark:text-slate-400">· {{ $center->name }}</span>
-                </h1>
-                <p class="text-sm text-slate-500 dark:text-slate-400">
-                    {{ __('La formation est liée au centre ; elle suit les mêmes règles que les six officielles (maximum 2 classes, 1 professeur responsable).') }}
-                </p>
+        <div class="flex items-center gap-3.5 [direction:ltr]" dir="ltr">
+            <x-ui.back-button :fallback="route('formations-generales.index', ['center_id' => $center->id])" />
+            <div class="flex items-center gap-3 {{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-lg shadow-brand-600/30">
+                    <x-icon name="{{ $editing ? 'pencil' : 'plus' }}" class="h-6 w-6 text-white" stroke-width="2" />
+                </span>
+                <div>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
+                        {{ $pageTitle }}
+                        <span class="ms-2 text-base font-normal text-slate-500 dark:text-slate-400">· {{ $center->name }}</span>
+                    </h1>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">
+                        {{ __('La formation est liée au centre ; elle suit les mêmes règles que les six officielles (maximum 2 classes, 1 professeur responsable).') }}
+                    </p>
+                </div>
             </div>
         </div>
-
-        <a href="{{ route('formations-generales.picker', ['center_id' => $center->id]) }}"
-           id="custom-back-picker"
-           class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:border-slate-300 hover:bg-slate-50 hover:text-brand-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:text-brand-400 transition">
-            <x-icon name="arrow-left" class="h-4 w-4 rtl:rotate-180" stroke-width="2" />
-            {{ __('Retour au catalogue') }}
-        </a>
     </div>
 
     @if ($errors->any())

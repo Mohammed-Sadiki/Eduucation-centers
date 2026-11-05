@@ -9,37 +9,24 @@
      EN-TÊTE
 ──────────────────────────────────────────────────────────── --}}
 <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-    <div class="flex items-center gap-3">
-        <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-lg shadow-brand-600/30">
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 14a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"/>
-            </svg>
-        </span>
-        <div>
-            <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
-                {{ __('Plan de classe') }}
-            </h1>
-            <p class="text-sm text-slate-500 dark:text-slate-400">
-                {{ __('Représentation visuelle d\'une salle de classe avec le professeur et ses élèves.') }}
-            </p>
+    <div class="flex items-center gap-3.5 [direction:ltr]" dir="ltr">
+        <x-ui.back-button id="class-plan-back-domaines" :fallback="auth()->user()->isSuperAdmin() ? route('super-admin.domaines') : route('center-admin.domaines')" />
+        <div class="flex items-center gap-3 {{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
+            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-lg shadow-brand-600/30">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 14a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"/>
+                </svg>
+            </span>
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
+                    {{ __('Plan de classe') }}
+                </h1>
+                <p class="text-sm text-slate-500 dark:text-slate-400">
+                    {{ __('Représentation visuelle d\'une salle de classe avec le professeur et ses élèves.') }}
+                </p>
+            </div>
         </div>
-    </div>
-
-    <div class="flex flex-wrap items-center gap-2">
-        @php
-            $backRoute = auth()->user()->isSuperAdmin()
-                ? route('super-admin.domaines')
-                : route('center-admin.domaines');
-        @endphp
-        <a href="{{ $backRoute }}"
-           id="class-plan-back-domaines"
-           class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:border-slate-300 hover:bg-slate-50 hover:text-brand-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:text-brand-400 transition"
-           title="{{ __('Retour aux formations générales') }}"
-        >
-            <x-icon name="arrow-left" class="h-4 w-4 rtl:rotate-180" stroke-width="2" />
-            {{ __('Retour aux formations générales') }}
-        </a>
     </div>
 </div>
 
