@@ -17,7 +17,7 @@
     if (!$activeDomain && request()->routeIs('super-admin.sante.dashboard')) {
         $activeDomain = 'sante';
     }
-    $isFormationDomain = ($user->isSuperAdmin() || $user->isCenterAdmin()) && !$isStagiaires && !$isFinance && (!empty($activeDomain) || !empty($activeFormationId));
+    $isFormationDomain = ($user->isSuperAdmin() || $user->isCenterAdmin() || $user->isSecretary()) && !$isStagiaires && !$isFinance && (!empty($activeDomain) || !empty($activeFormationId));
 
     // Configuration visuelle par domaine
     $domainMeta = [
@@ -143,7 +143,9 @@
             'title' => __('Gestion des stagiaires'),
             'items' => array_filter([
                 $link(__('Tous les stagiaires'), 'stagiaires.index', 'users', 'stagiaires.index'),
-                $link(__('Ajouter un stagiaire'), 'stagiaires.create', 'plus', 'stagiaires.create'),
+                ($user->isSuperAdmin() || $user->isSecretary())
+                    ? $link(__('Ajouter un stagiaire'), 'stagiaires.create', 'plus', 'stagiaires.create')
+                    : null,
             ])
         ];
 
@@ -229,34 +231,59 @@
 
     } elseif ($user->isSecretary()) {
         // ────────────────────────────────────────────────────────────
-        // SIDEBAR SECRÉTAIRE : gestion opérationnelle de son centre
-        // Consultation & gestion : Élèves, Inscriptions, Stagiaires,
-        // Pédagogie (Formations, Classes, Salles, Emploi du temps),
-        // Suivi (Présences, Évaluations, Documents, Certificats, Annonces, Notifications).
-        // AUCUN accès au module Gestion financière, ni Utilisateurs.
+        // SIDEBAR SECRÉTAIRE :
+        // 1. Lorsqu'elle entre dans une formation (contexte actif en session :
+        //    active_formation_id ou active_domain), navigation simplifiée
+        //    affichant UNIQUEMENT les 6 modules demandés :
+        //      1. Dashboard
+        //      2. Emploi du temps
+        //      3. Présences
+        //      4. Évaluations
+        //      5. Certificats
+        //      6. Notifications
+        // 2. Hors formation (accueil / navigation globale du centre) :
+        //    menu complet existant préservé.
         // ────────────────────────────────────────────────────────────
-        $groups[] = ['title' => null, 'items' => array_filter([
-            $link(__('Accueil'), 'admin.home', 'home', 'admin.home'),
-            $link(__('Élèves'), 'students.index', 'academic', 'students.*'),
-            $link(__('Inscriptions'), 'enrollments.index', 'clipboard', 'enrollments.*'),
-            $link(__('Stagiaires'), 'stagiaires.index', 'users', 'stagiaires.*'),
-        ])];
+        $isInFormation = !empty($activeFormationId) || !empty($activeDomain);
 
-        $groups[] = ['title' => __('Pédagogie'), 'items' => array_filter([
-            $link(__('Formations'), 'formations.index', 'book', 'formations.*'),
-            $link(__('Classes'), 'classes.index', 'classes', 'classes.*'),
-            $link(__('Salles'), 'rooms.index', 'door', 'rooms.*'),
-            $link(__('Emploi du temps'), 'schedules.index', 'calendar', 'schedules.*'),
-        ])];
+        if ($isInFormation) {
+            $secretaryDashboardItem = $activeFormation
+                ? ['label' => __('Dashboard'), 'url' => route('formations-generales.show', $activeFormation), 'icon' => 'home',
+                   'active' => request()->routeIs(['center-admin.domain.dashboard', 'formations-generales.show'])]
+                : $link(__('Dashboard'), 'center-admin.domain.dashboard', 'home', 'center-admin.domain.dashboard', null, [$activeDomain ?: 'sante']);
 
-        $groups[] = ['title' => __('Gestion & Suivi'), 'items' => array_filter([
-            $link(__('Présences'), 'attendances.index', 'clock', 'attendances.*'),
-            $link(__('Évaluations'), 'evaluations.index', 'chart', 'evaluations.*'),
-            $link(__('Documents'), 'documents.index', 'document', 'documents.*'),
-            $link(__('Certificats'), 'certificates.index', 'certificate', 'certificates.*'),
-            $link(__('Annonces'), 'announcements.index', 'megaphone', 'announcements.*'),
-            $link(__('Notifications'), 'notifications.index', 'bell', 'notifications.*'),
-        ])];
+            $groups[] = ['title' => null, 'items' => array_filter([
+                $secretaryDashboardItem,
+                $link(__('Emploi du temps'), 'schedules.index', 'calendar', 'schedules.*'),
+                $link(__('Présences'), 'attendances.index', 'clock', 'attendances.*'),
+                $link(__('Évaluations'), 'evaluations.index', 'chart', 'evaluations.*'),
+                $link(__('Certificats'), 'certificates.index', 'certificate', 'certificates.*'),
+                $link(__('Notifications'), 'notifications.index', 'bell', 'notifications.*'),
+            ])];
+        } else {
+            $groups[] = ['title' => null, 'items' => array_filter([
+                $link(__('Accueil'), 'admin.home', 'home', 'admin.home'),
+                $link(__('Élèves'), 'students.index', 'academic', 'students.*'),
+                $link(__('Inscriptions'), 'enrollments.index', 'clipboard', 'enrollments.*'),
+                $link(__('Stagiaires'), 'stagiaires.index', 'users', 'stagiaires.*'),
+            ])];
+
+            $groups[] = ['title' => __('Pédagogie'), 'items' => array_filter([
+                $link(__('Formations'), 'formations.index', 'book', 'formations.*'),
+                $link(__('Classes'), 'classes.index', 'classes', 'classes.*'),
+                $link(__('Salles'), 'rooms.index', 'door', 'rooms.*'),
+                $link(__('Emploi du temps'), 'schedules.index', 'calendar', 'schedules.*'),
+            ])];
+
+            $groups[] = ['title' => __('Gestion & Suivi'), 'items' => array_filter([
+                $link(__('Présences'), 'attendances.index', 'clock', 'attendances.*'),
+                $link(__('Évaluations'), 'evaluations.index', 'chart', 'evaluations.*'),
+                $link(__('Documents'), 'documents.index', 'document', 'documents.*'),
+                $link(__('Certificats'), 'certificates.index', 'certificate', 'certificates.*'),
+                $link(__('Annonces'), 'announcements.index', 'megaphone', 'announcements.*'),
+                $link(__('Notifications'), 'notifications.index', 'bell', 'notifications.*'),
+            ])];
+        }
 
     } elseif ($user->isTeacher()) {
         $groups[] = ['title' => __('Mon espace'), 'items' => array_filter([

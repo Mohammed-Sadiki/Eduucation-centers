@@ -205,16 +205,27 @@
                         @endif
                         <h3 class="mt-1 truncate text-sm font-bold text-slate-900 dark:text-white">{{ $formation->translated('name') }}</h3>
                         <p class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                            @if($formation->center)
+                                <span class="inline-flex items-center gap-1 font-medium text-slate-600 dark:text-slate-300">
+                                    <x-icon name="building" class="h-3.5 w-3.5 text-slate-400" />
+                                    {{ $formation->center->translated('name') }}
+                                </span>
+                            @endif
                             @if($formation->duration_hours)
                                 <span class="inline-flex items-center gap-1">
                                     <x-icon name="clock" class="h-3.5 w-3.5" />
                                     {{ format_number($formation->duration_hours) }} h
                                 </span>
                             @endif
-                            <span class="inline-flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-200">
-                                <x-icon name="banknotes" class="h-3.5 w-3.5" />
-                                {{ format_price((float) $formation->price, $formation->currency) }}
-                            </span>
+                            @php
+                                $displayedPrice = $formation->price ?? $formation->annual_price;
+                            @endphp
+                            @if($displayedPrice !== null && $displayedPrice > 0)
+                                <span class="inline-flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-200">
+                                    <x-icon name="banknotes" class="h-3.5 w-3.5" />
+                                    {{ format_price((float) $displayedPrice, $formation->currency ?? default_currency()) }}
+                                </span>
+                            @endif
                         </p>
                     </div>
                     <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition group-hover:border-brand-600 group-hover:bg-brand-600 group-hover:text-white dark:border-slate-700">

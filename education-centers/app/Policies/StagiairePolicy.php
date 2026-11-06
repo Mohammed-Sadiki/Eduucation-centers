@@ -44,7 +44,7 @@ class StagiairePolicy
     /**
      * Créer un dossier stagiaire.
      * Super Admin et Secrétaire uniquement.
-     * Responsable Centre : lecture seule.
+     * Admin Centre : strictement lecture seule (consultation uniquement).
      */
     public function create(User $authUser): bool
     {
@@ -54,7 +54,7 @@ class StagiairePolicy
     /**
      * Modifier un dossier stagiaire de son centre.
      * Super Admin et Secrétaire uniquement.
-     * Responsable Centre : lecture seule.
+     * Admin Centre : strictement lecture seule (consultation uniquement).
      */
     public function update(User $authUser, Stagiaire $stagiaire): bool
     {
@@ -65,6 +65,7 @@ class StagiairePolicy
 
     /**
      * Supprimer un dossier stagiaire : opération réservée au Super Admin.
+     * Admin Centre et Secrétaire : non autorisés.
      */
     public function delete(User $authUser, Stagiaire $stagiaire): bool
     {

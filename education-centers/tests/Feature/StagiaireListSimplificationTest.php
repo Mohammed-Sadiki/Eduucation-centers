@@ -569,9 +569,15 @@ class StagiaireListSimplificationTest extends TestCase
             // L'ancien état « non renseigné » de cette colonne n'est plus rendu non plus.
             $this->assertStringNotContainsString('Non renseigné', $page, $role);
 
-            // Les trois actions restent présentes.
-            foreach (['Consulter le stagiaire', 'Modifier le stagiaire', 'Supprimer le stagiaire'] as $action) {
-                $this->assertStringContainsString($action, $page, $role . ' : l\'action ' . $action . ' doit rester disponible.');
+            // Les actions selon les permissions du rôle.
+            $this->assertStringContainsString('Consulter le stagiaire', $page, $role);
+            if ($role === 'super admin') {
+                $this->assertStringContainsString('Modifier le stagiaire', $page, $role);
+                $this->assertStringContainsString('Supprimer le stagiaire', $page, $role);
+            } elseif ($role === 'admin centre') {
+                // Admin Centre est en consultation uniquement : ni modifier ni supprimer
+                $this->assertStringNotContainsString('Modifier le stagiaire', $page, $role);
+                $this->assertStringNotContainsString('Supprimer le stagiaire', $page, $role);
             }
         }
 

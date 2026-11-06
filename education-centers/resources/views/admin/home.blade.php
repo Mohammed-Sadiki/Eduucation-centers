@@ -15,11 +15,12 @@
 
     $communicationRoute = route('messages.index');
 
-    // La « Gestion des stagiaires » est ouverte au Super Admin (tous centres
-    // autorisés) comme à l'Admin Centre / Secrétaire (périmètre = son centre, imposé serveur).
-    $stagiairesRoute = $isSuperAdmin
+    // La « Gestion des stagiaires » est ouverte au Super Admin (tous centres autorisés)
+    // et à l'Admin Centre en consultation (/super-admin/stagiaires).
+    // La Secrétaire accède au formulaire d'ajout.
+    $stagiairesRoute = ($isSuperAdmin || $isCenterAdmin)
         ? route('stagiaires.index')
-        : (($isCenterAdmin || $isSecretary) ? route('stagiaires.create') : route('dashboard'));
+        : ($isSecretary ? route('stagiaires.create') : route('dashboard'));
 
     // Le module financier est ouvert exclusivement au Super Admin et au Responsable Centre.
     $financeRoute = route('super-admin.finance.students');

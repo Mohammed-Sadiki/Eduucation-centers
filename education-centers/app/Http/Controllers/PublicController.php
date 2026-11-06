@@ -18,7 +18,16 @@ class PublicController extends Controller
     public function home(): View
     {
         $centers = Center::where('status', 'active')->withCount(['generalFormations as formations_count', 'classes', 'students'])->get();
-        $formations = AcademicPerimeter::currentFormationsQuery()->with('center')->take(6)->get();
+        
+        // Formations populaires : formations actives réelles ordonnées par nombre d'inscriptions
+        $formations = AcademicPerimeter::currentFormationsQuery()
+            ->with(['center'])
+            ->withCount('enrollments')
+            ->orderByDesc('enrollments_count')
+            ->orderBy('name')
+            ->take(6)
+            ->get();
+
         $stats = [
             'centers' => Center::where('status', 'active')->count(),
             'students' => Student::where('status', 'active')->count(),

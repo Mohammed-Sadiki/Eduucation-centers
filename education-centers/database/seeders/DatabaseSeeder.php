@@ -16,6 +16,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Structure canonique uniformisée de la plateforme :
+        // 4 Centres, 1 Super Admin, 4 Admin Centre, 4 Secrétaires, 24 Formations et 24 Professeurs
+        $this->call(PlatformStructureSeeder::class);
+
         // 0. Domaines de formation (portail Super Admin) — lus dynamiquement depuis la base
         $this->call(DomainSeeder::class);
 

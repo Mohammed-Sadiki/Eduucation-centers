@@ -179,22 +179,26 @@
                                        title="{{ __('Consulter le stagiaire') }}">
                                         <x-icon name="eye" class="h-4 w-4" />
                                     </a>
-                                    <a href="{{ route('stagiaires.edit', $stagiaire) }}"
-                                       class="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-purple-600 dark:hover:bg-slate-800 dark:hover:text-purple-400 transition"
-                                       title="{{ __('Modifier le stagiaire') }}">
-                                        <x-icon name="pencil" class="h-4 w-4" />
-                                    </a>
-                                    <form action="{{ route('stagiaires.destroy', $stagiaire) }}" method="POST"
-                                          onsubmit="return confirm('{{ __('Confirmez-vous la suppression de ce stagiaire ?') }}');"
-                                          class="inline-block">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                                class="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/50 dark:hover:text-rose-400 transition"
-                                                title="{{ __('Supprimer le stagiaire') }}">
-                                            <x-icon name="trash" class="h-4 w-4" />
-                                        </button>
-                                    </form>
+                                    @can('update', $stagiaire)
+                                        <a href="{{ route('stagiaires.edit', $stagiaire) }}"
+                                           class="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-purple-600 dark:hover:bg-slate-800 dark:hover:text-purple-400 transition"
+                                           title="{{ __('Modifier le stagiaire') }}">
+                                            <x-icon name="pencil" class="h-4 w-4" />
+                                        </a>
+                                    @endcan
+                                    @can('delete', $stagiaire)
+                                        <form action="{{ route('stagiaires.destroy', $stagiaire) }}" method="POST"
+                                              onsubmit="return confirm('{{ __('Confirmez-vous la suppression de ce stagiaire ?') }}');"
+                                              class="inline-block">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                    class="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/50 dark:hover:text-rose-400 transition"
+                                                    title="{{ __('Supprimer le stagiaire') }}">
+                                                <x-icon name="trash" class="h-4 w-4" />
+                                            </button>
+                                        </form>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>
@@ -203,13 +207,15 @@
                             <td colspan="7" class="py-12 text-center text-sm text-slate-500">
                                 <span class="text-2xl block mb-2">🔍</span>
                                 {{ __('Aucun stagiaire correspondant aux critères sélectionnés.') }}
-                                <div class="mt-3">
-                                    <a href="{{ route('stagiaires.create') }}"
-                                       class="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-purple-700 transition">
-                                        <x-icon name="plus" class="h-3.5 w-3.5" />
-                                        <span>{{ __('Ajouter un stagiaire') }}</span>
-                                    </a>
-                                </div>
+                                @can('create', App\Models\Stagiaire::class)
+                                    <div class="mt-3">
+                                        <a href="{{ route('stagiaires.create') }}"
+                                           class="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-purple-700 transition">
+                                            <x-icon name="plus" class="h-3.5 w-3.5" />
+                                            <span>{{ __('Ajouter un stagiaire') }}</span>
+                                        </a>
+                                    </div>
+                                @endcan
                             </td>
                         </tr>
                     @endforelse

@@ -33,13 +33,15 @@
                 </p>
             </div>
         </div>
-        <div class="flex items-center gap-2">
-            <a href="{{ route('stagiaires.create') }}"
-               class="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-purple-700 transition">
-                <x-icon name="plus" class="h-4 w-4" />
-                <span>{{ __('Nouveau stagiaire') }}</span>
-            </a>
-        </div>
+        @can('create', App\Models\Stagiaire::class)
+            <div class="flex items-center gap-2">
+                <a href="{{ route('stagiaires.create') }}"
+                   class="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-purple-700 transition">
+                    <x-icon name="plus" class="h-4 w-4" />
+                    <span>{{ __('Nouveau stagiaire') }}</span>
+                </a>
+            </div>
+        @endcan
     </div>
 
     {{-- Filtres par type de document --}}
@@ -238,13 +240,15 @@
             <p class="mt-1 text-xs text-slate-500 max-w-sm mx-auto">
                 {{ __('Aucune pièce justificative ne correspond aux critères de filtre sélectionnés.') }}
             </p>
-            <div class="mt-4">
-                <a href="{{ route('stagiaires.create') }}"
-                   class="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-purple-700 transition">
-                    <x-icon name="plus" class="h-3.5 w-3.5" />
-                    <span>{{ __('Créer un dossier avec documents') }}</span>
-                </a>
-            </div>
+            @can('create', App\Models\Stagiaire::class)
+                <div class="mt-4">
+                    <a href="{{ route('stagiaires.create') }}"
+                       class="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-purple-700 transition">
+                        <x-icon name="plus" class="h-3.5 w-3.5" />
+                        <span>{{ __('Créer un dossier avec documents') }}</span>
+                    </a>
+                </div>
+            @endcan
         </div>
     @endif
 </div>

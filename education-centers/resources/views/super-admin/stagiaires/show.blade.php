@@ -41,22 +41,26 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
-            <a href="{{ route('stagiaires.edit', $stagiaire) }}"
-               class="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-purple-700 transition">
-                <x-icon name="pencil" class="h-4 w-4" />
-                <span>{{ __('Modifier le dossier') }}</span>
-            </a>
-            <form action="{{ route('stagiaires.destroy', $stagiaire) }}" method="POST"
-                  onsubmit="return confirm('{{ __('Confirmez-vous la suppression de ce stagiaire et de tous ses documents ?') }}');"
-                  class="inline-block">
-                @csrf
-                @method('DELETE')
-                <button type="submit"
-                        class="inline-flex items-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-700 shadow-2xs hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/50 transition">
-                    <x-icon name="trash" class="h-4 w-4" />
-                    <span>{{ __('Supprimer') }}</span>
-                </button>
-            </form>
+            @can('update', $stagiaire)
+                <a href="{{ route('stagiaires.edit', $stagiaire) }}"
+                   class="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-purple-700 transition">
+                    <x-icon name="pencil" class="h-4 w-4" />
+                    <span>{{ __('Modifier le dossier') }}</span>
+                </a>
+            @endcan
+            @can('delete', $stagiaire)
+                <form action="{{ route('stagiaires.destroy', $stagiaire) }}" method="POST"
+                      onsubmit="return confirm('{{ __('Confirmez-vous la suppression de ce stagiaire et de tous ses documents ?') }}');"
+                      class="inline-block">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                            class="inline-flex items-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-700 shadow-2xs hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/50 transition">
+                        <x-icon name="trash" class="h-4 w-4" />
+                        <span>{{ __('Supprimer') }}</span>
+                    </button>
+                </form>
+            @endcan
         </div>
     </div>
 
