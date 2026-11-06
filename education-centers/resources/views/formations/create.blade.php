@@ -77,9 +77,10 @@
                     </div>
                 @else
                     <div>
-                        <label for="center_id" class="ec-label text-base font-semibold">{{ __('Centre de formation') }} <span class="text-red-500">*</span></label>
+                        <label for="center_id" class="ec-label text-base font-semibold">{{ __('Centre concerné') }} <span class="text-red-500">*</span></label>
                         <select id="center_id" name="center_id" class="ec-select text-base @error('center_id') is-invalid @enderror" required>
-                            <option value="">{{ __('— Sélectionner le centre —') }}</option>
+                            <option value="" disabled @selected(old('center_id') === null || old('center_id') === '')>{{ __('— Sélectionner le centre —') }}</option>
+                            <option value="all" @selected(old('center_id') === 'all' || old('center_id') === '0')>{{ __('Tous les centres') }}</option>
                             @foreach($centers as $center)
                                 <option value="{{ $center->id }}" @selected(old('center_id') == $center->id)>
                                     {{ $center->translated('name') }} ({{ $center->code }})
@@ -87,7 +88,7 @@
                             @endforeach
                         </select>
                         @error('center_id') <p class="ec-error text-sm">{{ $message }}</p> @enderror
-                        <p class="ec-help text-sm">{{ __('Le code formation doit être unique au sein du centre choisi.') }}</p>
+                        <p class="ec-help text-sm">{{ __('Choisissez un centre précis ou « Tous les centres ».') }}</p>
                     </div>
                 @endif
 

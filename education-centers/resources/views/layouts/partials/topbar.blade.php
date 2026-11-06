@@ -14,8 +14,13 @@
     $isFinance = request()->routeIs('super-admin.finance.*');
     $isAdmin = $user->isSuperAdmin() || $user->isCenterAdmin() || $user->isSecretary();
 
-    // Détection du domaine actif (session ou route)
+    // Détection du domaine actif ou formation active (session ou route)
     $activeDomain = session('active_domain');
+    $activeFormationId = session('active_formation_id');
+    $activeFormation = null;
+    if ($activeFormationId) {
+        $activeFormation = \App\Models\Formation::find($activeFormationId);
+    }
     if (!$activeDomain && request()->routeIs('super-admin.domain.dashboard')) {
         $activeDomain = request()->route('domain');
     }
@@ -32,7 +37,19 @@
         'design-interieur' => ['label' => __('Design intérieur'), 'classes' => 'bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300',      'icon' => 'home'],
         'design-graphique' => ['label' => __('Design graphique'), 'classes' => 'bg-pink-100 text-pink-800 dark:bg-pink-900/40 dark:text-pink-300',              'icon' => 'brush'],
     ];
-    $topbarDomain = $domainTopbarConfig[$activeDomain] ?? null;
+
+    if ($activeFormation) {
+        $formationLabel = $activeFormation->translated('name') ?? $activeFormation->name;
+        $canonicalDomain = $activeFormation->official_code ?? $activeFormation->domain;
+        $topbarDomain = $domainTopbarConfig[$canonicalDomain] ?? [
+            'label' => $formationLabel,
+            'classes' => 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
+            'icon' => 'academic'
+        ];
+        $topbarDomain['label'] = $formationLabel;
+    } else {
+        $topbarDomain = $domainTopbarConfig[$activeDomain] ?? null;
+    }
 
     $homeUrl = ($user->isSuperAdmin() || $user->isCenterAdmin())
         ? route('admin.home')

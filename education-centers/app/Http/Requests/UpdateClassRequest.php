@@ -44,7 +44,7 @@ class UpdateClassRequest extends FormRequest
                         return;
                     }
 
-                    if ($formation->center_id != $centerId) {
+                    if ($formation->center_id !== null && $formation->center_id != $centerId) {
                         $fail(__('La formation sélectionnée n\'appartient pas au même centre que la classe.'));
 
                         return;

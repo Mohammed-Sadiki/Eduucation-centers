@@ -32,9 +32,22 @@ class UpdateFormationRequest extends FormRequest
         $authUser = $this->user();
 
         // Le center_id est immuable pour l'admin centre, ou issu de la formation existante
-        $centerId = $formation->center_id;
+        $centerId = $this->filled('center_id') && $authUser->isSuperAdmin()
+            ? ($this->input('center_id') === 'all' || $this->input('center_id') === '0' ? null : (int) $this->input('center_id'))
+            : $formation->center_id;
 
         return [
+            'center_id' => [
+                'nullable',
+                function ($attribute, $value, $fail) {
+                    if ($value === null || $value === '' || $value === 'all' || $value === '0') {
+                        return;
+                    }
+                    if (! \App\Models\Center::query()->whereKey($value)->exists()) {
+                        $fail(__('Le centre sélectionné est invalide.'));
+                    }
+                },
+            ],
             'name' => ['required', 'string', 'max:255'],
             'code' => [
                 'required',
@@ -42,6 +55,9 @@ class UpdateFormationRequest extends FormRequest
                 'max:50',
                 Rule::unique('formations', 'code')
                     ->where(function ($query) use ($centerId) {
+                        if ($centerId === null) {
+                            return $query->whereNull('center_id');
+                        }
                         return $query->where('center_id', $centerId);
                     })
                     ->ignore($formation->id),

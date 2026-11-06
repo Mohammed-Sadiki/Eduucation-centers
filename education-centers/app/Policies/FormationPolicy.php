@@ -32,11 +32,15 @@ class FormationPolicy
 
     /**
      * view : consulter une formation spécifique.
-     * Responsable Centre & Secrétaire : uniquement les formations de leur propre centre.
+     * Responsable Centre & Secrétaire : formations de leur centre ou communes à tous les centres (center_id is null).
      */
     public function view(User $authUser, Formation $formation): bool
     {
         if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
+            if ($formation->center_id === null) {
+                return true;
+            }
+
             return (int) $authUser->center_id === (int) $formation->center_id;
         }
 

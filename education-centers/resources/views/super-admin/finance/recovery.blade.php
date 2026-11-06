@@ -18,7 +18,7 @@
     {{-- En-tête de la page --}}
     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-slate-200/90 pb-5 dark:border-slate-800">
         <div class="flex items-center gap-3.5 [direction:ltr]" dir="ltr">
-            <x-ui.back-button :fallback="route('super-admin.finance.dashboard')" />
+            <x-ui.back-button :fallback="route('admin.home')" />
             <div class="{{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
                 <div class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-600 border border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 mb-1.5 shadow-2xs">
                     <span>⚖️</span>

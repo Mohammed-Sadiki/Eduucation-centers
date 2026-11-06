@@ -776,6 +776,12 @@ class FinanceDashboardController extends Controller
             ->paginate(20, ['*'], 'history_page')
             ->withQueryString();
 
+        // ── Calcul automatique du compte financier indépendant & solde ──
+        $accountBalance = $this->financeService->getAccountBalance(
+            $centerId,
+            $request->user()->isSuperAdmin()
+        );
+
         return view('super-admin.finance.expenses', compact(
             'chargeRows',
             'groupedExpenses',
@@ -787,6 +793,7 @@ class FinanceDashboardController extends Controller
             'salaryStats',
             'remainingBudget',
             'consumptionRate',
+            'accountBalance',
             'categories',
             'centers',
             'schoolYears',
@@ -906,8 +913,8 @@ class FinanceDashboardController extends Controller
      */
     public function storeExpense(Request $request): RedirectResponse
     {
-        if (! $request->user()->isSuperAdmin()) {
-            abort(403, __('Action non autorisée. Seul le Super Admin peut enregistrer une dépense.'));
+        if (! $request->user()->isSuperAdmin() && ! $request->user()->isCenterAdmin()) {
+            abort(403, __('Action non autorisée. Seuls le Super Admin et l\'Admin Centre peuvent enregistrer une dépense.'));
         }
 
         // ── Formulaire simplifié : title (nom/motif) + amount (prix DH) ──
@@ -918,7 +925,12 @@ class FinanceDashboardController extends Controller
                 'center_id' => 'nullable|exists:centers,id',
             ]);
 
-            $centerId = $this->resolveCenterScope($request) ?? $validated['center_id'] ?? Center::first()?->id;
+            // Pour un Admin Centre, le centre_id est impérativement son centre
+            if ($request->user()->isCenterAdmin()) {
+                $centerId = $request->user()->center_id;
+            } else {
+                $centerId = $this->resolveCenterScope($request) ?? $validated['center_id'] ?? Center::first()?->id;
+            }
 
             $expense = Expense::create([
                 'center_id' => $centerId,

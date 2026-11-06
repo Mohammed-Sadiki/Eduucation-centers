@@ -38,7 +38,7 @@ class MessageController extends Controller
     }
 
     /**
-     * Espace "Messagerie" dédié aux professeurs (lectures + réponses aux admins).
+     * Espace "Messagerie" dédié aux professeurs.
      */
     public function teacherIndex(Request $request)
     {
@@ -48,9 +48,10 @@ class MessageController extends Controller
             abort(403, __('Accès réservé aux professeurs.'));
         }
 
+        $contacts = $this->getAllowedContacts($user);
         $activeConversationId = $request->query('conversation_id');
 
-        return view('teacher.messages', compact('user', 'activeConversationId'));
+        return view('teacher.messages', compact('user', 'contacts', 'activeConversationId'));
     }
 
     /**
@@ -125,14 +126,6 @@ class MessageController extends Controller
     public function startDirect(Request $request, User $target): JsonResponse
     {
         $currentUser = $request->user();
-
-        // Un professeur ne peut pas initier une conversation : il répond uniquement
-        // dans les conversations ouvertes par l'administration.
-        if ($currentUser->isTeacher()) {
-            return response()->json([
-                'error' => __('Les professeurs répondent uniquement aux messages de l\'administration.'),
-            ], 403);
-        }
 
         // Vérification stricte des autorisations d'échange
         if (! $this->canCommunicate($currentUser, $target)) {
@@ -238,18 +231,12 @@ class MessageController extends Controller
     {
         $user = $request->user();
 
-        // 1. Un professeur ne peut que répondre dans une conversation existante ouverte
-        // par l'administration (jamais en initier une — voir canCommunicate).
-        if ($user->isTeacher() && $conversation->type !== 'direct') {
-            abort(403, __('Les professeurs ne peuvent répondre que dans les conversations de l\'administration.'));
-        }
-
-        // 2. Vérification que l'utilisateur participe à la conversation
+        // 1. Vérification que l'utilisateur participe à la conversation
         if (! $conversation->isParticipant($user)) {
             abort(403, __('Accès interdit à cette conversation.'));
         }
 
-        // 3. Vérification de la cible dans la matrice
+        // 2. Vérification de la cible dans la matrice
         $target = $conversation->getOtherParticipant($user);
         if ($target && ! $this->canCommunicate($user, $target)) {
             abort(403, __('Communication non autorisée avec ce destinataire.'));
@@ -382,27 +369,17 @@ class MessageController extends Controller
      */
     public function canCommunicate(User $sender, User $target): bool
     {
-        // Règle 1 : Un professeur ne peut communiquer qu'avec l'administration
-        // (Super Admin ou Admin du centre auquel il est rattaché) — jamais avec
-        // un autre professeur, et jamais pour initier une conversation.
-        if ($sender->isTeacher()) {
-            if ($target->isSuperAdmin()) {
-                return true;
-            }
-
-            if ($target->isCenterAdmin() || $target->isSecretary()) {
-                return in_array((int) $target->center_id, $sender->centerIds(), true);
-            }
-
+        // Règle 0 : Pas de communication avec soi-même
+        if ($sender->id === $target->id) {
             return false;
         }
 
-        // Règle 2 : Un étudiant n'a aucun accès à cette messagerie
-        if ($sender->isStudent() || $target->isStudent()) {
+        // Règle 1 : Les étudiants et comptes inactifs n'ont aucun accès à la messagerie
+        if ($sender->isStudent() || $target->isStudent() || ! $sender->isActive() || ! $target->isActive()) {
             return false;
         }
 
-        // Règle 3 : Super Admin peut envoyer à :
+        // Règle 2 : Super Admin peut communiquer avec :
         // - Tous les Admins Centre
         // - Toutes les Secrétaires
         // - Tous les Professeurs
@@ -410,26 +387,69 @@ class MessageController extends Controller
             return $target->isCenterAdmin() || $target->isSecretary() || $target->isTeacher();
         }
 
-        // Règle 4 : Admin de Centre / Secrétaire peut envoyer à :
+        // Règle 3 : Admin de Centre peut communiquer avec :
         // - Le Super Admin
-        // - Les Professeurs rattachés à son propre centre (centre direct ou via classes affectées)
-        if ($sender->isCenterAdmin() || $sender->isSecretary()) {
+        // - Tous les Professeurs de son propre centre
+        // - Toutes les Secrétaires de son propre centre
+        // - Ne peut pas communiquer avec les utilisateurs des autres centres, sauf le Super Admin
+        // - Ne peut pas communiquer avec les autres Admins de Centre
+        if ($sender->isCenterAdmin()) {
             if ($target->isSuperAdmin()) {
                 return true;
             }
 
-            // Interdiction formelle de communiquer avec un autre centre
-            if (($target->isCenterAdmin() || $target->isSecretary()) && (int) $target->center_id !== (int) $sender->center_id) {
+            if ($target->isTeacher()) {
+                $targetCenters = $target->centerIds();
+                return in_array((int) $sender->center_id, $targetCenters, true);
+            }
+
+            if ((int) $target->center_id !== (int) $sender->center_id) {
                 return false;
             }
 
-            // Si le destinataire est un professeur, vérifier qu'il est rattaché au centre de cet admin
-            if ($target->isTeacher()) {
-                $targetCenterIds = $target->centerIds();
-                return in_array((int) $sender->center_id, $targetCenterIds, true);
+            return $target->isSecretary();
+        }
+
+        // Règle 4 : Secrétaire peut communiquer avec :
+        // - Le Super Admin
+        // - L'Admin de son propre centre
+        // - Tous les Professeurs de son propre centre
+        // - Ne peut pas communiquer avec les utilisateurs des autres centres
+        // - Ne peut pas communiquer avec d'autres secrétaires
+        if ($sender->isSecretary()) {
+            if ($target->isSuperAdmin()) {
+                return true;
             }
 
-            return (int) $target->center_id === (int) $sender->center_id;
+            if ($target->isTeacher()) {
+                $targetCenters = $target->centerIds();
+                return in_array((int) $sender->center_id, $targetCenters, true);
+            }
+
+            if ((int) $target->center_id !== (int) $sender->center_id) {
+                return false;
+            }
+
+            return $target->isCenterAdmin();
+        }
+
+        // Règle 5 : Professeur peut communiquer avec :
+        // - Le Super Admin
+        // - L'Admin de son propre centre
+        // - Les Secrétaires de son propre centre
+        // - Ne peut pas communiquer avec les autres professeurs ni les utilisateurs des autres centres
+        if ($sender->isTeacher()) {
+            if ($target->isSuperAdmin()) {
+                return true;
+            }
+
+            // Vérifie l'appartenance au centre du professeur (centre direct ou classes affectées)
+            $teacherCenters = $sender->centerIds();
+            if (! in_array((int) $target->center_id, $teacherCenters, true)) {
+                return false;
+            }
+
+            return $target->isCenterAdmin() || $target->isSecretary();
         }
 
         return false;
@@ -450,13 +470,18 @@ class MessageController extends Controller
                 ->get();
         }
 
-        if ($user->isCenterAdmin() || $user->isSecretary()) {
-            // Admin de centre / Secrétaire : Super Admin + Professeurs affectés à son centre
+        if ($user->isCenterAdmin()) {
+            // Admin de centre : Super Admin + Secrétaires de son centre + Professeurs de son centre
             $superAdmins = User::where('role', User::ROLE_SUPER_ADMIN)
                 ->where('status', User::STATUS_ACTIVE)
                 ->get();
 
-            // Professeurs dont le centre principal est ce centre OU qui ont une classe dans ce centre
+            $secretaries = User::where('role', User::ROLE_SECRETARY)
+                ->where('status', User::STATUS_ACTIVE)
+                ->where('center_id', $user->center_id)
+                ->with('center')
+                ->get();
+
             $teachers = User::where('role', User::ROLE_TEACHER)
                 ->where('status', User::STATUS_ACTIVE)
                 ->where(function ($q) use ($user) {
@@ -468,7 +493,50 @@ class MessageController extends Controller
                 ->with(['center', 'teacher.classes'])
                 ->get();
 
-            return $superAdmins->concat($teachers)->sortBy('name')->values();
+            return $superAdmins->concat($secretaries)->concat($teachers)->sortBy('name')->values();
+        }
+
+        if ($user->isSecretary()) {
+            // Secrétaire : Super Admin + Admin de son centre + Professeurs de son centre
+            $superAdmins = User::where('role', User::ROLE_SUPER_ADMIN)
+                ->where('status', User::STATUS_ACTIVE)
+                ->get();
+
+            $centerAdmins = User::where('role', User::ROLE_CENTER_ADMIN)
+                ->where('status', User::STATUS_ACTIVE)
+                ->where('center_id', $user->center_id)
+                ->with('center')
+                ->get();
+
+            $teachers = User::where('role', User::ROLE_TEACHER)
+                ->where('status', User::STATUS_ACTIVE)
+                ->where(function ($q) use ($user) {
+                    $q->where('center_id', $user->center_id)
+                      ->orWhereHas('teacher.classes', function ($c) use ($user) {
+                          $c->where('center_id', $user->center_id);
+                      });
+                })
+                ->with(['center', 'teacher.classes'])
+                ->get();
+
+            return $superAdmins->concat($centerAdmins)->concat($teachers)->sortBy('name')->values();
+        }
+
+        if ($user->isTeacher()) {
+            // Professeur : Super Admin + Admin de son centre + Secrétaires de son centre
+            $superAdmins = User::where('role', User::ROLE_SUPER_ADMIN)
+                ->where('status', User::STATUS_ACTIVE)
+                ->get();
+
+            $centerIds = $user->centerIds();
+
+            $admins = User::whereIn('role', [User::ROLE_CENTER_ADMIN, User::ROLE_SECRETARY])
+                ->where('status', User::STATUS_ACTIVE)
+                ->whereIn('center_id', $centerIds)
+                ->with('center')
+                ->get();
+
+            return $superAdmins->concat($admins)->sortBy('name')->values();
         }
 
         return collect();

@@ -29,6 +29,15 @@ class RoomController extends Controller
             $query->where('center_id', $authUser->center_id);
         }
 
+        // Si une formation ou un domaine est actif, restreindre aux salles associées aux séances ou classes de cette formation
+        $context = function_exists('user_context') ? user_context() : null;
+        if ($context && ($context->hasFormation() || ($context->hasDomain() && $context->domainSlug() !== 'all'))) {
+            $perimeter = $this->perimeter($authUser);
+            $query->whereHas('schedules.classRoom', function ($sq) use ($perimeter) {
+                $sq->whereIn('formation_id', $perimeter->formationIds());
+            });
+        }
+
         // Filtre : recherche par nom
         if ($search = $request->input('search')) {
             $query->where('name', 'like', "%{$search}%");

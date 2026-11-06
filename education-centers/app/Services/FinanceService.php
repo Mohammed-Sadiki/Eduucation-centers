@@ -4,8 +4,10 @@ namespace App\Services;
 
 use App\Http\Controllers\SuperAdminDomainController;
 use App\Models\Enrollment;
+use App\Models\Expense;
 use App\Models\Formation;
 use App\Models\Payment;
+use App\Models\Stagiaire;
 use App\Models\Teacher;
 use App\Models\TeacherSalary;
 use App\Models\User;
@@ -591,6 +593,125 @@ class FinanceService
             'center_admin_share' => round($centerAdminShare, 2),
             'total_collected' => round($totalCollected, 2),
             'unclassified_count' => $unclassifiedCount,
+        ];
+    }
+
+    /**
+     * Calcul de la répartition 70/30 pour les revenus des stagiaires.
+     * - Si enregistré par Super Admin : 70% Super Admin / 30% Centre
+     * - Si enregistré par Secrétaire ou Admin Centre : 70% Centre / 30% Super Admin
+     *
+     * @return array{super_admin_share: float, center_admin_share: float, total_collected: float}
+     */
+    public function calculateStagiaireRevenueSplit(?int $centerId = null): array
+    {
+        $query = Stagiaire::with('creator')->whereNotNull('stage_price')->where('stage_price', '>', 0);
+
+        if ($centerId) {
+            $query->where('center_id', $centerId);
+        }
+
+        $stagiaires = $query->get();
+
+        $superAdminShare = 0.00;
+        $centerAdminShare = 0.00;
+        $totalCollected = 0.00;
+
+        foreach ($stagiaires as $stagiaire) {
+            $price = (float) $stagiaire->stage_price;
+            $totalCollected += $price;
+
+            $role = $stagiaire->creator?->role;
+
+            if ($role === User::ROLE_SUPER_ADMIN) {
+                $superAdminShare += $price * 0.70;
+                $centerAdminShare += $price * 0.30;
+            } elseif ($role === User::ROLE_SECRETARY || $role === User::ROLE_CENTER_ADMIN) {
+                $centerAdminShare += $price * 0.70;
+                $superAdminShare += $price * 0.30;
+            } else {
+                // Origine par défaut : centre
+                $centerAdminShare += $price * 0.70;
+                $superAdminShare += $price * 0.30;
+            }
+        }
+
+        return [
+            'super_admin_share' => round($superAdminShare, 2),
+            'center_admin_share' => round($centerAdminShare, 2),
+            'total_collected' => round($totalCollected, 2),
+        ];
+    }
+
+    /**
+     * Calcul du compte financier indépendant et du solde automatique pour un rôle / centre donné.
+     *
+     * Règle :
+     * Solde = Total des revenus attribués - Total des dépenses enregistrées.
+     *
+     * - Super Admin : revenus attribués (élèves + stagiaires) sur tous les centres (ou centre sélectionné)
+     *   moins les dépenses enregistrées par un Super Admin.
+     * - Admin Centre : revenus attribués à son centre (élèves + stagiaires)
+     *   moins les dépenses enregistrées pour son centre par le centre (ou dépenses de son centre).
+     *
+     * @return array{revenue: float, expenses: float, balance: float, is_negative: bool}
+     */
+    public function getAccountBalance(?int $centerId, bool $isSuperAdmin, string $schoolYear = '2026/2027'): array
+    {
+        // 1. Revenus des élèves (StudentFinancialRow / calculateRevenueSplit)
+        $studentRows = $this->getStudentFinancialRows(null, $schoolYear, $centerId);
+        $studentSplit = $this->calculateRevenueSplit($studentRows, $centerId);
+
+        // 2. Revenus des stagiaires
+        $stagiaireSplit = $this->calculateStagiaireRevenueSplit($centerId);
+
+        if ($isSuperAdmin) {
+            // Revenus attribués au Super Admin
+            $attributedRevenue = $studentSplit['super_admin_share'] + $stagiaireSplit['super_admin_share'];
+
+            // Dépenses enregistrées par le Super Admin (ou attribuées au compte Super Admin)
+            $expenseQuery = Expense::where('status', 'paid')
+                ->whereHas('recorder', fn ($q) => $q->where('role', User::ROLE_SUPER_ADMIN));
+
+            if ($centerId) {
+                $expenseQuery->where('center_id', $centerId);
+            }
+
+            $recordedExpenses = (float) $expenseQuery->sum('amount');
+        } else {
+            // Revenus attribués à l'Admin Centre
+            $attributedRevenue = $studentSplit['center_admin_share'] + $stagiaireSplit['center_admin_share'];
+
+            // Dépenses enregistrées du centre (déduites du compte du centre)
+            // Inclut les dépenses du centre et les salaires payés du centre
+            $expenseQuery = Expense::where('status', 'paid');
+            if ($centerId) {
+                $expenseQuery->where('center_id', $centerId);
+                // Si la dépense a été enregistrée par le Super Admin pour son propre compte, ne pas la déduire du centre
+                $expenseQuery->where(function ($q) {
+                    $q->whereNull('recorded_by')
+                        ->orWhereHas('recorder', fn ($sub) => $sub->where('role', '!=', User::ROLE_SUPER_ADMIN));
+                });
+            }
+
+            $recordedExpenses = (float) $expenseQuery->sum('amount');
+
+            // Ajouter les salaires des professeurs versés dans ce centre
+            if ($centerId) {
+                $teacherSalaries = (float) TeacherSalary::where('center_id', $centerId)
+                    ->where('status', 'paid')
+                    ->sum('paid_amount');
+                $recordedExpenses += $teacherSalaries;
+            }
+        }
+
+        $balance = round($attributedRevenue - $recordedExpenses, 2);
+
+        return [
+            'revenue' => round($attributedRevenue, 2),
+            'expenses' => round($recordedExpenses, 2),
+            'balance' => $balance,
+            'is_negative' => $balance < 0,
         ];
     }
 }

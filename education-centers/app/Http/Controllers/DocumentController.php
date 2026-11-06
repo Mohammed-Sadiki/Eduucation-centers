@@ -30,6 +30,15 @@ class DocumentController extends Controller
         } elseif ($user->isStudent()) {
             $query->where('student_id', $user->student?->id)->where('center_id', $user->center_id)->where('status', 'active');
         }
+
+        // Si une formation ou un domaine est actif, restreindre aux documents d'étudiants inscrits dans cette formation
+        $context = function_exists('user_context') ? user_context() : null;
+        if ($context && ($context->hasFormation() || ($context->hasDomain() && $context->domainSlug() !== 'all'))) {
+            $perimeter = $this->perimeter($user);
+            $query->whereHas('student.enrollments', function ($eq) use ($perimeter) {
+                $eq->whereIn('formation_id', $perimeter->formationIds());
+            });
+        }
         if ($type = $request->input('type')) {
             $query->where('type', $type);
         }

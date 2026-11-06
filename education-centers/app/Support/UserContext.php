@@ -3,26 +3,31 @@
 namespace App\Support;
 
 use App\Models\Domain;
+use App\Models\Formation;
 use App\Models\User;
 
 /**
  * Contexte applicatif résolu pour la requête courante.
  *
- * Centralise trois dimensions qui pilotent le filtrage et la sécurité :
+ * Centralise quatre dimensions qui pilotent le filtrage et la sécurité :
  *  - le rôle / l'utilisateur connecté ;
  *  - le centre de travail (null = tous les centres pour le Super Admin,
  *    forcé au centre propre pour un Admin Centre ou Secrétaire) ;
- *  - le domaine de formation actif (slug validé côté serveur).
+ *  - le domaine de formation actif (slug validé côté serveur) ;
+ *  - la formation active (espace formation isolée).
  *
  * Il est construit par le middleware {@see \App\Http\Middleware\ResolveDomainContext}
  * et accessible via le container ou le helper global `context()`.
  */
 class UserContext
 {
+    protected ?Formation $resolvedFormation = null;
+
     public function __construct(
         protected ?User $currentUser = null,
         protected ?string $domainSlug = null,
         protected ?int $centerId = null,
+        protected ?int $formationId = null,
     ) {}
 
     public function user(): ?User
@@ -90,6 +95,35 @@ class UserContext
     }
 
     /**
+     * ID de la formation active (null si aucun espace formation spécifique sélectionné).
+     */
+    public function formationId(): ?int
+    {
+        return $this->formationId;
+    }
+
+    public function hasFormation(): bool
+    {
+        return $this->formationId !== null;
+    }
+
+    /**
+     * Modèle Formation actif (résolu à la demande).
+     */
+    public function formation(): ?Formation
+    {
+        if ($this->formationId === null) {
+            return null;
+        }
+
+        if ($this->resolvedFormation === null) {
+            $this->resolvedFormation = Formation::find($this->formationId);
+        }
+
+        return $this->resolvedFormation;
+    }
+
+    /**
      * Modèle Domain du domaine actif (null si aucun).
      */
     public function domain(): ?Domain
@@ -98,10 +132,14 @@ class UserContext
     }
 
     /**
-     * Libellé du domaine actif, ou null.
+     * Libellé du domaine ou de la formation active.
      */
     public function domainLabel(): ?string
     {
+        if ($this->hasFormation() && ($formation = $this->formation())) {
+            return $formation->translated('name') ?? $formation->name;
+        }
+
         return $this->domain()?->name;
     }
 }

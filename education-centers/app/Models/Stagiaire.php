@@ -13,6 +13,7 @@ class Stagiaire extends Model
 
     protected $fillable = [
         'center_id',
+        'created_by',
         'first_name',
         'last_name',
         'date_of_birth',
@@ -56,6 +57,11 @@ class Stagiaire extends Model
     public function center(): BelongsTo
     {
         return $this->belongsTo(Center::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function diplomas(): HasMany

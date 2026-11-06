@@ -138,7 +138,7 @@
                 // formations générales officielles du centre (aucune étape Domaine).
                 const center = this.effectiveCenterId;
                 if (center === '') return this.formations;
-                return this.formations.filter(f => String(f.center_id) === center);
+                return this.formations.filter(f => !f.center_id || String(f.center_id) === center);
             },
             get selectedFormation() {
                 return this.formations.find(f => String(f.id) === String(this.formationId)) || null;
@@ -217,7 +217,8 @@
                 if (!formationSelect) return;
                 let visible = 0;
                 formationSelect.querySelectorAll('option[data-center-id]').forEach((option) => {
-                    const match = center === '' || option.dataset.centerId === center;
+                    const optCenter = option.dataset.centerId;
+                    const match = center === '' || optCenter === '' || optCenter === 'null' || optCenter === center;
                     option.hidden = !match;
                     option.disabled = !match;
                     if (match) visible++;

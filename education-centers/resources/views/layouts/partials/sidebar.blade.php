@@ -4,18 +4,20 @@
     $isStagiaires = request()->routeIs('stagiaires.*');
     $isFinance = request()->routeIs('super-admin.finance.*');
 
-    // ─── Détection du contexte domaine de formation ───────────────────────────
-    // On utilise la session active_domain pour identifier le contexte courant.
-    // Si aucun domaine n'est en session mais que la route correspond à un domaine,
-    // on le récupère depuis l'URL (robustesse en cas de navigation directe).
+    // ─── Détection du contexte domaine ou formation active ───────────────────
     $activeDomain = session('active_domain');
+    $activeFormationId = session('active_formation_id');
+    $activeFormation = null;
+    if ($activeFormationId) {
+        $activeFormation = \App\Models\Formation::find($activeFormationId);
+    }
     if (!$activeDomain && request()->routeIs('super-admin.domain.dashboard')) {
         $activeDomain = request()->route('domain');
     }
     if (!$activeDomain && request()->routeIs('super-admin.sante.dashboard')) {
         $activeDomain = 'sante';
     }
-    $isFormationDomain = $user->isSuperAdmin() && !$isStagiaires && !$isFinance && !empty($activeDomain);
+    $isFormationDomain = ($user->isSuperAdmin() || $user->isCenterAdmin()) && !$isStagiaires && !$isFinance && (!empty($activeDomain) || !empty($activeFormationId));
 
     // Configuration visuelle par domaine
     $domainMeta = [
@@ -26,10 +28,19 @@
         'design-interieur' => ['label' => __('Design intérieur'), 'color' => 'violet',  'icon' => 'home'],
         'design-graphique' => ['label' => __('Design graphique'), 'color' => 'pink',    'icon' => 'brush'],
     ];
-    $currentDomainMeta = $domainMeta[$activeDomain] ?? $domainMeta['sante'];
-    $domainLabel       = $currentDomainMeta['label'];
-    $domainColor       = $currentDomainMeta['color'];
-    $domainIcon        = $currentDomainMeta['icon'];
+
+    if ($activeFormation) {
+        $domainLabel = $activeFormation->translated('name') ?? $activeFormation->name;
+        $canonicalDomain = $activeFormation->official_code ?? $activeFormation->domain;
+        $currentDomainMeta = $domainMeta[$canonicalDomain] ?? ['label' => $domainLabel, 'color' => 'emerald', 'icon' => 'academic'];
+        $domainColor = $currentDomainMeta['color'];
+        $domainIcon = $currentDomainMeta['icon'];
+    } else {
+        $currentDomainMeta = $domainMeta[$activeDomain] ?? $domainMeta['sante'];
+        $domainLabel       = $currentDomainMeta['label'];
+        $domainColor       = $currentDomainMeta['color'];
+        $domainIcon        = $currentDomainMeta['icon'];
+    }
 
     // Palettes de couleur par domaine
     $colorPalette = [
@@ -112,25 +123,11 @@
         // des professeurs » ont été retirés. Les salaires sont désormais gérés
         // comme une catégorie de charge directement depuis « Dépenses ».
         $groups[] = [
-            'title' => __('Navigation'),
-            'items' => array_filter([
-                $link(__('Tableau de bord'), 'super-admin.finance.dashboard', 'chart', 'super-admin.finance.dashboard'),
-                $link(__('Statistiques'), 'super-admin.finance.statistics', 'arrow-trending-up', 'super-admin.finance.statistics'),
-            ])
-        ];
-
-        $groups[] = [
             'title' => __('Gestion financière'),
             'items' => array_filter([
                 $link(__('Paiements'), 'super-admin.finance.students', 'academic', 'super-admin.finance.students'),
                 $link(__('Dépenses'), 'super-admin.finance.expenses', 'banknotes', ['super-admin.finance.expenses', 'super-admin.finance.teachers']),
                 $link(__('Recouvrement'), 'super-admin.finance.recovery', 'clock', 'super-admin.finance.recovery'),
-            ])
-        ];
-
-        $groups[] = [
-            'title' => __('Configuration'),
-            'items' => array_filter([
                 $link(__('Configuration des prix'), 'super-admin.finance.configuration', 'wrench', 'super-admin.finance.configuration'),
             ])
         ];
@@ -156,15 +153,19 @@
         // Le dashboard du domaine actif est l'entrée principale.
         // ────────────────────────────────────────────────────────────
 
-        // Lien Dashboard dynamique selon le domaine actif
-        $dashboardRoute = ($activeDomain === 'sante' || !$activeDomain)
-            ? route('super-admin.sante.dashboard')
-            : route('super-admin.domain.dashboard', $activeDomain ?? 'sante');
+        // Lien Dashboard dynamique selon la formation active ou le domaine actif
+        if ($activeFormation) {
+            $dashboardRoute = route('formations-generales.show', $activeFormation);
+        } elseif ($activeDomain === 'sante' || !$activeDomain) {
+            $dashboardRoute = route('super-admin.sante.dashboard');
+        } else {
+            $dashboardRoute = route('super-admin.domain.dashboard', $activeDomain ?? 'sante');
+        }
 
         $groups[] = ['title' => null, 'items' => array_filter([
             $link(__('Accueil'), 'admin.home', 'home', 'admin.home'),
             ['label' => __('Dashboard ') . $domainLabel, 'url' => $dashboardRoute, 'icon' => $domainIcon,
-             'active' => request()->routeIs(['super-admin.sante.dashboard', 'super-admin.domain.dashboard'])],
+             'active' => request()->routeIs(['super-admin.sante.dashboard', 'super-admin.domain.dashboard', 'formations-generales.show'])],
         ])];
 
         $adminItems = array_filter([
@@ -209,8 +210,13 @@
         // Sans formation active en session, on retombe sur le domaine par
         // défaut comme le fait déjà le Super Admin (jamais sur admin.home).
         // ────────────────────────────────────────────────────────────
+        $centerDashboardItem = $activeFormation
+            ? ['label' => __('Dashboard'), 'url' => route('formations-generales.show', $activeFormation), 'icon' => 'home',
+               'active' => request()->routeIs(['center-admin.domain.dashboard', 'formations-generales.show'])]
+            : $link(__('Dashboard'), 'center-admin.domain.dashboard', 'home', 'center-admin.domain.dashboard', null, [$activeDomain ?: 'sante']);
+
         $groups[] = ['title' => null, 'items' => array_filter([
-            $link(__('Dashboard'), 'center-admin.domain.dashboard', 'home', 'center-admin.domain.dashboard', null, [$activeDomain ?: 'sante']),
+            $centerDashboardItem,
             $link(__('Emploi du temps'), 'schedules.index', 'calendar', 'schedules.*'),
             $link(__('Présences'), 'attendances.index', 'clock', 'attendances.*'),
             $link(__('Évaluations'), 'evaluations.index', 'chart', 'evaluations.*'),
@@ -430,8 +436,8 @@
                 </a>
             </div>
         </div>
-    @elseif(($user->isCenterAdmin() || $user->isSecretary()) && !empty($activeDomain))
-        {{-- BANNER DU CONTEXTE : DOMAINE ACTIF (ADMIN CENTRE, périmètre = son centre) --}}
+    @elseif(($user->isCenterAdmin() || $user->isSecretary()) && (!empty($activeDomain) || !empty($activeFormationId)))
+        {{-- BANNER DU CONTEXTE : DOMAINE ACTIF OU FORMATION (ADMIN CENTRE, périmètre = son centre) --}}
         <div class="border-b border-slate-200 {{ $pal['banner_bg'] }} p-3 dark:border-slate-800"
              data-domain="{{ $activeDomain }}"
              id="sidebar-domain-banner-center">

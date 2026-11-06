@@ -69,14 +69,14 @@ class UpdateEnrollmentRequest extends FormRequest
                 $validator->errors()->add('student_id', __('L\'étudiant sélectionné n\'appartient pas à ce centre.'));
             }
 
-            if ($formation && $formation->center_id !== $targetCenterId) {
+            if ($formation && $formation->center_id !== null && $formation->center_id !== $targetCenterId) {
                 $validator->errors()->add('formation_id', __('La formation sélectionnée n\'appartient pas à ce centre.'));
             }
 
             // 1 bis. Architecture obligatoire : une inscription ne peut viser
             // qu'une formation générale. Une ancienne sous-formation n'est plus
             // une option, même envoyée par requête directe.
-            if ($formation && $formation->center_id === $targetCenterId
+            if ($formation && ($formation->center_id === null || $formation->center_id === $targetCenterId)
                 && ! AcademicPerimeter::isCurrentFormation($formation)) {
                 $validator->errors()->add('formation_id', __('La formation sélectionnée n\'est plus proposée. Choisissez la formation générale équivalente.'));
             }

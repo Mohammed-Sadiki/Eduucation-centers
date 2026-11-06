@@ -54,6 +54,9 @@ class DashboardController extends Controller
      */
     public function adminHome(Request $request): View
     {
+        session()->forget('active_formation_id');
+        session()->forget('active_domain');
+
         return view('admin.home');
     }
 

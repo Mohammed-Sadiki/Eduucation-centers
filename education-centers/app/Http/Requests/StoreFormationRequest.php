@@ -28,12 +28,22 @@ class StoreFormationRequest extends FormRequest
         $authUser = $this->user();
 
         // Détermination du center_id cible pour la contrainte d'unicité
-        $targetCenterId = $authUser->isCenterAdmin() ? $authUser->center_id : $this->input('center_id');
+        $inputCenter = $this->input('center_id');
+        $targetCenterId = ($authUser->isCenterAdmin() || $authUser->isSecretary())
+            ? $authUser->center_id
+            : (($inputCenter === 'all' || $inputCenter === '0' || $inputCenter === null) ? null : (int) $inputCenter);
 
         return [
             'center_id' => [
-                $authUser->isSuperAdmin() ? 'required' : 'nullable',
-                'exists:centers,id',
+                'required',
+                function ($attribute, $value, $fail) {
+                    if ($value === 'all' || $value === '0') {
+                        return;
+                    }
+                    if (! \App\Models\Center::query()->whereKey($value)->exists()) {
+                        $fail(__('Le centre sélectionné est invalide.'));
+                    }
+                },
             ],
             // Domaine de rattachement : column métier réelle `domain` (slug),
             // obligatoire pour que la formation apparaisse dans le dashboard du
@@ -45,6 +55,9 @@ class StoreFormationRequest extends FormRequest
                 'string',
                 'max:50',
                 Rule::unique('formations', 'code')->where(function ($query) use ($targetCenterId) {
+                    if ($targetCenterId === null) {
+                        return $query->whereNull('center_id');
+                    }
                     return $query->where('center_id', $targetCenterId);
                 }),
             ],

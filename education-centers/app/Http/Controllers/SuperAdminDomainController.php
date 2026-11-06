@@ -34,6 +34,7 @@ class SuperAdminDomainController extends Controller
     public function index(): View
     {
         session()->forget('active_domain');
+        session()->forget('active_formation_id');
 
         $domains = DomainRegistry::visible();
 
@@ -55,6 +56,7 @@ class SuperAdminDomainController extends Controller
         $this->assertDomainAllowed($domain);
 
         session(['active_domain' => $domain]);
+        session()->forget('active_formation_id');
 
         // Filtre centre secondaire (Super Admin uniquement).
         $centerId = $request->query('center_id') ? (int) $request->query('center_id') : null;
@@ -85,6 +87,7 @@ class SuperAdminDomainController extends Controller
     public function clearDomain(): RedirectResponse
     {
         session()->forget('active_domain');
+        session()->forget('active_formation_id');
 
         return redirect()->route('dashboard');
     }

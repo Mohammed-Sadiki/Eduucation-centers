@@ -29,6 +29,7 @@ class CenterAdminDomainController extends SuperAdminDomainController
     public function domainPicker(Request $request): View
     {
         session()->forget('active_domain');
+        session()->forget('active_formation_id');
 
         $domains = DomainRegistry::visibleForCenter($this->centerId($request));
 
@@ -43,6 +44,7 @@ class CenterAdminDomainController extends SuperAdminDomainController
         $this->assertDomainAllowed($domain);
 
         session(['active_domain' => $domain]);
+        session()->forget('active_formation_id');
 
         // Périmètre forcé : le centre de l'Admin Centre, jamais un ?center_id externe.
         $centerId = $this->centerId($request);

@@ -171,3 +171,4 @@ class DemoAccountsSynchronizationTest extends TestCase
         $seeder->run();
     }
 }
+

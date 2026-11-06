@@ -5,6 +5,9 @@
     // générale personnalisée : $formation est défini uniquement en édition.
     $editing = isset($formation) && $formation instanceof \App\Models\Formation;
     $pageTitle = $editing ? __('Modifier la formation personnalisée') : __('Nouvelle formation générale');
+    $user = auth()->user();
+    $isSuperAdmin = $user->isSuperAdmin();
+    $currentCenterId = old('center_id', $editing ? ($formation->center_id ?? 'all') : ($center->id ?? ''));
 @endphp
 
 @section('title', $pageTitle . ' — ' . config('app.name'))
@@ -14,7 +17,7 @@
 
     <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-center gap-3.5 [direction:ltr]" dir="ltr">
-            <x-ui.back-button :fallback="route('formations-generales.index', ['center_id' => $center->id])" />
+            <x-ui.back-button :fallback="route('formations-generales.index', $center ? ['center_id' => $center->id] : [])" />
             <div class="flex items-center gap-3 {{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
                 <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-lg shadow-brand-600/30">
                     <x-icon name="{{ $editing ? 'pencil' : 'plus' }}" class="h-6 w-6 text-white" stroke-width="2" />
@@ -22,10 +25,14 @@
                 <div>
                     <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
                         {{ $pageTitle }}
-                        <span class="ms-2 text-base font-normal text-slate-500 dark:text-slate-400">· {{ $center->name }}</span>
+                        @if($center)
+                            <span class="ms-2 text-base font-normal text-slate-500 dark:text-slate-400">· {{ $center->name }}</span>
+                        @elseif($editing && $formation->center_id === null)
+                            <span class="ms-2 text-base font-normal text-slate-500 dark:text-slate-400">· {{ __('Tous les centres') }}</span>
+                        @endif
                     </h1>
                     <p class="text-sm text-slate-500 dark:text-slate-400">
-                        {{ __('La formation est liée au centre ; elle suit les mêmes règles que les six officielles (maximum 2 classes, 1 professeur responsable).') }}
+                        {{ __('La formation suit les mêmes règles que les six officielles (maximum 2 classes, 1 professeur responsable).') }}
                     </p>
                 </div>
             </div>
@@ -51,11 +58,6 @@
         @csrf
         @if ($editing)
             @method('PUT')
-        @else
-            {{-- Super Admin : le centre cible est transmis ; Admin Centre forcé serveur --}}
-            @if (auth()->user()->isSuperAdmin())
-                <input type="hidden" name="center_id" value="{{ $center->id }}">
-            @endif
         @endif
 
         <x-ui.form-grid>
@@ -63,6 +65,38 @@
             {{-- ═══════════════════════════ CARTE 1 — Identité ═══════════════════════════ --}}
             <x-ui.form-section :number="1" :title="__('Identité de la formation')">
                 <div class="grid gap-5 p-6 sm:grid-cols-2">
+
+                    {{-- Sélection du centre concerné --}}
+                    <div class="sm:col-span-2">
+                        <label for="center_id" class="ec-label text-base font-semibold">
+                            {{ __('Centre concerné') }} <span class="text-red-500">*</span>
+                        </label>
+                        @if ($isSuperAdmin)
+                            <select id="center_id" name="center_id" required
+                                    class="ec-select text-base @error('center_id') is-invalid @enderror">
+                                <option value="" disabled @selected($currentCenterId === '' || $currentCenterId === null)>
+                                    {{ __('— Choisir un centre ou tous les centres —') }}
+                                </option>
+                                <option value="all" @selected($currentCenterId === 'all' || (string)$currentCenterId === '0')>
+                                    {{ __('Tous les centres') }}
+                                </option>
+                                @foreach ($centers as $c)
+                                    <option value="{{ $c->id }}" @selected((string)$currentCenterId === (string)$c->id)>
+                                        {{ $c->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('center_id') <p class="ec-error text-sm">{{ $message }}</p> @enderror
+                            <p class="ec-help mt-1 text-sm">{{ __('Choisissez un centre précis ou « Tous les centres » pour rendre la formation visible partout.') }}</p>
+                        @else
+                            {{-- Admin Centre / Secrétaire : centre forcé automatiquement côté serveur (pas de champ d'entrée) --}}
+                            <div class="ec-input flex items-center justify-between bg-slate-50 text-base text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                                <span>{{ $user->center?->name ?? __('Votre centre') }}</span>
+                                <span class="ec-badge bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">{{ __('Automatique') }}</span>
+                            </div>
+                        @endif
+                    </div>
+
                     <div class="sm:col-span-2">
                         <label for="name" class="ec-label text-base font-semibold">{{ __('Nom de la formation') }} <span class="text-red-500">*</span></label>
                         <input type="text" id="name" name="name"
@@ -71,7 +105,7 @@
                                class="ec-input text-base @error('name') is-invalid @enderror"
                                placeholder="{{ __('Ex : Assistance médicale') }}">
                         @error('name') <p class="ec-error text-sm">{{ $message }}</p> @enderror
-                        <p class="ec-help mt-1 text-sm">{{ __('Le nom doit être unique dans le centre. Les six formations officielles restent en place.') }}</p>
+                        <p class="ec-help mt-1 text-sm">{{ __('Le nom doit être unique dans le périmètre concerné.') }}</p>
                     </div>
 
                     <div class="sm:col-span-2">
@@ -145,21 +179,31 @@
                             @endforeach
                         </select>
                         @error('teacher_id') <p class="ec-error text-sm">{{ $message }}</p> @enderror
-                        <p class="ec-help mt-1 text-sm">{{ __('Facultatif à la création. Un seul responsable, obligatoirement du centre.') }}</p>
+                        <p class="ec-help mt-1 text-sm">{{ __('Facultatif à la création. Un seul responsable.') }}</p>
                     </div>
 
                     <div>
                         <label for="image" class="ec-label text-base font-semibold">{{ __('Image de la carte (facultative)') }}</label>
                         <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png,.webp"
+                               onchange="previewFormationImage(event)"
                                class="ec-input w-full text-base @error('image') is-invalid @enderror file:me-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:text-base file:font-semibold file:text-slate-700 hover:file:bg-slate-200 dark:file:bg-slate-800 dark:file:text-slate-200">
                         @error('image') <p class="ec-error text-sm">{{ $message }}</p> @enderror
                         <p class="ec-help mt-1 text-sm">{{ __('JPG, PNG ou WebP — 2 Mo maximum. Sans image, une icône générique habille la carte.') }}</p>
 
+                        {{-- Aperçu en direct de l'image sélectionnée --}}
+                        <div id="image-live-preview-container" class="mt-3 hidden items-center gap-3 rounded-xl border border-brand-200 bg-brand-50/50 p-2.5 dark:border-brand-800/40 dark:bg-brand-950/20">
+                            <img id="image-live-preview" src="#" alt="{{ __('Nouvel aperçu') }}"
+                                 class="h-16 w-24 rounded-lg object-cover border border-brand-300 shadow-xs">
+                            <div class="text-xs text-brand-800 dark:text-brand-200 font-medium">
+                                {{ __('Aperçu de la nouvelle image sélectionnée.') }}
+                            </div>
+                        </div>
+
                         @if (!empty($formation?->image_path))
-                            <div class="mt-2 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                            <div id="image-current-container" class="mt-3 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
                                 <img src="{{ asset('storage/' . $formation->image_path) }}" alt="{{ __('Image actuelle') }}"
-                                     class="h-12 w-20 rounded-lg object-cover border border-slate-200 dark:border-slate-700">
-                                <span>{{ __('Image actuelle — envoyez un fichier pour la remplacer.') }}</span>
+                                     class="h-14 w-24 rounded-lg object-cover border border-slate-200 dark:border-slate-700">
+                                <span class="text-xs">{{ __('Image actuelle — envoyez un nouveau fichier pour la remplacer.') }}</span>
                             </div>
                         @endif
                     </div>
@@ -168,7 +212,7 @@
 
             {{-- Barre d'actions --}}
             <div class="flex flex-wrap items-center justify-end gap-3 pt-2 lg:col-span-2">
-                <a href="{{ route('formations-generales.picker', ['center_id' => $center->id]) }}"
+                <a href="{{ route('formations-generales.index', $center ? ['center_id' => $center->id] : []) }}"
                    class="ec-btn-secondary text-base">{{ __('Annuler') }}</a>
                 <button type="submit" id="btn-save-custom-formation" class="ec-btn-primary px-6 text-base">
                     <x-icon name="check" class="h-5 w-5" />
@@ -197,5 +241,25 @@
             </form>
         </div>
     @endif
+
+    <script>
+        function previewFormationImage(event) {
+            const input = event.target;
+            const container = document.getElementById('image-live-preview-container');
+            const preview = document.getElementById('image-live-preview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    container.classList.remove('hidden');
+                    container.classList.add('flex');
+                };
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                container.classList.add('hidden');
+                container.classList.remove('flex');
+            }
+        }
+    </script>
 
 @endsection

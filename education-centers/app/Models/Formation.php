@@ -170,10 +170,15 @@ class Formation extends Model
      */
     public function perimeterClasses(): Builder
     {
-        return ClassRoom::query()
+        $query = ClassRoom::query()
             ->with('formation')
-            ->whereIn('formation_id', AcademicPerimeter::equivalentIds($this))
-            ->where('center_id', $this->center_id);
+            ->whereIn('formation_id', AcademicPerimeter::equivalentIds($this));
+
+        if ($this->center_id !== null) {
+            $query->where('center_id', $this->center_id);
+        }
+
+        return $query;
     }
 
     /**
@@ -184,9 +189,14 @@ class Formation extends Model
      */
     public function perimeterEnrollments(): Builder
     {
-        return Enrollment::query()
-            ->whereIn('formation_id', AcademicPerimeter::equivalentIds($this))
-            ->where('center_id', $this->center_id);
+        $query = Enrollment::query()
+            ->whereIn('formation_id', AcademicPerimeter::equivalentIds($this));
+
+        if ($this->center_id !== null) {
+            $query->where('center_id', $this->center_id);
+        }
+
+        return $query;
     }
 
     /**
@@ -313,7 +323,10 @@ class Formation extends Model
             if ($ids === []) {
                 return [];
             }
-            $query->whereIn('center_id', $ids);
+            $query->where(function ($q) use ($ids) {
+                $q->whereIn('center_id', $ids)
+                    ->orWhereNull('center_id');
+            });
         }
 
         /** @var Collection<int, static> $formations */

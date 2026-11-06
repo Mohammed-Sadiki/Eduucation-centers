@@ -26,7 +26,7 @@
     {{-- En-tête de la page --}}
     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-slate-200/90 pb-5 dark:border-slate-800">
         <div class="flex items-center gap-3.5 [direction:ltr]" dir="ltr">
-            <x-ui.back-button :fallback="route('super-admin.finance.dashboard')" />
+            <x-ui.back-button :fallback="route('admin.home')" />
             <div class="{{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
                 <div class="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-600 border border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 mb-1.5 shadow-2xs">
                     <span>🧾</span>
@@ -65,59 +65,58 @@
         </div>
     @endif
 
-    {{-- ── 1. QUATRE CARTES STATISTIQUES EXISTANTES CONSERVÉES ────────────── --}}
+    {{-- ── 1. CARTES FINANCIÈRES & SOLDE DU COMPTE ────────────── --}}
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {{-- Budget annuel alloué --}}
+        {{-- Revenus attribués --}}
         <div class="finance-card p-4.5">
-            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Budget alloué') }}</span>
-            <div class="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white whitespace-nowrap">
-                {{ format_price($annualBudget, 'MAD') }}
+            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Revenus attribués (70/30)') }}</span>
+            <div class="mt-2 text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                {{ format_price($accountBalance['revenue'] ?? 0, 'MAD') }}
             </div>
             <div class="mt-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
-                {{ __('Plafond prévisionnel annuel') }}
+                {{ auth()->user()->isSuperAdmin() ? __('Part Super Admin (Élèves + Stagiaires)') : __('Part Centre (Élèves + Stagiaires)') }}
             </div>
         </div>
 
         {{-- Dépenses & charges engagées (dépenses + salaires) --}}
         <div class="finance-card p-4.5">
-            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Charges engagées') }}</span>
+            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Total Dépenses') }}</span>
             <div class="mt-2 text-2xl font-extrabold text-rose-600 dark:text-rose-400 whitespace-nowrap">
+                {{ format_price($accountBalance['expenses'] ?? $totalExpenses, 'MAD') }}
+            </div>
+            <div class="mt-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+                {{ __('Dépenses déduites du compte') }}
+            </div>
+        </div>
+
+        {{-- Solde automatique (Revenus - Dépenses) --}}
+        <div class="finance-card p-4.5">
+            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Solde du compte') }}</span>
+            <div class="mt-2 text-2xl font-extrabold whitespace-nowrap {{ ($accountBalance['is_negative'] ?? false) ? 'text-rose-600 dark:text-rose-400' : 'text-[#0DAD98]' }}">
+                {{ format_price($accountBalance['balance'] ?? 0, 'MAD') }}
+            </div>
+            <div class="mt-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
+                {{ __('Revenus attribués - Dépenses enregistrées') }}
+            </div>
+        </div>
+
+        {{-- Charges engagées & Suivi --}}
+        <div class="finance-card p-4.5">
+            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Charges engagées') }}</span>
+            <div class="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white whitespace-nowrap">
                 {{ format_price($totalExpenses, 'MAD') }}
             </div>
             <div class="mt-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
-                {{ $chargeRows->count() }} {{ __('charge(s) (achats + salaires)') }} ·
-                <span class="text-emerald-600 dark:text-emerald-400">{{ __('versé :') }} {{ format_price($realizedTotal, 'MAD') }}</span> ·
-                <span class="text-amber-600 dark:text-amber-400">{{ __('reste :') }} {{ format_price($dueTotal, 'MAD') }}</span>
-            </div>
-        </div>
-
-        {{-- Budget restant (calculé automatiquement) --}}
-        <div class="finance-card p-4.5">
-            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Budget restant') }}</span>
-            <div class="mt-2 text-2xl font-extrabold text-[#0DAD98] whitespace-nowrap">
-                {{ format_price($remainingBudget, 'MAD') }}
-            </div>
-            <div class="mt-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
-                {{ __('Solde disponible déduit en temps réel') }}
-            </div>
-        </div>
-
-        {{-- Taux de consommation --}}
-        <div class="finance-card p-4.5">
-            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400">{{ __('Taux de consommation') }}</span>
-            <div class="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white whitespace-nowrap">
-                {{ $consumptionRate }}%
-            </div>
-            <div class="mt-3 text-xs text-slate-400 border-t border-slate-100 dark:border-slate-800/80 pt-2">
-                {{ __('Consommé sur budget initial') }}
+                {{ $chargeRows->count() }} {{ __('charge(s)') }} ·
+                <span class="text-emerald-600 dark:text-emerald-400">{{ __('versé :') }} {{ format_price($realizedTotal, 'MAD') }}</span>
             </div>
         </div>
     </div>
 
     {{-- ── 2. DEUX BOUTONS D'ACTION SOUS LES CARTES ───────────────────────── --}}
     <div class="flex flex-wrap items-center gap-3 pt-2">
-        {{-- Bouton 1 : + Ajouter (réservé au Super Admin) --}}
-        @if(auth()->user()->isSuperAdmin())
+        {{-- Bouton 1 : + Ajouter (Super Admin et Admin Centre) --}}
+        @if(auth()->user()->isSuperAdmin() || auth()->user()->isCenterAdmin())
             <button type="button"
                     x-on:click="openAddModal()"
                     class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-brand-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-500/20 active:scale-[0.99] dark:bg-brand-500 dark:hover:bg-brand-600">
@@ -249,7 +248,7 @@
     </div>
 
     {{-- ── 4. MODALE SIMPLE D'AJOUT DE DÉPENSE (DEUX CHAMPS) ──────────────── --}}
-    @if(auth()->user()->isSuperAdmin())
+    @if(auth()->user()->isSuperAdmin() || auth()->user()->isCenterAdmin())
         <div x-show="addModalOpen"
              x-cloak
              x-transition:enter="transition ease-out duration-200"

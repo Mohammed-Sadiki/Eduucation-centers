@@ -34,7 +34,7 @@ abstract class Controller
     {
         $context ??= user_context();
 
-        if (! $context->hasDomain()) {
+        if (! $context->hasDomain() && ! $context->hasFormation()) {
             return $query;
         }
 

@@ -99,7 +99,7 @@ class FinanceSidebarSimplificationTest extends TestCase
      */
     public function test_super_admin_finance_sidebar_contains_only_three_items_in_gestion_financiere(): void
     {
-        $response = $this->actingAs($this->superAdmin)->get(route('super-admin.finance.dashboard'));
+        $response = $this->actingAs($this->superAdmin)->get(route('super-admin.finance.students'));
         $response->assertOk();
 
         $sidebar = $this->getSidebar($response->getContent());
@@ -107,23 +107,27 @@ class FinanceSidebarSimplificationTest extends TestCase
         // La section Gestion financière existe
         $this->assertStringContainsString(__('Gestion financière'), $sidebar);
 
-        // Les 3 liens demandés sont présents
+        // Les 4 liens demandés sont présents (Paiements, Dépenses, Recouvrement, Configuration des prix)
         $this->assertStringContainsString(route('super-admin.finance.students'), $sidebar);
         $this->assertStringContainsString(route('super-admin.finance.expenses'), $sidebar);
         $this->assertStringContainsString(route('super-admin.finance.recovery'), $sidebar);
+        $this->assertStringContainsString(route('super-admin.finance.configuration'), $sidebar);
 
         // Libellés visibles
         $this->assertStringContainsString(__('Paiements'), $sidebar);
         $this->assertStringContainsString(__('Dépenses'), $sidebar);
         $this->assertStringContainsString(__('Recouvrement'), $sidebar);
+        $this->assertStringContainsString(__('Configuration des prix'), $sidebar);
 
-        // Ordre respecté : Paiements < Dépenses < Recouvrement
+        // Ordre respecté : Paiements < Dépenses < Recouvrement < Configuration des prix
         $posPaiements = strpos($sidebar, route('super-admin.finance.students'));
         $posDepenses = strpos($sidebar, route('super-admin.finance.expenses'));
         $posRecouvrement = strpos($sidebar, route('super-admin.finance.recovery'));
+        $posConfig = strpos($sidebar, route('super-admin.finance.configuration'));
 
         $this->assertTrue($posPaiements < $posDepenses, 'Paiements doit précéder Dépenses');
         $this->assertTrue($posDepenses < $posRecouvrement, 'Dépenses doit précéder Recouvrement');
+        $this->assertTrue($posRecouvrement < $posConfig, 'Recouvrement doit précéder Configuration des prix');
 
         // Aucun autre lien de l'ancien module ne figure dans la sidebar
         $this->assertStringNotContainsString(route('super-admin.finance.bank'), $sidebar);
@@ -131,21 +135,17 @@ class FinanceSidebarSimplificationTest extends TestCase
         $this->assertStringNotContainsString(route('super-admin.finance.history'), $sidebar);
         $this->assertStringNotContainsString(route('super-admin.finance.reports'), $sidebar);
 
-        // Les sections Navigation et Configuration restent intactes
-        $this->assertStringContainsString(__('Navigation'), $sidebar);
-        $this->assertStringContainsString(route('super-admin.finance.dashboard'), $sidebar);
-        $this->assertStringContainsString(route('super-admin.finance.statistics'), $sidebar);
-
-        $this->assertStringContainsString(__('Configuration'), $sidebar);
-        $this->assertStringContainsString(route('super-admin.finance.configuration'), $sidebar);
+        // Les anciennes entrées Dashboard / Statistiques ont été retirées des liens
+        $this->assertStringNotContainsString('href="' . route('super-admin.finance.dashboard') . '"', $sidebar);
+        $this->assertStringNotContainsString('href="' . route('super-admin.finance.statistics') . '"', $sidebar);
     }
 
     /**
-     * 2. Admin Centre : la section GESTION FINANCIÈRE contient uniquement Paiements, Dépenses, Recouvrement.
+     * 2. Admin Centre : la section GESTION FINANCIÈRE contient uniquement Paiements, Dépenses, Recouvrement, Configuration.
      */
     public function test_center_admin_finance_sidebar_contains_only_three_items_in_gestion_financiere(): void
     {
-        $response = $this->actingAs($this->centerAdmin)->get(route('super-admin.finance.dashboard'));
+        $response = $this->actingAs($this->centerAdmin)->get(route('super-admin.finance.students'));
         $response->assertOk();
 
         $sidebar = $this->getSidebar($response->getContent());
@@ -153,23 +153,27 @@ class FinanceSidebarSimplificationTest extends TestCase
         // La section Gestion financière existe
         $this->assertStringContainsString(__('Gestion financière'), $sidebar);
 
-        // Les 3 liens sont présents
+        // Les 4 liens sont présents
         $this->assertStringContainsString(route('super-admin.finance.students'), $sidebar);
         $this->assertStringContainsString(route('super-admin.finance.expenses'), $sidebar);
         $this->assertStringContainsString(route('super-admin.finance.recovery'), $sidebar);
+        $this->assertStringContainsString(route('super-admin.finance.configuration'), $sidebar);
 
         // Libellés visibles
         $this->assertStringContainsString(__('Paiements'), $sidebar);
         $this->assertStringContainsString(__('Dépenses'), $sidebar);
         $this->assertStringContainsString(__('Recouvrement'), $sidebar);
+        $this->assertStringContainsString(__('Configuration des prix'), $sidebar);
 
-        // Ordre respecté : Paiements < Dépenses < Recouvrement
+        // Ordre respecté : Paiements < Dépenses < Recouvrement < Configuration des prix
         $posPaiements = strpos($sidebar, route('super-admin.finance.students'));
         $posDepenses = strpos($sidebar, route('super-admin.finance.expenses'));
         $posRecouvrement = strpos($sidebar, route('super-admin.finance.recovery'));
+        $posConfig = strpos($sidebar, route('super-admin.finance.configuration'));
 
         $this->assertTrue($posPaiements < $posDepenses, 'Paiements doit précéder Dépenses');
         $this->assertTrue($posDepenses < $posRecouvrement, 'Dépenses doit précéder Recouvrement');
+        $this->assertTrue($posRecouvrement < $posConfig, 'Recouvrement doit précéder Configuration des prix');
 
         // Aucun autre lien superflu
         $this->assertStringNotContainsString(route('super-admin.finance.bank'), $sidebar);
@@ -177,13 +181,9 @@ class FinanceSidebarSimplificationTest extends TestCase
         $this->assertStringNotContainsString(route('super-admin.finance.history'), $sidebar);
         $this->assertStringNotContainsString(route('super-admin.finance.reports'), $sidebar);
 
-        // Les sections Navigation et Configuration restent intactes
-        $this->assertStringContainsString(__('Navigation'), $sidebar);
-        $this->assertStringContainsString(route('super-admin.finance.dashboard'), $sidebar);
-        $this->assertStringContainsString(route('super-admin.finance.statistics'), $sidebar);
-
-        $this->assertStringContainsString(__('Configuration'), $sidebar);
-        $this->assertStringContainsString(route('super-admin.finance.configuration'), $sidebar);
+        // Les anciennes entrées Dashboard / Statistiques ont été retirées des liens
+        $this->assertStringNotContainsString('href="' . route('super-admin.finance.dashboard') . '"', $sidebar);
+        $this->assertStringNotContainsString('href="' . route('super-admin.finance.statistics') . '"', $sidebar);
     }
 
     /**
@@ -244,7 +244,7 @@ class FinanceSidebarSimplificationTest extends TestCase
     {
         $this->actingAs($this->superAdmin)->get(route('locale.switch', 'ar'))->assertRedirect();
 
-        $response = $this->actingAs($this->superAdmin)->get(route('super-admin.finance.dashboard'));
+        $response = $this->actingAs($this->superAdmin)->get(route('super-admin.finance.students'));
         $response->assertOk();
 
         $sidebar = $this->getSidebar($response->getContent());

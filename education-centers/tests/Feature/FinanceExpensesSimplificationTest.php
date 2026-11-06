@@ -86,17 +86,17 @@ class FinanceExpensesSimplificationTest extends TestCase
     }
 
     /**
-     * Test 1 : Les 4 cartes statistiques s'affichent correctement.
+     * Test 1 : Les 4 cartes s'affichent correctement.
      */
     public function test_expenses_page_displays_the_four_cards(): void
     {
         $response = $this->actingAs($this->superAdmin)->get(route('super-admin.finance.expenses', ['center_id' => $this->centerTanger->id]));
 
         $response->assertStatus(200);
-        $response->assertSee('Budget alloué');
+        $response->assertSee('Revenus attribués');
+        $response->assertSee('Total Dépenses');
+        $response->assertSee('Solde du compte');
         $response->assertSee('Charges engagées');
-        $response->assertSee('Budget restant');
-        $response->assertSee('Taux de consommation');
         $response->assertSee('+ Ajouter');
         $response->assertSee('Historique des dépenses');
     }
@@ -203,21 +203,28 @@ class FinanceExpensesSimplificationTest extends TestCase
     }
 
     /**
-     * Test 5 : Responsable Centre consulte sans bouton Ajouter ni droit d'écriture.
+     * Test 5 : Responsable Centre consulte et peut ajouter une dépense pour son centre.
      */
-    public function test_center_manager_has_read_only_access(): void
+    public function test_center_manager_can_access_and_add_expense(): void
     {
         $response = $this->actingAs($this->centerAdminTanger)->get(route('super-admin.finance.expenses'));
         $response->assertStatus(200);
         $response->assertSee('Historique des dépenses');
-        $response->assertDontSee('+ Ajouter');
+        $response->assertSee('+ Ajouter');
 
-        // Tentative de POST rejetée par 403
+        // L'Admin Centre peut ajouter une dépense
         $postResponse = $this->actingAs($this->centerAdminTanger)->post(route('super-admin.finance.expenses.store'), [
-            'title' => 'Tentative interdite',
-            'amount' => 100,
+            'title' => 'Achat fournitures centre',
+            'amount' => 150,
         ]);
-        $postResponse->assertStatus(403);
+        $postResponse->assertRedirect(route('super-admin.finance.expenses'));
+
+        $this->assertDatabaseHas('expenses', [
+            'title' => 'Achat fournitures centre',
+            'amount' => 150,
+            'center_id' => $this->centerTanger->id,
+            'recorded_by' => $this->centerAdminTanger->id,
+        ]);
     }
 
     /**

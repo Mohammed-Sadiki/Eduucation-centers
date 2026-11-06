@@ -119,10 +119,12 @@ Route::middleware('auth')->group(function () {
     // multi-centres (restriction volontaire via ?center_id).
     Route::middleware('role:super_admin,center_admin')->group(function () {
         Route::prefix('super-admin/finance')->name('super-admin.finance.')->group(function () {
-            // 1. Tableau de bord
+            // 1. Dashboard financier
             Route::get('/', [FinanceDashboardController::class, 'index'])->name('dashboard');
-            // 2. Statistiques
-            Route::get('/statistiques', [FinanceDashboardController::class, 'statistics'])->name('statistics');
+            // 2. Redirection de l'ancienne page statistiques vers Paiements
+            Route::get('/statistiques', function () {
+                return redirect()->route('super-admin.finance.students');
+            })->name('statistics');
             // 3. Gestion financière : Paiements
             Route::get('/etudiants', [FinanceDashboardController::class, 'students'])->name('students');
             Route::post('/paiements-etudiants', [FinanceDashboardController::class, 'storeStudentPayment'])->name('students.payment.store');
@@ -355,11 +357,11 @@ Route::middleware('auth')->group(function () {
     // ──────────────────────────────────────────────────────────────────────────
     Route::middleware('role:super_admin,center_admin,secretary,teacher')->group(function () {
         Route::post('/messages/conversations/{conversation}', [MessageController::class, 'sendMessage'])->name('messages.send');
+        Route::post('/messages/start-direct/{target}', [MessageController::class, 'startDirect'])->name('messages.start-direct');
     });
 
     Route::middleware('role:super_admin,center_admin,secretary')->group(function () {
         Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
-        Route::post('/messages/start-direct/{target}', [MessageController::class, 'startDirect'])->name('messages.start-direct');
     });
 
     // Routes de consultation des messages (Super Admin, Center Admin, Teacher)

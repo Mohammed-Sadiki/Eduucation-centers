@@ -200,6 +200,8 @@ class StagiaireController extends Controller
             $data['center_id'] = $request->user()->center_id;
         }
 
+        $data['created_by'] = $request->user()->id;
+
         // Les informations absentes du formulaire restent gérées par leurs
         // valeurs par défaut en base : aucune écriture explicite de NULL.
         $data = $this->withoutNullValues($data);

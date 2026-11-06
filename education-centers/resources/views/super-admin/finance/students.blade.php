@@ -39,7 +39,7 @@
     ──────────────────────────────────────────────────────────── --}}
     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-slate-200/90 pb-5 dark:border-slate-800">
         <div class="flex items-center gap-3.5 [direction:ltr]" dir="ltr">
-            <x-ui.back-button :fallback="route('super-admin.finance.dashboard')" />
+            <x-ui.back-button :fallback="route('admin.home')" />
             <div class="{{ current_dir() === 'rtl' ? '[direction:rtl] text-end' : '' }}">
                 <div class="inline-flex items-center gap-1.5 rounded-full bg-[#ECFDF5] px-2.5 py-0.5 text-xs font-semibold text-[#0DAD98] border border-[#0DAD98]/20 dark:bg-[#0DAD98]/15 dark:text-[#0DAD98] mb-1.5 shadow-2xs">
                     <span>🎓</span>

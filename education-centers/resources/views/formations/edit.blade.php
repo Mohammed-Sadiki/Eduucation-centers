@@ -45,6 +45,27 @@
                     </div>
                     <div class="card-body p-4">
                         <div class="row g-3">
+                            @if(auth()->user()->isSuperAdmin())
+                                <div class="col-md-12">
+                                    <label for="center_id" class="form-label fw-semibold">
+                                        {{ __('Centre concerné') }} <span class="text-danger">*</span>
+                                    </label>
+                                    <select id="center_id" name="center_id" class="form-select @error('center_id') is-invalid @enderror" required>
+                                        <option value="all" @selected(old('center_id', $formation->center_id) === null || old('center_id') === 'all')>
+                                            {{ __('Tous les centres') }}
+                                        </option>
+                                        @foreach($centers as $c)
+                                            <option value="{{ $c->id }}" @selected((string) old('center_id', $formation->center_id) === (string) $c->id)>
+                                                {{ $c->translated('name') }} ({{ $c->code }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('center_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            @endif
+
                             <div class="col-md-8">
                                 <label for="name" class="form-label fw-semibold">
                                     {{ __('Intitulé de la formation') }} <span class="text-danger">*</span>

@@ -226,7 +226,7 @@
                 const opt = formationSelect.options[i];
                 if (!opt.value) continue;
                 const optCenter = opt.getAttribute('data-center-id');
-                if (!selectedCenter || optCenter === selectedCenter) {
+                if (!selectedCenter || !optCenter || optCenter === selectedCenter) {
                     opt.style.display = '';
                 } else {
                     opt.style.display = 'none';

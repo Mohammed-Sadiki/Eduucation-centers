@@ -122,18 +122,18 @@ class DomainDashboardData
                 ->count(),
             'attendances_today' => ! empty($classIds)
                 ? Attendance::query()
-                    ->where('center_id', $centerId)
+                    ->when($centerId !== null, fn (Builder $q) => $q->where('center_id', $centerId))
                     ->whereIn('class_id', $classIds)
                     ->whereDate('date', now()->toDateString())
                     ->count()
                 : 0,
             'payments_total' => (float) Payment::query()
-                ->where('center_id', $centerId)
+                ->when($centerId !== null, fn (Builder $q) => $q->where('center_id', $centerId))
                 ->whereIn('formation_id', $equivalentIds)
                 ->where('status', 'paid')
                 ->sum('amount'),
             'certificates_issued' => Certificate::query()
-                ->where('center_id', $centerId)
+                ->when($centerId !== null, fn (Builder $q) => $q->where('center_id', $centerId))
                 ->whereIn('formation_id', $equivalentIds)
                 ->where('status', 'issued')
                 ->count(),

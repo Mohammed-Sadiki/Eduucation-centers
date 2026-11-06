@@ -104,7 +104,7 @@ class UpdateStudentRequest extends FormRequest
                     $validator->errors()->add('formation_id', __('La formation sélectionnée est inactive.'));
                 }
 
-                if ((int) $formation->center_id !== $centerId) {
+                if ($formation->center_id !== null && (int) $formation->center_id !== $centerId) {
                     $validator->errors()->add('formation_id', __('La formation sélectionnée n\'appartient pas au centre du dossier.'));
                 }
 

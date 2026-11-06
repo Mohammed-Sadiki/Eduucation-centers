@@ -72,7 +72,10 @@ class AcademicPerimeter
             ->orderBy('name');
 
         if ($centerId) {
-            $query->where('center_id', $centerId);
+            $query->where(function ($q) use ($centerId) {
+                $q->where('center_id', $centerId)
+                    ->orWhereNull('center_id');
+            });
         }
 
         return $query;
@@ -93,6 +96,7 @@ class AcademicPerimeter
         protected ?User $user = null,
         protected ?int $centerId = null,
         protected ?string $domainSlug = null,
+        protected ?int $formationId = null,
     ) {}
 
     /**
@@ -103,8 +107,9 @@ class AcademicPerimeter
      * @param  string|null  $domainSlug  Espace de formation forcé par l'appelant
      *                                   (tableaux de bord d'une formation) ; par défaut
      *                                   l'espace de la session.
+     * @param  int|null  $formationId  Formation active explicite (espace formation isolée).
      */
-    public static function for(?User $user, ?int $centerId = null, ?string $domainSlug = null): self
+    public static function for(?User $user, ?int $centerId = null, ?string $domainSlug = null, ?int $formationId = null): self
     {
         $context = function_exists('user_context') ? user_context() : null;
 
@@ -115,10 +120,13 @@ class AcademicPerimeter
             $forcedCenter = (int) $centerId;
         }
 
+        $resolvedFormationId = $formationId ?? $context?->formationId();
+
         return new self(
             user: $user,
             centerId: $forcedCenter,
             domainSlug: $domainSlug ?? $context?->domainSlug(),
+            formationId: $resolvedFormationId,
         );
     }
 
@@ -130,6 +138,19 @@ class AcademicPerimeter
     public function domainSlug(): ?string
     {
         return $this->domainSlug;
+    }
+
+    public function formationId(): ?int
+    {
+        return $this->formationId;
+    }
+
+    public function withFormation(?int $formationId): self
+    {
+        $clone = clone $this;
+        $clone->formationId = $formationId;
+
+        return $clone;
     }
 
     /**
@@ -144,6 +165,7 @@ class AcademicPerimeter
     {
         $clone = clone $this;
         $clone->domainSlug = null;
+        $clone->formationId = null;
 
         return $clone;
     }
@@ -163,8 +185,17 @@ class AcademicPerimeter
             ->where('status', 'active')
             ->orderBy('name');
 
+        if ($this->formationId) {
+            $equivalent = static::equivalentIds($this->formationId);
+            $query->whereIn('id', $equivalent);
+            return $query;
+        }
+
         if ($this->centerId) {
-            $query->where('center_id', $this->centerId);
+            $query->where(function ($q) {
+                $q->where('center_id', $this->centerId)
+                    ->orWhereNull('center_id');
+            });
         }
 
         if ($this->domainSlug && $this->domainSlug !== 'all') {
@@ -210,18 +241,20 @@ class AcademicPerimeter
      */
     public function formationIds(?int $formationId = null): array
     {
-        if ($formationId !== null) {
-            if (isset(static::$scopedIds[$formationId])) {
-                return static::$scopedIds[$formationId];
+        $targetId = $formationId ?? $this->formationId;
+
+        if ($targetId !== null) {
+            if (isset(static::$scopedIds[$targetId])) {
+                return static::$scopedIds[$targetId];
             }
 
-            $formation = Formation::query()->find($formationId);
+            $formation = Formation::query()->find($targetId);
 
             // Une sous-formation héritée est résolue vers sa formation générale :
             // filtrer sur l'une ou l'autre revient au même jeu de données.
-            return static::$scopedIds[$formationId] = $formation
+            return static::$scopedIds[$targetId] = $formation
                 ? $this->idsOf(static::generalFormation($formation) ?? $formation)
-                : [$formationId];
+                : [$targetId];
         }
 
         $ids = [];
@@ -324,7 +357,9 @@ class AcademicPerimeter
      */
     public function keepsUnattached(?int $formationId = null): bool
     {
-        return $formationId === null && ($this->domainSlug === null || $this->domainSlug === 'all');
+        $targetId = $formationId ?? $this->formationId;
+
+        return $targetId === null && ($this->domainSlug === null || $this->domainSlug === 'all');
     }
 
     /**
@@ -342,6 +377,7 @@ class AcademicPerimeter
      */
     public function applyTo(Builder $query, ?int $formationId = null, string $column = 'formation_id'): Builder
     {
+        $targetFormationId = $formationId ?? $this->formationId;
         $model = $query->getModel();
 
         // La requête porte-t-elle les FORMATIONS elles-mêmes ? Alors le périmètre
@@ -361,19 +397,19 @@ class AcademicPerimeter
                 $query->where('domain', $this->domainSlug);
             }
 
-            return $formationId === null
+            return $targetFormationId === null
                 ? $query
-                : $query->whereIn('id', $this->formationIds($formationId));
+                : $query->whereIn('id', $this->formationIds($targetFormationId));
         }
 
         if (method_exists($model, 'scopeWithinGeneralFormations')) {
             return $query->withinGeneralFormations(
-                $this->formationIds($formationId),
-                $this->keepsUnattached($formationId)
+                $this->formationIds($targetFormationId),
+                $this->keepsUnattached($targetFormationId)
             );
         }
 
-        return $this->applyFormationIds($query, $column, $formationId);
+        return $this->applyFormationIds($query, $column, $targetFormationId);
     }
 
     // ─── Classes ─────────────────────────────────────────────────────────────
@@ -422,7 +458,9 @@ class AcademicPerimeter
             $query->where('status', 'active');
         }
 
-        if ($this->domainSlug && $this->domainSlug !== 'all') {
+        if ($this->formationId) {
+            $query->whereIn('formation_id', $this->formationIds($this->formationId));
+        } elseif ($this->domainSlug && $this->domainSlug !== 'all') {
             $query->forDomain($this->domainSlug);
         }
 
@@ -469,7 +507,9 @@ class AcademicPerimeter
     {
         $query = $this->classesQuery($formationId);
 
-        if ($this->domainSlug && $this->domainSlug !== 'all') {
+        if ($this->formationId) {
+            $query->whereIn('formation_id', $this->formationIds($this->formationId));
+        } elseif ($this->domainSlug && $this->domainSlug !== 'all') {
             $query->forDomain($this->domainSlug);
         }
 

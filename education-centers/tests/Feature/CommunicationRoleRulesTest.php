@@ -256,22 +256,22 @@ class CommunicationRoleRulesTest extends TestCase
     }
 
     // ──────────────────────────────────────────────────────────────────────────
-    // 13, 14 & 15. Professeur : réponses autorisées vers l'administration,
-    // initiation de conversation et professeur <-> professeur INTERDITES
+    // 13, 14 & 15. Professeur : peut initier avec Super Admin et Admin de son centre,
+    // mais professeur <-> professeur et professeur <-> autre centre INTERDITS
     // ──────────────────────────────────────────────────────────────────────────
 
-    public function test_teacher_cannot_send_to_super_admin(): void
+    public function test_teacher_can_send_to_super_admin(): void
     {
         $this->actingAs($this->teacherUserBerlin)
             ->postJson(route('messages.start-direct', $this->superAdmin))
-            ->assertForbidden();
+            ->assertOk();
     }
 
-    public function test_teacher_cannot_send_to_center_admin(): void
+    public function test_teacher_can_send_to_center_admin(): void
     {
         $this->actingAs($this->teacherUserBerlin)
             ->postJson(route('messages.start-direct', $this->adminBerlin))
-            ->assertForbidden();
+            ->assertOk();
     }
 
     public function test_teacher_cannot_send_to_another_teacher(): void
@@ -328,11 +328,10 @@ class CommunicationRoleRulesTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_teacher_cannot_initiate_conversation_via_http(): void
+    public function test_teacher_cannot_initiate_conversation_with_another_center_admin(): void
     {
-        // Le professeur ne peut pas initier : la route start-direct lui est fermée
         $this->actingAs($this->teacherUserBerlin)
-            ->postJson(route('messages.start-direct', $this->superAdmin))
+            ->postJson(route('messages.start-direct', $this->adminMunich))
             ->assertForbidden();
     }
 

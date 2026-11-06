@@ -151,8 +151,8 @@ class StoreStudentRequest extends FormRequest
                     $validator->errors()->add('formation_id', __('La formation sélectionnée est inactive.'));
                 }
 
-                // Isolation multi-centres : la formation doit appartenir au centre retenu.
-                if ((int) $formation->center_id !== $centerId) {
+                // Isolation multi-centres : la formation doit appartenir au centre retenu ou être commune à tous les centres (center_id NULL).
+                if ($formation->center_id !== null && (int) $formation->center_id !== $centerId) {
                     $validator->errors()->add('formation_id', __('La formation sélectionnée n\'appartient pas au centre choisi.'));
                 }
 

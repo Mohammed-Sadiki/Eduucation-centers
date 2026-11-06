@@ -46,7 +46,7 @@ class StoreClassRequest extends FormRequest
                         return;
                     }
 
-                    if ($targetCenterId && $formation->center_id != $targetCenterId) {
+                    if ($targetCenterId && $formation->center_id !== null && $formation->center_id != $targetCenterId) {
                         $fail(__('La formation sélectionnée n\'appartient pas au même centre que la classe.'));
 
                         return;

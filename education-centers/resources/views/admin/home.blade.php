@@ -22,7 +22,7 @@
         : (($isCenterAdmin || $isSecretary) ? route('stagiaires.create') : route('dashboard'));
 
     // Le module financier est ouvert exclusivement au Super Admin et au Responsable Centre.
-    $financeRoute = route('super-admin.finance.dashboard');
+    $financeRoute = route('super-admin.finance.students');
 @endphp
 
 @section('content')
@@ -197,7 +197,7 @@
                 </div>
                 <div class="relative">
                     <h2 class="text-xl font-bold text-slate-900 transition-colors group-hover:text-amber-700 dark:text-white dark:group-hover:text-amber-300">{{ __('Gestion financière') }}</h2>
-                    <p class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ __('Suivez les factures, paiements, salaires, dépenses et statistiques financières.') }}</p>
+                    <p class="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ __('Gérez les paiements des étudiants, les dépenses, le recouvrement et la configuration des prix.') }}</p>
                 </div>
             </div>
             <div class="relative mt-4 flex items-center justify-between rounded-xl bg-amber-100/70 px-4 py-2.5 text-sm font-semibold text-amber-800 transition-colors group-hover:bg-amber-200/60 dark:bg-amber-500/10 dark:text-amber-300 dark:group-hover:bg-amber-500/20">

@@ -96,7 +96,12 @@ class FormationController extends Controller
         $authUser = $request->user();
 
         // Détermination stricte du center_id côté serveur (jamais faire confiance au client)
-        $centerId = ($authUser->isCenterAdmin() || $authUser->isSecretary()) ? $authUser->center_id : (int) $request->input('center_id');
+        if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
+            $centerId = (int) $authUser->center_id;
+        } else {
+            $inputCenter = $request->input('center_id');
+            $centerId = ($inputCenter === 'all' || $inputCenter === '0' || $inputCenter === null) ? null : (int) $inputCenter;
+        }
 
         $data = $request->validated();
         $data['center_id'] = $centerId;
@@ -128,8 +133,9 @@ class FormationController extends Controller
         Gate::authorize('update', $formation);
 
         $formation->load('center');
+        $centers = auth()->user()->isSuperAdmin() ? Center::orderBy('name')->get() : collect();
 
-        return view('formations.edit', compact('formation'));
+        return view('formations.edit', compact('formation', 'centers'));
     }
 
     /**
@@ -137,7 +143,17 @@ class FormationController extends Controller
      */
     public function update(UpdateFormationRequest $request, Formation $formation): RedirectResponse
     {
-        $formation->update($request->validated());
+        $authUser = $request->user();
+        $data = $request->validated();
+
+        if ($authUser->isSuperAdmin() && $request->has('center_id')) {
+            $inputCenter = $request->input('center_id');
+            $data['center_id'] = ($inputCenter === 'all' || $inputCenter === '0' || $inputCenter === null || $inputCenter === '')
+                ? null
+                : (int) $inputCenter;
+        }
+
+        $formation->update($data);
 
         return redirect()
             ->route('formations.show', $formation)

@@ -43,6 +43,9 @@ class GeneralFormationController extends Controller
     {
         Gate::authorize('viewAny', Formation::class);
 
+        session()->forget('active_formation_id');
+        session()->forget('active_domain');
+
         $authUser = $request->user();
 
         if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
@@ -63,10 +66,13 @@ class GeneralFormationController extends Controller
             ->get()
             ->keyBy('official_code');
 
-        // Formations générales personnalisées du centre (catalogue extensible).
+        // Formations générales personnalisées du centre ou valables pour tous les centres (center_id NULL).
         $customFormations = Formation::query()
             ->customGeneral()
-            ->where('center_id', $centerId)
+            ->where(function ($q) use ($centerId) {
+                $q->where('center_id', $centerId)
+                    ->orWhereNull('center_id');
+            })
             ->orderBy('name')
             ->get();
 
@@ -93,6 +99,9 @@ class GeneralFormationController extends Controller
     public function picker(Request $request): View
     {
         Gate::authorize('viewAny', Formation::class);
+
+        session()->forget('active_formation_id');
+        session()->forget('active_domain');
 
         $authUser = $request->user();
 
@@ -140,35 +149,40 @@ class GeneralFormationController extends Controller
         Gate::authorize('create', Formation::class);
 
         $authUser = $request->user();
+        $centers = Center::query()->orderBy('name')->get();
 
         if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $centerId = (int) $authUser->center_id;
         } else {
-            // Super Admin : centre choisi via ?center_id, sinon premier centre
-            // (même résolution que index()/picker() — jamais d'écran vide).
-            $centers = Center::query()->orderBy('name')->get();
-            $centerId = (int) $request->query('center_id', (string) ($centers->first()->id ?? 0));
+            // Super Admin : centre choisi via ?center_id (optionnel)
+            $selectedParam = $request->query('center_id');
+            if ($selectedParam === 'all' || $selectedParam === '0') {
+                $centerId = null;
+            } else {
+                $centerId = $selectedParam !== null ? (int) $selectedParam : null;
+            }
         }
 
-        $center = Center::query()->findOrFail($centerId);
+        $center = $centerId ? Center::query()->find($centerId) : null;
 
         $centerTeachers = Teacher::query()
-            ->where('center_id', $centerId)
+            ->when($centerId !== null, fn ($q) => $q->where('center_id', $centerId))
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->get();
 
         return view('formations-generales.create-custom', [
             'center' => $center,
+            'centers' => $centers,
             'centerTeachers' => $centerTeachers,
         ]);
     }
 
     /**
-     * Enregistre une nouvelle formation générale personnalisée dans le centre actif.
+     * Enregistre une nouvelle formation générale personnalisée dans le centre actif ou pour tous les centres.
      * is_official = true et official_code = NULL : mêmes règles métier que les
      * six officielles (≤2 classes, 1 responsable) mais hors du DomainRegistry.
-     * Le center_id est toujours forcé côté serveur (isolation des centres).
+     * Le center_id peut être NULL si l'option « Tous les centres » est choisie par le Super Admin.
      */
     public function store(Request $request): RedirectResponse
     {
@@ -176,22 +190,38 @@ class GeneralFormationController extends Controller
 
         $authUser = $request->user();
 
-        // Centre forcé : Admin Centre / Secrétaire = le sien ; Super Admin = center_id fourni.
+        // Centre forcé : Admin Centre / Secrétaire = le sien ; Super Admin = sélection explicite ou "all".
         if ($authUser->isCenterAdmin() || $authUser->isSecretary()) {
             $centerId = (int) $authUser->center_id;
         } else {
-            $centerId = (int) $request->input('center_id', 0);
-            if ($centerId <= 0 || ! Center::query()->whereKey($centerId)->exists()) {
+            $inputCenter = $request->input('center_id');
+            if ($inputCenter === null || $inputCenter === '') {
                 return redirect()
                     ->route('formations-generales.index')
-                    ->with('error', __('Centre invalide pour la création de la formation.'));
+                    ->with('error', __('Veuillez sélectionner un centre ou l\'option « Tous les centres ».'));
+            }
+
+            if ($inputCenter === 'all' || $inputCenter === '0') {
+                $centerId = null;
+            } else {
+                $centerId = (int) $inputCenter;
+                if (! Center::query()->whereKey($centerId)->exists()) {
+                    return redirect()
+                        ->route('formations-generales.index')
+                        ->with('error', __('Centre sélectionné invalide.'));
+                }
             }
         }
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255',
                 Rule::unique('formations', 'name')
-                    ->where('center_id', $centerId)
+                    ->where(function ($query) use ($centerId) {
+                        if ($centerId === null) {
+                            return $query->whereNull('center_id');
+                        }
+                        return $query->where('center_id', $centerId);
+                    })
                     ->where('is_official', true)],
             'description' => ['nullable', 'string', 'max:2000'],
             'duration_weeks' => ['nullable', 'integer', 'min:1', 'max:520'],
@@ -203,17 +233,21 @@ class GeneralFormationController extends Controller
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
-        // Professeur du même centre obligatoirement (facultatif à la création).
+        // Professeur du même centre obligatoirement si la formation est rattachée à un centre précis.
         if (! empty($data['teacher_id'])) {
             $teacher = Teacher::query()->findOrFail($data['teacher_id']);
-            if ((int) $teacher->center_id !== $centerId) {
+            if ($centerId !== null && (int) $teacher->center_id !== $centerId) {
                 return back()
                     ->withInput()
                     ->withErrors(['teacher_id' => __('Ce professeur n\'appartient pas au centre sélectionné.')]);
             }
         }
 
-        $center = Center::query()->findOrFail($centerId);
+        $codePrefix = 'ALL';
+        if ($centerId !== null) {
+            $center = Center::query()->find($centerId);
+            $codePrefix = $center?->code ?? (string) $centerId;
+        }
 
         $imagePath = $request->hasFile('image')
             ? $request->file('image')->store('formations', 'public')
@@ -222,8 +256,7 @@ class GeneralFormationController extends Controller
         $formation = Formation::query()->create([
             'center_id' => $centerId,
             'name' => $data['name'],
-            // Code technique auto-généré, unique par centre (cf. index unique).
-            'code' => strtoupper(sprintf('CF-%s-%s', $center->code, Str::random(6))),
+            'code' => strtoupper(sprintf('CF-%s-%s', $codePrefix, Str::random(6))),
             'description' => $data['description'] ?? null,
             'duration_weeks' => $data['duration_weeks'] ?? null,
             'duration_hours' => $data['duration_hours'] ?? null,
@@ -237,8 +270,8 @@ class GeneralFormationController extends Controller
         ]);
 
         return redirect()
-            ->route('formations-generales.index', ['center_id' => $centerId])
-            ->with('success', __('La formation « :name » a été ajoutée au catalogue du centre.', ['name' => $formation->name]));
+            ->route('formations-generales.index', $centerId ? ['center_id' => $centerId] : [])
+            ->with('success', __('La formation « :name » a été ajoutée avec succès.', ['name' => $formation->name]));
     }
 
     /**
@@ -252,9 +285,10 @@ class GeneralFormationController extends Controller
         abort_unless($formation->official_code === null, 404);
 
         $formation->load(['teacher', 'center']);
+        $centers = Center::query()->orderBy('name')->get();
 
         $centerTeachers = Teacher::query()
-            ->where('center_id', $formation->center_id)
+            ->when($formation->center_id !== null, fn ($q) => $q->where('center_id', $formation->center_id))
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->get();
@@ -262,6 +296,7 @@ class GeneralFormationController extends Controller
         return view('formations-generales.create-custom', [
             'formation' => $formation,
             'center' => $formation->center,
+            'centers' => $centers,
             'centerTeachers' => $centerTeachers,
         ]);
     }
@@ -274,10 +309,38 @@ class GeneralFormationController extends Controller
         $this->authorizeOfficial($request, $formation, 'update');
         abort_unless($formation->official_code === null, 404);
 
+        $authUser = $request->user();
+        $targetCenterId = $formation->center_id;
+
+        // Si Super Admin modifie le centre concerné
+        if ($authUser->isSuperAdmin() && $request->has('center_id')) {
+            $inputCenter = $request->input('center_id');
+            if ($inputCenter === null || $inputCenter === '') {
+                return back()
+                    ->withInput()
+                    ->withErrors(['center_id' => __('Veuillez sélectionner un centre ou l\'option « Tous les centres ».')]);
+            }
+            if ($inputCenter === 'all' || $inputCenter === '0') {
+                $targetCenterId = null;
+            } else {
+                $targetCenterId = (int) $inputCenter;
+                if (! Center::query()->whereKey($targetCenterId)->exists()) {
+                    return back()
+                        ->withInput()
+                        ->withErrors(['center_id' => __('Centre sélectionné invalide.')]);
+                }
+            }
+        }
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255',
                 Rule::unique('formations', 'name')
-                    ->where('center_id', $formation->center_id)
+                    ->where(function ($query) use ($targetCenterId) {
+                        if ($targetCenterId === null) {
+                            return $query->whereNull('center_id');
+                        }
+                        return $query->where('center_id', $targetCenterId);
+                    })
                     ->where('is_official', true)
                     ->ignore($formation->id)],
             'description' => ['nullable', 'string', 'max:2000'],
@@ -292,17 +355,16 @@ class GeneralFormationController extends Controller
 
         if (! empty($data['teacher_id'])) {
             $teacher = Teacher::query()->findOrFail($data['teacher_id']);
-            if ((int) $teacher->center_id !== (int) $formation->center_id) {
+            if ($targetCenterId !== null && (int) $teacher->center_id !== (int) $targetCenterId) {
                 return back()
                     ->withInput()
-                    ->withErrors(['teacher_id' => __('Ce professeur n\'appartient pas au centre de cette formation.')]);
+                    ->withErrors(['teacher_id' => __('Ce professeur n\'appartient pas au centre sélectionné.')]);
             }
         }
 
         if ($request->hasFile('image')) {
             // Remplacement : on efface l'ancien fichier après upload réussi.
             $oldPath = $formation->image_path;
-            $data['image'] = null;
             $formation->image_path = $request->file('image')->store('formations', 'public');
             if ($oldPath && $oldPath !== $formation->image_path) {
                 Storage::disk('public')->delete($oldPath);
@@ -310,6 +372,7 @@ class GeneralFormationController extends Controller
         }
 
         $formation->fill([
+            'center_id' => $targetCenterId,
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
             'duration_weeks' => $data['duration_weeks'] ?? null,
@@ -321,7 +384,7 @@ class GeneralFormationController extends Controller
         ])->save();
 
         return redirect()
-            ->route('formations-generales.index', ['center_id' => $formation->center_id])
+            ->route('formations-generales.index', $formation->center_id ? ['center_id' => $formation->center_id] : [])
             ->with('success', __('La formation « :name » a été mise à jour.', ['name' => $formation->name]));
     }
 
@@ -381,7 +444,7 @@ class GeneralFormationController extends Controller
 
         if ($centerId <= 0 || ! DomainRegistry::isValid($data['official_code'])) {
             return redirect()
-                ->route('formations-generales.index', ['center_id' => $centerId ?: null])
+                ->route('formations-generales.picker', ['center_id' => $centerId ?: null])
                 ->with('error', __('Emplacement de formation officielle invalide.'));
         }
 
@@ -498,6 +561,14 @@ class GeneralFormationController extends Controller
     public function show(Request $request, Formation $formation, DomainDashboardData $dashboardService): View
     {
         $this->authorizeOfficial($request, $formation, 'view');
+
+        // Mettre en session l'espace de la formation sélectionnée
+        session(['active_formation_id' => $formation->id]);
+        if ($formation->official_code) {
+            session(['active_domain' => $formation->official_code]);
+        } else {
+            session()->forget('active_domain');
+        }
 
         $formation->load(['center', 'teacher']);
 
