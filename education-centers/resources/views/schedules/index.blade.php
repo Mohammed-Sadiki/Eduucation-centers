@@ -54,7 +54,7 @@
             <select name="teacher_id" class="ec-select">
                 <option value="">{{ __('Tous les professeurs') }}</option>
                 @foreach($teachers as $t)
-                    <option value="{{ $t->id }}" @selected(request('teacher_id') == $t->id)>{{ $t->full_name }}</option>
+                    <option value="{{ $t->id }}" @selected(request('teacher_id') == $t->id)>{{ $t->full_name_with_formation }}</option>
                 @endforeach
             </select>
         </div>

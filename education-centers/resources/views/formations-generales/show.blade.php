@@ -104,7 +104,7 @@
                             class="mt-1 w-full rounded-xl border-slate-200 bg-white text-sm shadow-xs focus:border-brand-500 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
                         <option value="" disabled selected>{{ __('Sélectionner un professeur…') }}</option>
                         @foreach ($centerTeachers as $teacher)
-                            <option value="{{ $teacher->id }}" @selected($formation->teacher_id === $teacher->id)>{{ $teacher->full_name }} ({{ $teacher->teacher_number }})</option>
+                            <option value="{{ $teacher->id }}" @selected($formation->teacher_id === $teacher->id)>{{ $teacher->full_name_with_formation }} ({{ $teacher->teacher_number }})</option>
                         @endforeach
                     </select>
                 </div>

@@ -173,8 +173,10 @@
                                 class="ec-select text-base @error('teacher_id') is-invalid @enderror">
                             <option value="">— {{ __('Non assigné') }} —</option>
                             @foreach ($centerTeachers as $t)
-                                <option value="{{ $t->id }}" @selected((int) old('teacher_id', $formation->teacher_id ?? 0) === (int) $t->id)>
-                                    {{ $t->full_name }}
+                                <option value="{{ $t->id }}"
+                                        data-center-id="{{ $t->center_id }}"
+                                        @selected((int) old('teacher_id', $formation->teacher_id ?? 0) === (int) $t->id)>
+                                    {{ $t->full_name_with_formation }}
                                 </option>
                             @endforeach
                         </select>
@@ -260,6 +262,47 @@
                 container.classList.remove('flex');
             }
         }
+
+        // Filtrage dynamique des professeurs selon le centre sélectionné
+        document.addEventListener('DOMContentLoaded', function () {
+            const centerSelect = document.getElementById('center_id');
+            const teacherSelect = document.getElementById('teacher_id');
+
+            if (!centerSelect || !teacherSelect) return;
+
+            const teacherOptions = Array.from(teacherSelect.querySelectorAll('option')).slice(1); // Exclut « Non assigné »
+
+            function filterTeachersByCenter() {
+                const selectedCenter = centerSelect.value;
+                const currentSelectedTeacherId = teacherSelect.value;
+                let isCurrentTeacherStillVisible = false;
+
+                teacherOptions.forEach(option => {
+                    const teacherCenterId = option.getAttribute('data-center-id');
+
+                    // Si « Tous les centres » ou vide : on montre tous les professeurs
+                    // Si un centre spécifique est sélectionné : on montre uniquement les profs de ce centre
+                    if (!selectedCenter || selectedCenter === 'all' || selectedCenter === '0' || teacherCenterId === selectedCenter) {
+                        option.hidden = false;
+                        option.disabled = false;
+                        if (option.value === currentSelectedTeacherId) {
+                            isCurrentTeacherStillVisible = true;
+                        }
+                    } else {
+                        option.hidden = true;
+                        option.disabled = true;
+                    }
+                });
+
+                // Si le professeur précédemment sélectionné n'appartient pas au nouveau centre, on réinitialise à « Non assigné »
+                if (currentSelectedTeacherId && !isCurrentTeacherStillVisible) {
+                    teacherSelect.value = '';
+                }
+            }
+
+            centerSelect.addEventListener('change', filterTeachersByCenter);
+            filterTeachersByCenter();
+        });
     </script>
 
 @endsection

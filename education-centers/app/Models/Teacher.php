@@ -261,6 +261,42 @@ class Teacher extends Model
     }
 
     /**
+     * Nom de la formation ou du domaine enseigné par ce professeur.
+     */
+    public function getFormationNameAttribute(): ?string
+    {
+        if ($this->relationLoaded('formation') && $this->formation) {
+            return $this->formation->translated('name') ?? $this->formation->name;
+        }
+
+        if ($this->formation_id) {
+            $f = $this->formation;
+            if ($f) {
+                return $f->translated('name') ?? $f->name;
+            }
+        }
+
+        if ($this->domain) {
+            $labels = \App\Support\DomainRegistry::labels();
+            return $labels[$this->domain] ?? ucfirst(str_replace('-', ' ', $this->domain));
+        }
+
+        return null;
+    }
+
+    /**
+     * Nom complet du professeur suivi de sa formation entre parenthèses.
+     * Exemple : "Amina Bennani (Santé)"
+     */
+    public function getFullNameWithFormationAttribute(): string
+    {
+        $fullName = $this->full_name;
+        $formationName = $this->formation_name;
+
+        return $formationName ? "{$fullName} ({$formationName})" : $fullName;
+    }
+
+    /**
      * Generate a unique teacher number based on center code.
      * Format: {CENTER_CODE}-T-{000001}
      * Examples: BER-T-000001, MUN-T-000001

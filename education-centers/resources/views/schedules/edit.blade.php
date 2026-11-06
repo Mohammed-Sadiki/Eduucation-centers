@@ -99,7 +99,7 @@
                                         <option value="{{ $t->id }}" 
                                             {{ old('teacher_id', $schedule->teacher_id) == $t->id ? 'selected' : '' }}
                                             data-classes="{{ $t->classes->pluck('id')->join(',') }}">
-                                            {{ $t->full_name }}
+                                            {{ $t->full_name_with_formation }}
                                         </option>
                                     @endforeach
                                 </select>

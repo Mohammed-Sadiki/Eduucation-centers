@@ -446,7 +446,7 @@
                                     <option value="">{{ __('-- Choisir un professeur --') }}</option>
                                     @foreach($availableTeachers as $availTeacher)
                                         <option value="{{ $availTeacher->id }}">
-                                            {{ $availTeacher->full_name }} ({{ $availTeacher->teacher_number }})
+                                            {{ $availTeacher->full_name_with_formation }} ({{ $availTeacher->teacher_number }})
                                             @if($availTeacher->specialization)
                                                 — {{ $availTeacher->specialization }}
                                             @endif

@@ -165,7 +165,11 @@ class GeneralFormationController extends Controller
 
         $center = $centerId ? Center::query()->find($centerId) : null;
 
+        // Si un centre spécifique est sélectionné (ou si l'utilisateur est Admin/Secrétaire de centre),
+        // on charge les professeurs de ce centre.
+        // Si "Tous les centres" ou aucun centre précis n'est fixé, on charge l'ensemble des professeurs.
         $centerTeachers = Teacher::query()
+            ->with('formation')
             ->when($centerId !== null, fn ($q) => $q->where('center_id', $centerId))
             ->orderBy('last_name')
             ->orderBy('first_name')
@@ -288,6 +292,7 @@ class GeneralFormationController extends Controller
         $centers = Center::query()->orderBy('name')->get();
 
         $centerTeachers = Teacher::query()
+            ->with('formation')
             ->when($formation->center_id !== null, fn ($q) => $q->where('center_id', $formation->center_id))
             ->orderBy('last_name')
             ->orderBy('first_name')
@@ -483,6 +488,7 @@ class GeneralFormationController extends Controller
         $formation->load(['teacher', 'center']);
 
         $centerTeachers = Teacher::query()
+            ->with('formation')
             ->where('center_id', $formation->center_id)
             ->orderBy('last_name')
             ->orderBy('first_name')
@@ -581,6 +587,7 @@ class GeneralFormationController extends Controller
         // Classes de la formation pour gestion éventuelle
         $classes = $formation->perimeterClasses()->orderBy('code')->get();
         $centerTeachers = Teacher::query()
+            ->with('formation')
             ->where('center_id', $formation->center_id)
             ->orderBy('last_name')
             ->orderBy('first_name')

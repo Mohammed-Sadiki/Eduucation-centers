@@ -158,7 +158,7 @@
                         <option value="">— {{ __('Non assigné') }} —</option>
                         @foreach ($centerTeachers as $t)
                             <option value="{{ $t->id }}" @selected((int) old('teacher_id', $formation->teacher_id) === (int) $t->id)>
-                                {{ $t->full_name }}
+                                {{ $t->full_name_with_formation }}
                             </option>
                         @endforeach
                     </select>
