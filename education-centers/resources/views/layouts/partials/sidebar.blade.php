@@ -151,48 +151,74 @@
 
     } elseif ($user->isSuperAdmin()) {
         // ────────────────────────────────────────────────────────────
-        // CONTEXTE : DOMAINE DE FORMATION (Santé, Informatique, etc.)
-        // Le dashboard du domaine actif est l'entrée principale.
+        // CONTEXTE : SUPER ADMIN
+        // 1. Lorsqu'il entre dans une formation ou un domaine spécifique
+        //    (contexte actif en session : active_formation_id ou active_domain) :
+        //    navigation simplifiée affichant UNIQUEMENT les 6 modules (identique secrétaire) :
+        //      1. Dashboard (pédagogique de la formation/domaine)
+        //      2. Emploi du temps
+        //      3. Présences
+        //      4. Évaluations
+        //      5. Certificats
+        //      6. Notifications
+        // 2. Hors formation (accueil / navigation globale) :
+        //    menu complet avec Pédagogie, Gestion, Communication, etc.
         // ────────────────────────────────────────────────────────────
+        $isInFormation = !empty($activeFormationId) || !empty($activeDomain);
 
-        // Lien Dashboard dynamique selon la formation active ou le domaine actif
-        if ($activeFormation) {
-            $dashboardRoute = route('formations-generales.show', $activeFormation);
-        } elseif ($activeDomain === 'sante' || !$activeDomain) {
-            $dashboardRoute = route('super-admin.sante.dashboard');
+        if ($isInFormation) {
+            $superAdminDashboardItem = $activeFormation
+                ? ['label' => __('Dashboard'), 'url' => route('formations-generales.show', $activeFormation), 'icon' => 'home',
+                   'active' => request()->routeIs(['super-admin.sante.dashboard', 'super-admin.domain.dashboard', 'formations-generales.show'])]
+                : [
+                    'label' => __('Dashboard'),
+                    'url' => ($activeDomain === 'sante' || !$activeDomain)
+                        ? route('super-admin.sante.dashboard')
+                        : route('super-admin.domain.dashboard', $activeDomain ?? 'sante'),
+                    'icon' => 'home',
+                    'active' => request()->routeIs(['super-admin.sante.dashboard', 'super-admin.domain.dashboard', 'formations-generales.show'])
+                ];
+
+            $groups[] = ['title' => null, 'items' => array_filter([
+                $superAdminDashboardItem,
+                $link(__('Emploi du temps'), 'schedules.index', 'calendar', 'schedules.*'),
+                $link(__('Présences'), 'attendances.index', 'clock', 'attendances.*'),
+                $link(__('Évaluations'), 'evaluations.index', 'chart', 'evaluations.*'),
+                $link(__('Certificats'), 'certificates.index', 'certificate', 'certificates.*'),
+                $link(__('Notifications'), 'notifications.index', 'bell', 'notifications.*'),
+            ])];
         } else {
-            $dashboardRoute = route('super-admin.domain.dashboard', $activeDomain ?? 'sante');
+            $groups[] = ['title' => null, 'items' => array_filter([
+                $link(__('Accueil'), 'admin.home', 'home', 'admin.home'),
+                $link(__('Élèves'), 'students.index', 'academic', 'students.*'),
+                $link(__('Inscriptions'), 'enrollments.index', 'clipboard', 'enrollments.*'),
+                $link(__('Stagiaires'), 'stagiaires.index', 'users', 'stagiaires.*'),
+            ])];
+
+            $adminItems = array_filter([
+                $link(__('Centres'), 'centers.index', 'building', 'centers.*'),
+                $link(__('Formations'), 'formations.index', 'book', 'formations.*'),
+                $link(__('Classes'), 'classes.index', 'classes', 'classes.*'),
+                $link(__('Salles'), 'rooms.index', 'door', 'rooms.*'),
+                $link(__('Emploi du temps'), 'schedules.index', 'calendar', 'schedules.*'),
+                $link(__('Inscriptions'), 'enrollments.index', 'clipboard', 'enrollments.*'),
+            ]);
+            $groups[] = ['title' => __('Pédagogie'), 'items' => $adminItems];
+
+            $ops = array_filter([
+                $link(__('Présences'), 'attendances.index', 'clock', 'attendances.*'),
+                $link(__('Évaluations'), 'evaluations.index', 'chart', 'evaluations.*'),
+                $link(__('Documents'), 'documents.index', 'document', 'documents.*'),
+                $link(__('Certificats'), 'certificates.index', 'certificate', 'certificates.*'),
+            ]);
+            $groups[] = ['title' => __('Gestion'), 'items' => $ops];
+
+            $com = array_filter([
+                $link(__('Notifications'), 'notifications.index', 'bell', 'notifications.*'),
+                $link(__('Annonces'), 'announcements.index', 'megaphone', 'announcements.*'),
+            ]);
+            $groups[] = ['title' => __('Communication'), 'items' => $com];
         }
-
-        $groups[] = ['title' => null, 'items' => array_filter([
-            $link(__('Accueil'), 'admin.home', 'home', 'admin.home'),
-            ['label' => __('Dashboard ') . $domainLabel, 'url' => $dashboardRoute, 'icon' => $domainIcon,
-             'active' => request()->routeIs(['super-admin.sante.dashboard', 'super-admin.domain.dashboard', 'formations-generales.show'])],
-        ])];
-
-        $adminItems = array_filter([
-            $link(__('Centres'), 'centers.index', 'building', 'centers.*'),
-            $link(__('Formations'), 'formations.index', 'book', 'formations.*'),
-            $link(__('Classes'), 'classes.index', 'classes', 'classes.*'),
-            $link(__('Salles'), 'rooms.index', 'door', 'rooms.*'),
-            $link(__('Emploi du temps'), 'schedules.index', 'calendar', 'schedules.*'),
-            $link(__('Inscriptions'), 'enrollments.index', 'clipboard', 'enrollments.*'),
-        ]);
-        $groups[] = ['title' => __('Pédagogie'), 'items' => $adminItems];
-
-        $ops = array_filter([
-            $link(__('Présences'), 'attendances.index', 'clock', 'attendances.*'),
-            $link(__('Évaluations'), 'evaluations.index', 'chart', 'evaluations.*'),
-            $link(__('Documents'), 'documents.index', 'document', 'documents.*'),
-            $link(__('Certificats'), 'certificates.index', 'certificate', 'certificates.*'),
-        ]);
-        $groups[] = ['title' => __('Gestion'), 'items' => $ops];
-
-        $com = array_filter([
-            $link(__('Notifications'), 'notifications.index', 'bell', 'notifications.*'),
-            $link(__('Annonces'), 'announcements.index', 'megaphone', 'announcements.*'),
-        ]);
-        $groups[] = ['title' => __('Communication'), 'items' => $com];
 
     } elseif ($user->isCenterAdmin()) {
         // ────────────────────────────────────────────────────────────
