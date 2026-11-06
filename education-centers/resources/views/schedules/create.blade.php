@@ -55,7 +55,7 @@
                                 @if(auth()->user()->isSuperAdmin())
                                     <div class="col-md-6">
                                         <label for="center_id" class="form-label fw-semibold">{{ __('Centre') }} <span class="text-danger">*</span></label>
-                                        <select name="center_id" id="center_id" class="form-select @error('center_id') is-invalid @enderror" required onchange="this.form.submit()">
+                                        <select name="center_id" id="center_id" class="form-select @error('center_id') is-invalid @enderror" required onchange="window.location.href = '{{ route('schedules.create') }}?center_id=' + this.value">
                                             <option value="">{{ __('Sélectionner un centre...') }}</option>
                                             @foreach($centers as $c)
                                                 <option value="{{ $c->id }}" {{ old('center_id', $selectedCenterId) == $c->id ? 'selected' : '' }}>

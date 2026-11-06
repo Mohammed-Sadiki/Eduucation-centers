@@ -191,18 +191,33 @@ class ScheduleController extends Controller
 
         $authUser = $request->user();
         $centers = $authUser->isSuperAdmin() ? Center::orderBy('name')->get() : collect();
+        $activeFormation = session('active_formation_id') ? \App\Models\Formation::find(session('active_formation_id')) : null;
 
-        // Déterminer le centre de référence pour charger les listes déroulantes
+        // Déterminer le centre de référence pour charger les listes déroulantes :
+        // Si on est dans l'espace d'une formation, on se cale sur son centre par défaut.
         $selectedCenterId = ($authUser->isCenterAdmin() || $authUser->isSecretary())
             ? $authUser->center_id
-            : ($request->input('center_id') ?? $centers->first()?->id);
+            : ($request->input('center_id') ?? $activeFormation?->center_id ?? $centers->first()?->id);
 
-        $perimeter = $this->perimeter($authUser, $authUser->isSuperAdmin() ? (int) $request->input('center_id') : null);
+        $perimeter = $this->perimeter(
+            $authUser,
+            $selectedCenterId ? (int) $selectedCenterId : null,
+            $activeFormation ? ($activeFormation->official_code ?? $activeFormation->domain) : session('active_domain'),
+            $activeFormation?->id
+        );
 
         // Classes des formations générales actives du périmètre, libellées
         // « Formation · Groupe X » ; les professeurs de la classe restent
         // nécessaires à l'Alpine du formulaire.
         $classes = $perimeter->classesForSelect(activeOnly: true);
+
+        // Si l'utilisateur se trouve dans l'espace d'une formation spécifique,
+        // on ne propose que les 2 classes de cette formation.
+        if ($activeFormation) {
+            $equivalentIds = \App\Support\AcademicPerimeter::equivalentIds($activeFormation);
+            $classes = $classes->filter(fn ($c) => $c->formation_id === $activeFormation->id || in_array($c->formation_id, $equivalentIds, true))->values();
+        }
+
         $classes->load('teachers');
 
         $rooms = Room::query()
